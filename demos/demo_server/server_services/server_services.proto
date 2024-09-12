@@ -1,0 +1,10 @@
+syntax = "proto3";
+option go_package = "inzynierka/server_services";
+
+service connectionTest {
+    rpc TestConnection(TextMessage) returns (TextMessage) {}
+}
+
+message TextMessage {
+    string text = 1;
+}
