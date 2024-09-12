@@ -1,0 +1,6 @@
+.venv/
+soundFiles
+.env
+.DS_Store
+.vscode
+*.pem
