@@ -32,14 +32,9 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir -p "/server/SOUND_FILES" \
     && chmod -R 0666 "/server/SOUND_FILES"
 
-ARG SERVER_PORT=9900
-EXPOSE ${SERVER_PORT}
-ENV SERVER_PORT=${SERVER_PORT}
-
-
 ENV JWT_PUBLIC_KEY_PATH=/server/keys/ecdsa_public_key.pem
 ENV JWT_PRIVATE_KEY_PATH=/server/keys/ecdsa_private_key.pem
-ENV DATABASE_URL=postgres://postgres:mysecretpassword@host.docker.internal:5432/whisperDatabase
+
 
 
 CMD ["./golang-server"]

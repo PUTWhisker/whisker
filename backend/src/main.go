@@ -26,25 +26,28 @@ func main() {
 		log.Fatalf("Invalid port number: %v", err)
 	}
 	port := flag.Int("port", portNumber, "The server port")
-	pool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
-	}
-	defer pool.Close()
-
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
 	SoundTransferProto.RegisterSoundServiceServer(s, &services.SoundServer{SoundFileStoragePath: os.Getenv("SOUND_FILES_FOLDER_PATH")})
-	AuthenticationProto.RegisterClientServiceServer(s, &services.AuthenticationServer{DbPool: pool})
-
 	reflection.Register(s)
+
+	if os.Getenv("USE_DATABASE") == "True" {
+		pool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+			os.Exit(1)
+		}
+		AuthenticationProto.RegisterClientServiceServer(s, &services.AuthenticationServer{DbPool: pool})
+		log.Println("Database connected")
+		defer pool.Close()
+	}
 
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+
 }
