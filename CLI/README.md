@@ -6,3 +6,7 @@
 3. To run python client run `python main.py`
 
 To see available flags with descriptions run `python main.py --help`
+
+
+### Example use
+`python main.py --local --port 50051 --save file_path /home/krzysztof/whisper-monorepo/CLI/sample_file.mp3`

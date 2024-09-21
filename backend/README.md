@@ -20,4 +20,8 @@ protoc --go_out=. --go_opt=paths=source_relative \
 
 ## Run docker container
 1. Build image `docker build -t grpc-whisper .`
-1. Run container `docker run -p 9900:9900 grpc-whisper`
+1. Run container `docker run --rm -p 50051:50051 -e SERVER_PORT=50051 grpc-whisper`
+
+## Run docker container with database connected
+1. Run container `docker run -p 50051:50051 -e SERVER_PORT=50051 --rm --net=host -e USE_DATABASE=True -e DATABASE_URL=postgres://postgres:password@localhost:5432/whisper grpc-whisper` 
+1. Run database container, for example postgres one `docker run --name some-postgres -e POSTGRES_PASSWORD=password -p 5432:5432 -d -v infastructure_postgres_data:/var/lib/postgresql/data postgres`
