@@ -1,0 +1,42 @@
+
+services:
+  server:
+    image: grpc-whisper
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    # volumes:
+    #   - D:\Studia\Inzynierka\whisper_dependency\without_cuda\local:/usr/local
+    environment:
+      - PYTHONUNBUFFERED=1
+      - SERVER_PORT=9900
+      - USE_DATABASE=True
+      - DATABASE_URL=postgres://postgres:password@postgres:5432/whisper
+    
+  proxy:
+    build:
+      context: .
+      dockerfile: proxy/Dockerfile
+    ports:
+      - 50051:50051
+      - 9901:9901
+    depends_on:
+      - server
+  
+  postgres:
+    image: postgres
+    container_name: whisper-postgres
+    hostname: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=password
+      
+volumes:
+  postgres_data:
+
+
+
+

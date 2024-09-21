@@ -62,7 +62,9 @@ func IsUserInDatabase(email string, pool *pgxpool.Pool) bool {
 }
 
 func checkLoginPassword(email string, password string, pool *pgxpool.Pool) bool {
-	rows, err := pool.Query(context.Background(), "SELECT password_hash FROM app_user WHERE email=$1;", email)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	rows, err := pool.Query(ctx, "SELECT password_hash FROM app_user WHERE email=$1;", email)
 	if err != nil {
 		log.Fatal(err)
 		return false
@@ -81,7 +83,7 @@ func checkLoginPassword(email string, password string, pool *pgxpool.Pool) bool 
 func loadPrivateECDSAKeyFromFile(filepath string) (*ecdsa.PrivateKey, error) {
 	keyData, err := os.ReadFile(filepath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open key file")
 	}
 
 	block, _ := pem.Decode(keyData)
@@ -91,7 +93,7 @@ func loadPrivateECDSAKeyFromFile(filepath string) (*ecdsa.PrivateKey, error) {
 
 	privateKey, err := x509.ParseECPrivateKey(block.Bytes)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to parse key")
 	}
 
 	return privateKey, nil
@@ -131,7 +133,12 @@ func generateJWT(privateKeyPath string, username string) (string, error) {
 	var (
 		t *jwt.Token
 	)
-	key, _ := loadPrivateECDSAKeyFromFile(privateKeyPath)
+	key, err := loadPrivateECDSAKeyFromFile(privateKeyPath)
+
+	if err != nil {
+		return "not", err
+	}
+
 	claims := UserClaims{
 		username,
 		jwt.RegisteredClaims{
