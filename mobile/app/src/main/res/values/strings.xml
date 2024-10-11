@@ -2,5 +2,4 @@
     <string name="app_name">voicememos</string>
     <string name="start_recording">Start Recording</string>
     <string name="title_activity_start">StartActivity</string>
-    <string name="server_url">100.80.80.156:50051</string>
 </resources>

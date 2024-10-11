@@ -10,14 +10,18 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import io.grpc.authentication.AuthenticationClient
 import io.grpc.soundtransfer.SoundTransferGrpc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -61,7 +65,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var filenameInput: EditText
 
     private lateinit var db : AppDatabase
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -131,7 +134,6 @@ class MainActivity : AppCompatActivity() {
             // Hide the keyboard
             val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(filenameInput.windowToken, 0)
-//            uploadRecording()
         }
 
         filenameInput.setOnClickListener {
@@ -145,9 +147,6 @@ class MainActivity : AppCompatActivity() {
         btnBack.setOnClickListener {
             goBack()
         }
-
-
-
     }
 
     private val amplitudeRunnable: Runnable = object : Runnable {
@@ -162,6 +161,21 @@ class MainActivity : AppCompatActivity() {
 
 //    /storage/emulated/0/Android/data/edu.put.whisper/files/Music/test.mp3
     fun btnRecordPressed(v: View) {
+        Log.i("auth", resources.getString(R.string.server_url))
+        val authenticationClient = AuthenticationClient(Uri.parse(resources.getString(R.string.server_url)))
+        lifecycleScope.launch(Dispatchers.IO) {
+            authenticationClient.Login("Krzysztof", "Krzysztof")
+            val out = authenticationClient.GetTranslations()
+            Log.i("auth", out.toString())
+            val filePath = getRecordingFilePath("testowenagranie")
+            val transfer = SoundTransferGrpc(Uri.parse(resources.getString(R.string.server_url)))
+            val output: String? = transfer.sendSoundFile(filePath)
+            if (output != null) {
+                Log.i("auth", output)
+            } else {
+                Log.i("auth", "Nie dziala")
+            }
+        }
         tempFilePath = getTempRecordingFilePath()
         setVisibility(View.GONE, btnList, btnRecord, btnBack)
         setVisibility(View.VISIBLE, btnSave, btnStop, btnTranscript, btnDelete)
@@ -206,10 +220,7 @@ class MainActivity : AppCompatActivity() {
 
         setVisibility(View.GONE, tvTimer, btnRecord, btnList, btnResume, btnStop, btnCancel, btnSave, btnDelete, waveformView, btnTranscript)
         setVisibility(View.VISIBLE, tvTranscript, btnBack)
-        val filePath = getRecordingFilePath("test123")
-        GlobalScope.launch(Dispatchers.IO) {
-            uploadRecording(filePath)
-        }
+
     }
 
     fun btnStopPressed(v: View) {
