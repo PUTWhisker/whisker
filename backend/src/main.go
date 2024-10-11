@@ -31,7 +31,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	SoundTransferProto.RegisterSoundServiceServer(s, &services.SoundServer{SoundFileStoragePath: os.Getenv("SOUND_FILES_FOLDER_PATH")})
+
 	if os.Getenv("USE_DATABASE") == "True" {
 		pool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 		if err != nil {
@@ -39,8 +39,11 @@ func main() {
 			os.Exit(1)
 		}
 		AuthenticationProto.RegisterClientServiceServer(s, &services.AuthenticationServer{DbPool: pool})
+		SoundTransferProto.RegisterSoundServiceServer(s, &services.SoundServer{SoundFileStoragePath: os.Getenv("SOUND_FILES_FOLDER_PATH"), DbPool: pool})
 		log.Println("Database connected")
 		defer pool.Close()
+	} else {
+		SoundTransferProto.RegisterSoundServiceServer(s, &services.SoundServer{SoundFileStoragePath: os.Getenv("SOUND_FILES_FOLDER_PATH")})
 	}
 
 	reflection.Register(s)

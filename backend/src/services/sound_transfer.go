@@ -11,16 +11,32 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 type SoundServer struct {
 	SoundFileStoragePath string
+	DbPool               *pgxpool.Pool
 	pb.UnimplementedSoundServiceServer
 }
 
 func (s *SoundServer) TestConnection(ctx context.Context, in *pb.TextMessage) (*pb.TextMessage, error) {
 	log.Printf("Received: %v", in.GetText())
 	return &pb.TextMessage{Text: in.GetText()}, nil
+}
+
+func SaveTextToHistory(text string, username string, pool *pgxpool.Pool) {
+	fmt.Println("Here")
+	_, err := pool.Exec(context.Background(), `
+    INSERT INTO transcription(app_user_id, content) 
+    VALUES ((SELECT id FROM app_user WHERE email = $1), $2);
+	`, username, text)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (s *SoundServer) SendSoundFile(ctx context.Context, in *pb.SoundRequest) (*pb.SoundResponse, error) {
@@ -31,6 +47,20 @@ func (s *SoundServer) SendSoundFile(ctx context.Context, in *pb.SoundRequest) (*
 	response := transcribe(soundFilePath)
 	fmt.Println(soundFilePath)
 	os.Remove(soundFilePath)
+
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Errorf(codes.DataLoss, "Failed to get metadata")
+	}
+	username, err := GetUserNameFromMetadata(md)
+	if err != nil {
+		return nil, err
+	}
+
+	if username != "" {
+		SaveTextToHistory(response, username, s.DbPool)
+	}
+
 	return &pb.SoundResponse{Text: response}, nil
 }
 
