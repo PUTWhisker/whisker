@@ -163,10 +163,11 @@ func verifyJWT(tokenString string) (*jwt.Token, error) {
 		return publicKey, nil
 	})
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return nil, err
 	} else if _, ok := token.Claims.(*UserClaims); ok {
 	} else {
-		log.Fatal("unknown claims type, cannot proceed")
+		return nil, status.Error(1, "unknown claims type, cannot proceed")
 	}
 
 	// Check if the token is valid
@@ -205,6 +206,20 @@ func GetTranslationFromDB(username string, pool *pgxpool.Pool) bool {
 
 }
 
+func GetUserNameFromMetadata(metadata metadata.MD) (string, error) {
+	// no metadata attached
+	if metadata["jwt"] == nil {
+		return "", nil
+	}
+	unverifiedToken := metadata["jwt"][0]
+	token, err := verifyJWT(unverifiedToken)
+	if err != nil {
+		return "", err
+	}
+	claims := token.Claims.(*UserClaims)
+	return claims.Username, nil
+}
+
 func (s *AuthenticationServer) GetTranslation(_ *pb.Empty, stream pb.ClientService_GetTranslationServer) error {
 	timestampFormat := time.StampNano
 	defer func() {
@@ -216,18 +231,16 @@ func (s *AuthenticationServer) GetTranslation(_ *pb.Empty, stream pb.ClientServi
 	if !ok {
 		return status.Errorf(codes.DataLoss, "Failed to get metadata")
 	}
-	unverifiedToken := md["jwt"][0]
-	token, err := verifyJWT(unverifiedToken)
+	username, err := GetUserNameFromMetadata(md)
 
 	if err != nil {
 		return err
 	}
-	claims := token.Claims.(*UserClaims)
 
 	header := metadata.New(map[string]string{"location": "MTV", "timestamp": time.Now().Format(timestampFormat)})
 	stream.SendHeader(header)
 
-	rows, err := s.DbPool.Query(context.Background(), "SELECT content FROM transcription WHERE app_user_id=(select id from app_user where email=$1 LIMIT 1);", claims.Username)
+	rows, err := s.DbPool.Query(context.Background(), "SELECT content FROM transcription WHERE app_user_id=(select id from app_user where email=$1 LIMIT 1);", username)
 	if err != nil {
 		log.Fatal(err)
 		return err
