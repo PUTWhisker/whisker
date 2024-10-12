@@ -30,6 +30,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
+	services.ConnectToWhisperServer()
+
 	s := grpc.NewServer()
 	SoundTransferProto.RegisterSoundServiceServer(s, &services.SoundServer{SoundFileStoragePath: os.Getenv("SOUND_FILES_FOLDER_PATH")})
 	if os.Getenv("USE_DATABASE") == "True" {

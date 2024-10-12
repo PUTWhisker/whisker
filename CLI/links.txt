@@ -1,4 +1,0 @@
-https://grpc.io/docs/languages/python/basics/
-https://grpc.io/docs/guides/performance/ <- use asyncio
-https://grpc.github.io/grpc/python/grpc_asyncio.html#grpc.aio.StreamStreamCall <- asyncio documentation
-https://protobuf.dev/reference/python/python-generated/#repeated-fields <- streaming Python documentation

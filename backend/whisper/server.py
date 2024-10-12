@@ -1,0 +1,77 @@
+from concurrent import futures
+from time import sleep
+from threading import Thread
+
+import sound_transfer_pb2_grpc as Services
+import sound_transfer_pb2 as Variables
+import faster_whisper_model
+import grpc
+import asyncio
+import logging
+
+_cleanup_coroutines = []
+
+class SoundService(Services.SoundServiceServicer):
+
+    def __init__(self):
+        self.number = 0
+        self.fastModel = faster_whisper_model.FasterWhisperHandler()
+
+
+    def TestConnection(self, request, context):
+        return Variables.TextMessage(text=request.text)
+    
+    
+    async def SendSoundFile(self, request, context):
+        print("Received audio file.")
+        print(type(request.sound_data)) # <- received audio file
+        print(request.flags) # <- received flags
+        result = await self.fastModel.handleFile(request.sound_data, context, False)
+        return Variables.SoundResponse(text=result)
+
+
+    def StreamSoundFile(self, requestIter, context):
+        def parse_request():
+            previous = ""
+            for request in requestIter:
+                try:
+                    result, previous = self.fastModel.handleRecord(request.sound_data, context, previous, True)
+                except Exception as e:
+                    print(e)
+                yield Variables.SoundResponse(
+                    text=result
+                )
+        return parse_request()
+
+
+async def server():
+    port = "7070"
+    server = grpc.aio.server(
+    futures.ThreadPoolExecutor(max_workers=10),
+    options=[
+        ('grpc.max_send_message_length', 50 * 1024 * 1024),  # 50MB
+        ('grpc.max_receive_message_length', 50 * 1024 * 1024)  # 50MB
+    ]
+)
+    Services.add_SoundServiceServicer_to_server(SoundService(), server)
+    server.add_insecure_port("[::]:" + port) # change to secure later
+    await server.start()
+    try:
+        print("Server started, listening on " + port)
+        await server.wait_for_termination()
+    except KeyboardInterrupt:
+        await server.stop(5)
+        print("Keybourd interruption detected, server closing...")
+    await server.wait_for_termination()
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(server())
+    except KeyboardInterrupt:
+        logging.info("Detected keyboard interruption, shutting down...")
+    finally:
+        loop.run_until_complete(*_cleanup_coroutines)
+        loop.close()

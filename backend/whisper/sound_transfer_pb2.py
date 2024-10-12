@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14sound_transfer.proto\"1\n\x0cSoundRequest\x12\x12\n\nsound_data\x18\x01 \x01(\x0c\x12\r\n\x05\x66lags\x18\x02 \x03(\t\"\x1d\n\rSoundResponse\x12\x0c\n\x04text\x18\x03 \x01(\t\"\x1b\n\x0bTextMessage\x12\x0c\n\x04text\x18\x04 \x01(\t2\xa6\x01\n\x0cSoundService\x12.\n\x0eTestConnection\x12\x0c.TextMessage\x1a\x0c.TextMessage\"\x00\x12\x30\n\rSendSoundFile\x12\r.SoundRequest\x1a\x0e.SoundResponse\"\x00\x12\x34\n\x0fStreamSoundFile\x12\r.SoundRequest\x1a\x0e.SoundResponse(\x01\x30\x01\x42\x1cZ\x1ainzynierka/server_servicesb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14sound_transfer.proto\"1\n\x0cSoundRequest\x12\x12\n\nsound_data\x18\x01 \x01(\x0c\x12\r\n\x05\x66lags\x18\x02 \x03(\t\"\x1d\n\rSoundResponse\x12\x0c\n\x04text\x18\x03 \x01(\t\"\x1b\n\x0bTextMessage\x12\x0c\n\x04text\x18\x04 \x01(\t2\xa6\x01\n\x0cSoundService\x12\x30\n\rSendSoundFile\x12\r.SoundRequest\x1a\x0e.SoundResponse\"\x00\x12.\n\x0eTestConnection\x12\x0c.TextMessage\x1a\x0c.TextMessage\"\x00\x12\x34\n\x0fStreamSoundFile\x12\r.SoundRequest\x1a\x0e.SoundResponse(\x01\x30\x01\x42\x1cZ\x1ainzynierka/server_servicesb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)

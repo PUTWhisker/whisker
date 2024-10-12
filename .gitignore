@@ -1,4 +1,5 @@
-.venv/
+*venv
+*__pycache__/
 soundFiles
 .env
 .DS_Store
