@@ -74,12 +74,13 @@ async def main(parser: argparse.ArgumentParser):
     #read server's details
     if (args.local):
         print("local option")
-        host = "127.0.0.1" #TODO: This may not work with docker, need to be tested
+        # host = "host.docker.internal"
+        host = "127.0.0.1"
         port = args.port
     else:
         print("server option")
-        host = "1234123" # Here insert pp server address
-        port = "9090"
+        host = "100.80.80.156" # Here insert pp server address
+        port = args.port
 
     # Check if file exists if it was passed as an argument
     if (args.fileName != None):
@@ -90,7 +91,7 @@ async def main(parser: argparse.ArgumentParser):
     # Innitiate connection with the server
     console = ConsolePrinter(host, port, args.language, args.model, args.save)
     if not await console.startApp():
-        return
+       return
 
     if (args.fileName != None): # If there is a valid audio file as an argument, initiate SendSoundFile method
         with open(args.fileName, 'rb') as file:
@@ -99,7 +100,7 @@ async def main(parser: argparse.ArgumentParser):
     elif (args.record): # If there is a record flag, initiate StreamSoundFile method (app can't do both, record and translate file)
         await console.record()
     else: # No action specified by the user
-        return;
+        return
 
 
 

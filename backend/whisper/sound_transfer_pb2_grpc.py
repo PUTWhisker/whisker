@@ -39,15 +39,15 @@ class SoundServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.TestConnection = channel.unary_unary(
-                '/SoundService/TestConnection',
-                request_serializer=sound__transfer__pb2.TextMessage.SerializeToString,
-                response_deserializer=sound__transfer__pb2.TextMessage.FromString,
-                _registered_method=True)
         self.SendSoundFile = channel.unary_unary(
                 '/SoundService/SendSoundFile',
                 request_serializer=sound__transfer__pb2.SoundRequest.SerializeToString,
                 response_deserializer=sound__transfer__pb2.SoundResponse.FromString,
+                _registered_method=True)
+        self.TestConnection = channel.unary_unary(
+                '/SoundService/TestConnection',
+                request_serializer=sound__transfer__pb2.TextMessage.SerializeToString,
+                response_deserializer=sound__transfer__pb2.TextMessage.FromString,
                 _registered_method=True)
         self.StreamSoundFile = channel.stream_stream(
                 '/SoundService/StreamSoundFile',
@@ -59,13 +59,13 @@ class SoundServiceStub(object):
 class SoundServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def TestConnection(self, request, context):
+    def SendSoundFile(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SendSoundFile(self, request, context):
+    def TestConnection(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -80,15 +80,15 @@ class SoundServiceServicer(object):
 
 def add_SoundServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'TestConnection': grpc.unary_unary_rpc_method_handler(
-                    servicer.TestConnection,
-                    request_deserializer=sound__transfer__pb2.TextMessage.FromString,
-                    response_serializer=sound__transfer__pb2.TextMessage.SerializeToString,
-            ),
             'SendSoundFile': grpc.unary_unary_rpc_method_handler(
                     servicer.SendSoundFile,
                     request_deserializer=sound__transfer__pb2.SoundRequest.FromString,
                     response_serializer=sound__transfer__pb2.SoundResponse.SerializeToString,
+            ),
+            'TestConnection': grpc.unary_unary_rpc_method_handler(
+                    servicer.TestConnection,
+                    request_deserializer=sound__transfer__pb2.TextMessage.FromString,
+                    response_serializer=sound__transfer__pb2.TextMessage.SerializeToString,
             ),
             'StreamSoundFile': grpc.stream_stream_rpc_method_handler(
                     servicer.StreamSoundFile,
@@ -107,33 +107,6 @@ class SoundService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def TestConnection(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/SoundService/TestConnection',
-            sound__transfer__pb2.TextMessage.SerializeToString,
-            sound__transfer__pb2.TextMessage.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
     def SendSoundFile(request,
             target,
             options=(),
@@ -150,6 +123,33 @@ class SoundService(object):
             '/SoundService/SendSoundFile',
             sound__transfer__pb2.SoundRequest.SerializeToString,
             sound__transfer__pb2.SoundResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def TestConnection(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/SoundService/TestConnection',
+            sound__transfer__pb2.TextMessage.SerializeToString,
+            sound__transfer__pb2.TextMessage.FromString,
             options,
             channel_credentials,
             insecure,

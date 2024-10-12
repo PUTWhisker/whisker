@@ -3,7 +3,7 @@ from client import GrpcClient
 import random
 import asyncio
 import grpc
-
+import time
 
 class ConsolePrinter:
 
@@ -20,6 +20,7 @@ class ConsolePrinter:
     
     def _errorHandler(func):
         async def wrapper(*args, **kwargs):
+            start = time.time()
             try:
                 return await func(*args, **kwargs)
             except grpc.RpcError as grpcError:
@@ -27,6 +28,9 @@ class ConsolePrinter:
             except Exception as e:
                 print(f'This is an unhandled exception.')
                 print(e)
+            finally:
+                end = time.time()
+                print(f'Execution time: {end - start}')
         return wrapper
     
 

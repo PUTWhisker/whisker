@@ -30,6 +30,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
+	services.ConnectToWhisperServer()
+
 	s := grpc.NewServer()
 
 	if os.Getenv("USE_DATABASE") == "True" {
