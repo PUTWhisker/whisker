@@ -8,6 +8,7 @@ import faster_whisper_model
 import grpc
 import asyncio
 import logging
+import os
 
 _cleanup_coroutines = []
 
@@ -16,6 +17,14 @@ class SoundService(Services.SoundServiceServicer):
     def __init__(self):
         self.number = 0
         self.fastModel = faster_whisper_model.FasterWhisperHandler()
+        try:
+            os.mkdir("tempFiles")
+        except FileExistsError:
+            pass
+        except PermissionError:
+            print(f"Permission denied: Unable to create direcotry tempFiles.")
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
 
     def TestConnection(self, request, context):
@@ -73,5 +82,5 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logging.info("Detected keyboard interruption, shutting down...")
     finally:
-        loop.run_until_complete(*_cleanup_coroutines)
+        loop.run_until_complete(asyncio.gather(*_cleanup_coroutines))
         loop.close()
