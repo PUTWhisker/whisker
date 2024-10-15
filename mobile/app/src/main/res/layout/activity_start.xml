@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".StartActivity">
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -19,7 +20,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- Zmieniony Log In na MaterialButton -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/tvLogin"
                 android:layout_width="100dp"
@@ -32,7 +32,6 @@
                 app:rippleColor="@color/grayDark"
                 android:layout_marginEnd="16dp"/>
 
-            <!-- Zmieniony Register na MaterialButton -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/tvRegister"
                 android:layout_width="100dp"
@@ -90,17 +89,16 @@
                 android:gravity="center"/>
         </LinearLayout>
 
-        <View
-            android:id="@+id/bottomSheetBG"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#80000000"
-            android:visibility="gone" />
-
-
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <View
+        android:id="@+id/bottomSheetLogin"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/opaqueBG"/>
+
+    <include layout="@layout/bottom_popup_login"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

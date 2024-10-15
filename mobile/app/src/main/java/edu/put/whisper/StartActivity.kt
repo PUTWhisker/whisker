@@ -4,10 +4,14 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.view.View
 import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -19,7 +23,12 @@ class StartActivity : AppCompatActivity() {
     private lateinit var btnRecordActivity: Button
     private lateinit var btnChooseFile: Button
     private lateinit var tvSelectedFile: TextView
-    private lateinit var tvLogin: TextView
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
+    private lateinit var bottomSheetLogin: View
+    private lateinit var btnCancelLog: Button
+    private lateinit var btnSubmit: Button
+    private lateinit var passwordInput: Button
+    private lateinit var loginInput: EditText
     private val PICK_FILE_REQUEST_CODE = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,6 +38,13 @@ class StartActivity : AppCompatActivity() {
         btnRecordActivity = findViewById(R.id.btnRecordActivity)
         btnChooseFile = findViewById(R.id.btnChooseFile)
         tvSelectedFile = findViewById(R.id.tvSelectedFile)
+
+        val bottomSheetL: LinearLayout = findViewById(R.id.bottomSheetL)
+        bottomSheetLogin = findViewById(R.id.bottomSheetLogin)
+
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetL)
+        bottomSheetBehavior.peekHeight = 0
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
 
         btnRecordActivity.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
