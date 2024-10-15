@@ -19,6 +19,7 @@ class StartActivity : AppCompatActivity() {
     private lateinit var btnRecordActivity: Button
     private lateinit var btnChooseFile: Button
     private lateinit var tvSelectedFile: TextView
+    private lateinit var tvLogin: TextView
     private val PICK_FILE_REQUEST_CODE = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
