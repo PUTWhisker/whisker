@@ -21,7 +21,7 @@
             app:layout_constraintEnd_toEndOf="parent">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/tvLogin"
+                android:id="@+id/btnLogin"
                 android:layout_width="100dp"
                 android:layout_height="48dp"
                 android:text="Log In"
@@ -33,7 +33,7 @@
                 android:layout_marginEnd="16dp"/>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/tvRegister"
+                android:id="@+id/btnRegister"
                 android:layout_width="100dp"
                 android:layout_height="48dp"
                 android:text="Register"

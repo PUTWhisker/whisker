@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -25,6 +26,9 @@ class StartActivity : AppCompatActivity() {
     private lateinit var tvSelectedFile: TextView
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
     private lateinit var bottomSheetLogin: View
+    private lateinit var bottomSheetTitle: TextView
+    private lateinit var btnLogin: Button
+    private lateinit var btnRegister: Button
     private lateinit var btnCancelLog: Button
     private lateinit var btnSubmit: Button
     private lateinit var passwordInput: Button
@@ -38,6 +42,14 @@ class StartActivity : AppCompatActivity() {
         btnRecordActivity = findViewById(R.id.btnRecordActivity)
         btnChooseFile = findViewById(R.id.btnChooseFile)
         tvSelectedFile = findViewById(R.id.tvSelectedFile)
+        btnLogin = findViewById(R.id.btnLogin)
+        loginInput = findViewById(R.id.loginInput)
+        btnRegister = findViewById(R.id.btnRegister)
+        btnLogin = findViewById(R.id.btnLogin)
+        btnCancelLog = findViewById(R.id.btnCancelLog)
+        btnSubmit = findViewById(R.id.btnSubmit)
+        bottomSheetTitle = findViewById(R.id.bottomSheetTitle)
+
 
         val bottomSheetL: LinearLayout = findViewById(R.id.bottomSheetL)
         bottomSheetLogin = findViewById(R.id.bottomSheetLogin)
@@ -45,6 +57,42 @@ class StartActivity : AppCompatActivity() {
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetL)
         bottomSheetBehavior.peekHeight = 0
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+
+        btnRegister.setOnClickListener{
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetLogin.visibility = View.VISIBLE
+            bottomSheetTitle.setText("Register")
+        }
+
+        btnLogin.setOnClickListener {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetLogin.visibility = View.VISIBLE
+            bottomSheetTitle.setText("Log in")
+        }
+        btnCancelLog.setOnClickListener {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            bottomSheetLogin.visibility = View.GONE
+
+        }
+
+        btnSubmit.setOnClickListener {
+
+//            val email = loginInput.text.toString()
+//            val password = passwordInput.text.toString()
+//            if (email.isEmpty()) {
+//                Toast.makeText(this, "Please enter your email", Toast.LENGTH_LONG).show()
+//                return@setOnClickListener
+//            }
+//            if (password.isEmpty()){
+//                Toast.makeText(this, "Please enter your password", Toast.LENGTH_LONG).show()
+//                return@setOnClickListener
+//            }
+
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            bottomSheetLogin.visibility = View.GONE
+        }
+
+
 
         btnRecordActivity.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
