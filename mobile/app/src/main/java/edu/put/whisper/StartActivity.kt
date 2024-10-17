@@ -31,7 +31,8 @@ class StartActivity : AppCompatActivity() {
     private lateinit var btnRegister: Button
     private lateinit var btnCancelLog: Button
     private lateinit var btnSubmit: Button
-    private lateinit var passwordInput: Button
+    private lateinit var passwordInput: EditText
+    private lateinit var repeatPasswordInput: EditText
     private lateinit var loginInput: EditText
     private val PICK_FILE_REQUEST_CODE = 1
 
@@ -44,6 +45,8 @@ class StartActivity : AppCompatActivity() {
         tvSelectedFile = findViewById(R.id.tvSelectedFile)
         btnLogin = findViewById(R.id.btnLogin)
         loginInput = findViewById(R.id.loginInput)
+        passwordInput = findViewById(R.id.passwordInput)
+        repeatPasswordInput = findViewById(R.id.repeatPasswordInput)
         btnRegister = findViewById(R.id.btnRegister)
         btnLogin = findViewById(R.id.btnLogin)
         btnCancelLog = findViewById(R.id.btnCancelLog)
@@ -62,6 +65,11 @@ class StartActivity : AppCompatActivity() {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             bottomSheetLogin.visibility = View.VISIBLE
             bottomSheetTitle.setText("Register")
+            repeatPasswordInput.visibility = View.VISIBLE
+
+            // TODO dwa razy wpisać hasło
+            // TODO lista zeby przeglądać historię
+            // funkcja ktora przerzuca z inne threada na main thread zeby layout zmieniac
         }
 
         btnLogin.setOnClickListener {
@@ -76,20 +84,31 @@ class StartActivity : AppCompatActivity() {
         }
 
         btnSubmit.setOnClickListener {
+            val password = passwordInput.text.toString()
+            val repeatPassword = repeatPasswordInput.text.toString()
+            val title = bottomSheetTitle.text.toString()
+            if(title == "Register") {
 
-//            val email = loginInput.text.toString()
-//            val password = passwordInput.text.toString()
-//            if (email.isEmpty()) {
-//                Toast.makeText(this, "Please enter your email", Toast.LENGTH_LONG).show()
-//                return@setOnClickListener
-//            }
-//            if (password.isEmpty()){
-//                Toast.makeText(this, "Please enter your password", Toast.LENGTH_LONG).show()
-//                return@setOnClickListener
-//            }
+                // sprawdzenie czy hasła są takie same
+                if (password == repeatPassword) {
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                    bottomSheetLogin.visibility = View.GONE
+                    Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
 
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-            bottomSheetLogin.visibility = View.GONE
+                    loginInput.text.clear()
+                    passwordInput.text.clear()
+                    repeatPasswordInput.text.clear()
+                    repeatPasswordInput.visibility = View.GONE
+                } else {
+                    Toast.makeText(
+                        this,
+                        "Passwords do not match. Please try again.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    passwordInput.text.clear()
+                    repeatPasswordInput.text.clear()
+                }
+            }
         }
 
 
