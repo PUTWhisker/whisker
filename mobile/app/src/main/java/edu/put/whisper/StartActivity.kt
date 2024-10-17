@@ -43,7 +43,7 @@ class StartActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
 
-        val serverUri = Uri.parse("")  // TODO dowiedziec sie URI
+        val serverUri = Uri.parse("http://100.80.80.156:50051/")  // TODO dowiedziec sie URI
         authClient = AuthenticationClient(serverUri)
 
         btnRecordActivity = findViewById(R.id.btnRecordActivity)
@@ -131,6 +131,22 @@ class StartActivity : AppCompatActivity() {
                     ).show()
                     passwordInput.text.clear()
                     repeatPasswordInput.text.clear()
+                }
+            }
+            if(title == "Log in"){
+                GlobalScope.launch(Dispatchers.IO) {
+                    val success = authClient.Login(username, password)
+                    withContext(Dispatchers.Main) {
+                        if (success) {
+                            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                            bottomSheetLogin.visibility = View.GONE
+                            Toast.makeText(this@StartActivity, "Login successful!", Toast.LENGTH_SHORT).show()
+
+                            //showTranslationsHistory()
+                        } else {
+                            Toast.makeText(this@StartActivity, "Login failed. Try again.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
             }
         }
