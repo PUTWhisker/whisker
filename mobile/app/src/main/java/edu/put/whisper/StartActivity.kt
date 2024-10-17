@@ -13,6 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import io.grpc.authentication.AuthenticationClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -36,9 +37,14 @@ class StartActivity : AppCompatActivity() {
     private lateinit var loginInput: EditText
     private val PICK_FILE_REQUEST_CODE = 1
 
+    private lateinit var authClient: AuthenticationClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
+
+        val serverUri = Uri.parse("")  // TODO dowiedziec sie URI
+        authClient = AuthenticationClient(serverUri)
 
         btnRecordActivity = findViewById(R.id.btnRecordActivity)
         btnChooseFile = findViewById(R.id.btnChooseFile)
@@ -61,7 +67,7 @@ class StartActivity : AppCompatActivity() {
         bottomSheetBehavior.peekHeight = 0
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
 
-        btnRegister.setOnClickListener{
+        btnRegister.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             bottomSheetLogin.visibility = View.VISIBLE
             bottomSheetTitle.setText("Register")
@@ -84,21 +90,39 @@ class StartActivity : AppCompatActivity() {
         }
 
         btnSubmit.setOnClickListener {
+            val username = loginInput.text.toString()
             val password = passwordInput.text.toString()
             val repeatPassword = repeatPasswordInput.text.toString()
             val title = bottomSheetTitle.text.toString()
-            if(title == "Register") {
-
-                // sprawdzenie czy hasła są takie same
+            if (title == "Register") {
                 if (password == repeatPassword) {
-                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-                    bottomSheetLogin.visibility = View.GONE
-                    Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
+                    GlobalScope.launch(Dispatchers.IO) {
+                        val success = authClient.Register(username, password)
+                        withContext(Dispatchers.Main) {
+                            if (success) {
+                                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                                bottomSheetLogin.visibility = View.GONE
+                                Toast.makeText(
+                                    this@StartActivity,
+                                    "Registration successful!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
 
-                    loginInput.text.clear()
-                    passwordInput.text.clear()
-                    repeatPasswordInput.text.clear()
-                    repeatPasswordInput.visibility = View.GONE
+                                loginInput.text.clear()
+                                passwordInput.text.clear()
+                                repeatPasswordInput.text.clear()
+                                repeatPasswordInput.visibility = View.GONE
+                            } else {
+                                Toast.makeText(
+                                    this@StartActivity,
+                                    "Registration failed. Try again.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                            }
+                        }
+                    }
+
                 } else {
                     Toast.makeText(
                         this,
@@ -123,7 +147,10 @@ class StartActivity : AppCompatActivity() {
                 type = "audio/*"
                 addCategory(Intent.CATEGORY_OPENABLE)
             }
-            startActivityForResult(Intent.createChooser(intent, "Choose a file"), PICK_FILE_REQUEST_CODE)
+            startActivityForResult(
+                Intent.createChooser(intent, "Choose a file"),
+                PICK_FILE_REQUEST_CODE
+            )
         }
     }
 
