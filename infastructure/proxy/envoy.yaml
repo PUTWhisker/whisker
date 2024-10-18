@@ -69,5 +69,5 @@ static_resources:
             - endpoint:
                 address:
                   socket_address:
-                    address: server
-                    port_value: ${SERVER_PORT}
+                    address: golang-server
+                    port_value: 9900

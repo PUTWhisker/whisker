@@ -10,6 +10,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"time"
 
 	"inzynierka/server/services"
 
@@ -31,7 +32,16 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	services.ConnectToWhisperServer()
+	connected := false
+	for !connected {
+		err = services.ConnectToWhisperServer()
+		if err != nil {
+			fmt.Printf("Couldn't connect to whisper server, retrying in 10 s")
+			time.Sleep(10 * time.Second)
+		} else {
+			connected = true
+		}
+	}
 
 	s := grpc.NewServer()
 	SoundTransferProto.RegisterSoundServiceServer(s, &services.SoundServer{SoundFileStoragePath: os.Getenv("SOUND_FILES_FOLDER_PATH")})

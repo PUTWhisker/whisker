@@ -6,9 +6,6 @@ import (
 	pb "inzynierka/server/proto/sound_transfer"
 	"io"
 	"log"
-	"os"
-	"os/exec"
-	"strings"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -19,13 +16,12 @@ type SoundServer struct {
 	pb.UnimplementedSoundServiceServer
 }
 
-var whisperPort string = "127.0.0.1:7070"
+var whisperPort string = "whisper-server:7070"
 var WhisperServer pb.SoundServiceClient
 
 func ConnectToWhisperServer() error {
 	conn, err := grpc.NewClient(whisperPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("%v", err)
 		return err
 	}
 	WhisperServer = pb.NewSoundServiceClient(conn)
@@ -33,7 +29,6 @@ func ConnectToWhisperServer() error {
 		Text: "Hello server",
 	})
 	if err != nil {
-		log.Fatalf("%v", err)
 		return err
 	}
 	fmt.Println(res)
@@ -54,22 +49,6 @@ func (s *SoundServer) SendSoundFile(ctx context.Context, in *pb.SoundRequest) (*
 	return res, nil
 }
 
-func transcribe(soundFilePath string) string {
-	modelPath := os.Getenv("MODEL_PATH")
-	soundFiles := os.Getenv("SOUND_FILES_FOLDER_PATH")
-	cmd := exec.Command(modelPath, soundFilePath, "-f", "txt", "--language", "Polish", "--output_dir", soundFiles)
-	var out strings.Builder
-	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-	textOutputPath := soundFilePath[:len(soundFilePath)-4] + ".txt"
-	bytes, _ := os.ReadFile(textOutputPath)
-	os.Remove(textOutputPath)
-	return string(bytes)
-}
-
 func (s *SoundServer) StreamSoundFile(stream pb.SoundService_StreamSoundFileServer) error {
 	whisperStream, _ := WhisperServer.StreamSoundFile(context.TODO())
 	errChannel := make(chan error)
@@ -86,7 +65,6 @@ func (s *SoundServer) StreamSoundFile(stream pb.SoundService_StreamSoundFileServ
 				panic("Whisper server error")
 			}
 			stream.Send(whisperTranscription)
-			//fmt.Println("goroutine send message to channel")
 		}
 	}(whisperStream, errChannel)
 
@@ -106,7 +84,6 @@ func (s *SoundServer) StreamSoundFile(stream pb.SoundService_StreamSoundFileServ
 		if err := whisperStream.Send(in); err != nil {
 			return err
 		}
-		//fmt.Println("Main function sent message to whisper")
 		select {
 		case err = <-errChannel:
 			return (err)
