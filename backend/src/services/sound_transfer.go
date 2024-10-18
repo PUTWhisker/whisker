@@ -21,13 +21,12 @@ type SoundServer struct {
 	pb.UnimplementedSoundServiceServer
 }
 
-var whisperPort string = "127.0.0.1:7070"
+var whisperPort string = "whisper-server:7070"
 var WhisperServer pb.SoundServiceClient
 
 func ConnectToWhisperServer() error {
 	conn, err := grpc.NewClient(whisperPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("%v", err)
 		return err
 	}
 	WhisperServer = pb.NewSoundServiceClient(conn)
@@ -35,7 +34,6 @@ func ConnectToWhisperServer() error {
 		Text: "Hello server",
 	})
 	if err != nil {
-		log.Fatalf("%v", err)
 		return err
 	}
 	fmt.Println(res)
@@ -97,7 +95,6 @@ func (s *SoundServer) StreamSoundFile(stream pb.SoundService_StreamSoundFileServ
 				panic("Whisper server error")
 			}
 			stream.Send(whisperTranscription)
-			//fmt.Println("goroutine send message to channel")
 		}
 	}(whisperStream, errChannel)
 
@@ -117,7 +114,6 @@ func (s *SoundServer) StreamSoundFile(stream pb.SoundService_StreamSoundFileServ
 		if err := whisperStream.Send(in); err != nil {
 			return err
 		}
-		//fmt.Println("Main function sent message to whisper")
 		select {
 		case err = <-errChannel:
 			return (err)

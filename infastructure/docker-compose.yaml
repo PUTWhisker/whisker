@@ -1,15 +1,21 @@
 
 services:
-  golang-server:
-    image: grpc-whisper
+  whisper-server:
     build:
-      context: ../backend
+      context: ../backend/whisper
+      dockerfile: Dockerfile
+
+  golang-server:
+    build:
+      context: ../backend/src
       dockerfile: Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
       - SERVER_PORT=9900
       - USE_DATABASE=True
       - DATABASE_URL=postgres://postgres:password@postgres:5432/whisper
+    depends_on: # Change depends_on to healthcheck
+      - whisper-server
     
   proxy:
     build:

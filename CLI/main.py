@@ -75,7 +75,7 @@ async def main(parser: argparse.ArgumentParser):
     if (args.local):
         print("local option")
         # host = "host.docker.internal"
-        host = "127.0.0.1"
+        host = "localhost"
         port = args.port
     else:
         print("server option")

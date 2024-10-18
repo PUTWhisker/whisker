@@ -76,7 +76,9 @@ async def server():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    loop = asyncio.get_event_loop()
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     try:
         loop.run_until_complete(server())
     except KeyboardInterrupt:
