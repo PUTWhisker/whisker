@@ -10,6 +10,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"time"
 
 	"inzynierka/server/services"
 
@@ -19,8 +20,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-func main() {
-	godotenv.Load()
+func createTCPListener() net.Listener {
 	portNumber, err := strconv.Atoi(os.Getenv("SERVER_PORT"))
 	if err != nil {
 		log.Fatalf("Invalid port number: %v", err)
@@ -30,26 +30,55 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	s := grpc.NewServer()
+	return lis
+}
 
+func registerGrpcServices(server *grpc.Server) *pgxpool.Pool {
 	if os.Getenv("USE_DATABASE") == "True" {
 		pool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-			os.Exit(1)
+			log.Fatalf("Unable to initialize pool: %v\n", err)
 		}
-		AuthenticationProto.RegisterClientServiceServer(s, &services.AuthenticationServer{DbPool: pool})
-		SoundTransferProto.RegisterSoundServiceServer(s, &services.SoundServer{SoundFileStoragePath: os.Getenv("SOUND_FILES_FOLDER_PATH"), DbPool: pool})
-		log.Println("Database connected")
-		defer pool.Close()
+		err = pool.Ping(context.Background())
+		if err != nil {
+			log.Fatalf("Unable to connect to database: %v\n", err)
+		}
+		AuthenticationProto.RegisterClientServiceServer(
+			server,
+			&services.AuthenticationServer{
+				Db:           &services.UserDb{Pool: pool},
+				JwtGenerator: &services.JWTGenerator{PrivateKeyPath: os.Getenv("JWT_PRIVATE_KEY_PATH")},
+			},
+		)
+		SoundTransferProto.RegisterSoundServiceServer(server, &services.SoundServer{SoundFileStoragePath: os.Getenv("SOUND_FILES_FOLDER_PATH"), DbPool: pool})
+		return pool
 	} else {
-		SoundTransferProto.RegisterSoundServiceServer(s, &services.SoundServer{SoundFileStoragePath: os.Getenv("SOUND_FILES_FOLDER_PATH")})
+		SoundTransferProto.RegisterSoundServiceServer(server, &services.SoundServer{SoundFileStoragePath: os.Getenv("SOUND_FILES_FOLDER_PATH"), DbPool: nil})
 	}
+	return nil
+}
 
-	reflection.Register(s)
+func main() {
+	godotenv.Load()
+	lis := createTCPListener()
+	grpcServer := grpc.NewServer()
+	dbPool := registerGrpcServices(grpcServer)
+	connected := false
+	for !connected {
+		err := services.ConnectToWhisperServer()
+		if err != nil {
+			fmt.Printf("Couldn't connect to whisper server, retrying in 10 s")
+			time.Sleep(10 * time.Second)
+		} else {
+			connected = true
+		}
+	}
+	if dbPool != nil {
+		defer dbPool.Close()
+	}
+	reflection.Register(grpcServer)
 	log.Printf("server listening at %v", lis.Addr())
-	if err := s.Serve(lis); err != nil {
+	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
-
 }
