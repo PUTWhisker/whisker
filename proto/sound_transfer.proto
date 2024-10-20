@@ -7,7 +7,7 @@ option java_outer_classname = "SoundTransferProto";
 service SoundService {
     rpc TestConnection(TextMessage) returns (TextMessage) {};
     rpc SendSoundFile(SoundRequest) returns (SoundResponse) {};
-    rpc StreamSoundFile(stream SoundRequest) returns (stream SoundResponse);
+    rpc StreamSoundFile(stream SoundRequest) returns (stream SoundStreamResponse);
 }
 
 message SoundRequest {
@@ -21,4 +21,9 @@ message SoundResponse {
 
 message TextMessage {
     string text = 4;
+}
+
+message SoundStreamResponse {
+    string text = 5;
+    repeated string flags = 6;
 }

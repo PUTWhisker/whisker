@@ -5,3 +5,4 @@ soundFiles
 .DS_Store
 .vscode
 *.pem
+*.pth

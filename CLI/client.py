@@ -58,13 +58,13 @@ class GrpcClient:
             responseIter = self.stub.StreamSoundFile(recording.record()) # Streaming recorded audio yield by record() funciton
             print("Recording started. You may start talking now.")
             async for response in responseIter:
-                # if response.flags[0] == "True":
-                #     iter += 1
-                #     transcription.append("")
+                if response.flags[0] == "True":
+                    iter += 1
+                    transcription.append("")
                 transcription[iter] = response.text
                 os.system('cls' if os.name=='nt' else 'clear') # Clear terminal to correct transcription
-                # for transcript in transcription: # Displaying server's responses
-                #     print(transcript)
+                for transcript in transcription: # Displaying server's responses
+                    print(transcript)
                 print(transcription)
 
         except (grpc.RpcError, Exception):

@@ -24,3 +24,11 @@ class TextMessage(_message.Message):
     TEXT_FIELD_NUMBER: _ClassVar[int]
     text: str
     def __init__(self, text: _Optional[str] = ...) -> None: ...
+
+class SoundStreamResponse(_message.Message):
+    __slots__ = ("text", "flags")
+    TEXT_FIELD_NUMBER: _ClassVar[int]
+    FLAGS_FIELD_NUMBER: _ClassVar[int]
+    text: str
+    flags: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, text: _Optional[str] = ..., flags: _Optional[_Iterable[str]] = ...) -> None: ...
