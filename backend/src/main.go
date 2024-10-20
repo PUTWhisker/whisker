@@ -10,6 +10,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"time"
 
 	"inzynierka/server/services"
 
@@ -30,6 +31,18 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
+	connected := false
+	for !connected {
+		err = services.ConnectToWhisperServer()
+		if err != nil {
+			fmt.Printf("Couldn't connect to whisper server, retrying in 10 s")
+			time.Sleep(10 * time.Second)
+		} else {
+			connected = true
+		}
+	}
+
 	s := grpc.NewServer()
 
 	if os.Getenv("USE_DATABASE") == "True" {
