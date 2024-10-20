@@ -30,19 +30,8 @@ func createTCPListener() net.Listener {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-
-	connected := false
-	for !connected {
-		err = services.ConnectToWhisperServer()
-		if err != nil {
-			fmt.Printf("Couldn't connect to whisper server, retrying in 10 s")
-			time.Sleep(10 * time.Second)
-		} else {
-			connected = true
-		}
-	}
-
-	s := grpc.NewServer()
+	return lis
+}
 
 func registerGrpcServices(server *grpc.Server) *pgxpool.Pool {
 	if os.Getenv("USE_DATABASE") == "True" {
@@ -74,6 +63,16 @@ func main() {
 	lis := createTCPListener()
 	grpcServer := grpc.NewServer()
 	dbPool := registerGrpcServices(grpcServer)
+	connected := false
+	for !connected {
+		err := services.ConnectToWhisperServer()
+		if err != nil {
+			fmt.Printf("Couldn't connect to whisper server, retrying in 10 s")
+			time.Sleep(10 * time.Second)
+		} else {
+			connected = true
+		}
+	}
 	if dbPool != nil {
 		defer dbPool.Close()
 	}
