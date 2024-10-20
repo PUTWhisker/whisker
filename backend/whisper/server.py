@@ -23,7 +23,7 @@ class SoundService(Services.SoundServiceServicer):
         except FileExistsError:
             pass
         except PermissionError:
-            print(f"Permission denied: Unable to create direcotry tempFiles.")
+            print("Permission denied: Unable to create direcotry tempFiles.")
         except Exception as e:
             print(f"An error occurred: {e}")
 

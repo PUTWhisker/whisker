@@ -5,7 +5,7 @@ import os
 
 import preprocess
 
-model_size = "tiny"
+model_size = "small"
 
 class FasterWhisperHandler():
     

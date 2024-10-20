@@ -10,10 +10,10 @@ services:
       context: ../backend/src
       dockerfile: Dockerfile
     environment:
-      - PYTHONUNBUFFERED=1
       - SERVER_PORT=9900
       - USE_DATABASE=True
       - DATABASE_URL=postgres://postgres:password@postgres:5432/whisper
+      - WHISPER_SERVER=whisper-server
     depends_on: # Change depends_on to healthcheck
       - whisper-server
     

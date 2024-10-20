@@ -6,6 +6,7 @@ import (
 	pb "inzynierka/server/proto/sound_transfer"
 	"io"
 	"log"
+	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
@@ -21,7 +22,7 @@ type SoundServer struct {
 	pb.UnimplementedSoundServiceServer
 }
 
-var whisperPort string = "localhost:7070"
+var whisperPort string = os.Getenv("WHISPER_SERVER") + ":7070"
 var WhisperServer pb.SoundServiceClient
 
 func ConnectToWhisperServer() error {

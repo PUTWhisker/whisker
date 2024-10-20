@@ -7,6 +7,8 @@ import asyncio
 import os.path
 import logging
 
+
+logging.basicConfig(format="%(levelname)s:%(name)s:%(message)s", level=logging.INFO)
 # FLAGS: language, modelSize, host, port, audioFile, record, saving
 
 # Read user's input flags and arguments
@@ -77,7 +79,6 @@ def parse() -> argparse.ArgumentParser:
 
 async def main(parser: argparse.ArgumentParser):
     args = parser.parse_args()
-
     #read server's details
     if (args.local):
         logging.info("local option")
