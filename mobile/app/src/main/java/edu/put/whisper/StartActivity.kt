@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import io.grpc.authentication.AuthenticationClient
+import io.grpc.authentication.TextHistory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -35,6 +36,11 @@ class StartActivity : AppCompatActivity() {
     private lateinit var passwordInput: EditText
     private lateinit var repeatPasswordInput: EditText
     private lateinit var loginInput: EditText
+    private lateinit var tvHello: TextView
+    private lateinit var btnLogout: Button
+    private lateinit var btnHistory: TextView
+    private lateinit var tvHistory: TextView
+    private lateinit var llFileRecord: LinearLayout
     private val PICK_FILE_REQUEST_CODE = 1
 
     private lateinit var authClient: AuthenticationClient
@@ -43,7 +49,7 @@ class StartActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
 
-        val serverUri = Uri.parse("http://100.80.80.156:50051/")  // TODO dowiedziec sie URI
+        val serverUri = Uri.parse("http://100.80.80.156:50051/")
         authClient = AuthenticationClient(serverUri)
 
         btnRecordActivity = findViewById(R.id.btnRecordActivity)
@@ -58,6 +64,11 @@ class StartActivity : AppCompatActivity() {
         btnCancelLog = findViewById(R.id.btnCancelLog)
         btnSubmit = findViewById(R.id.btnSubmit)
         bottomSheetTitle = findViewById(R.id.bottomSheetTitle)
+        tvHello = findViewById(R.id.tvHello)
+        btnHistory = findViewById(R.id.btnHistory)
+        btnLogout = findViewById(R.id.btnLogout)
+        tvHistory = findViewById(R.id.tvHistory)
+        llFileRecord = findViewById(R.id.llFileRecord)
 
 
         val bottomSheetL: LinearLayout = findViewById(R.id.bottomSheetL)
@@ -72,20 +83,23 @@ class StartActivity : AppCompatActivity() {
             bottomSheetLogin.visibility = View.VISIBLE
             bottomSheetTitle.setText("Register")
             repeatPasswordInput.visibility = View.VISIBLE
+            btnSubmit.text = "Register"
 
-            // TODO dwa razy wpisać hasło
-            // TODO lista zeby przeglądać historię
-            // funkcja ktora przerzuca z inne threada na main thread zeby layout zmieniac
         }
 
         btnLogin.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             bottomSheetLogin.visibility = View.VISIBLE
             bottomSheetTitle.setText("Log in")
+            btnLogin.setText("Log in")
         }
         btnCancelLog.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             bottomSheetLogin.visibility = View.GONE
+            loginInput.text.clear()
+            passwordInput.text.clear()
+            repeatPasswordInput.text.clear()
+            repeatPasswordInput.visibility = View.GONE
 
         }
 
@@ -104,7 +118,7 @@ class StartActivity : AppCompatActivity() {
                                 bottomSheetLogin.visibility = View.GONE
                                 Toast.makeText(
                                     this@StartActivity,
-                                    "Registration successful!",
+                                    "Registration successful! You can now log in.",
                                     Toast.LENGTH_SHORT
                                 ).show()
 
@@ -112,6 +126,7 @@ class StartActivity : AppCompatActivity() {
                                 passwordInput.text.clear()
                                 repeatPasswordInput.text.clear()
                                 repeatPasswordInput.visibility = View.GONE
+                                btnLogin.setText("Log in")
                             } else {
                                 Toast.makeText(
                                     this@StartActivity,
@@ -141,6 +156,14 @@ class StartActivity : AppCompatActivity() {
                             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
                             bottomSheetLogin.visibility = View.GONE
                             Toast.makeText(this@StartActivity, "Login successful!", Toast.LENGTH_SHORT).show()
+                            btnLogin.visibility = View.GONE
+                            btnRegister.visibility = View.GONE
+                            btnHistory.visibility = View.VISIBLE
+
+                            tvHello.text = "Hello $username"
+                            tvHello.visibility = View.VISIBLE
+                            btnLogout.visibility = View.VISIBLE
+
 
                             //showTranslationsHistory()
                         } else {
@@ -149,6 +172,10 @@ class StartActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+
+        btnHistory.setOnClickListener{
+            showTranslationHistory()
         }
 
 
@@ -193,5 +220,17 @@ class StartActivity : AppCompatActivity() {
             }
         }
         return fileName
+    }
+
+    private fun showTranslationHistory() {
+        llFileRecord.visibility = View.GONE
+
+        GlobalScope.launch(Dispatchers.IO) {
+            val history = authClient.GetTranslations()  // Załaduj historię
+            withContext(Dispatchers.Main) {
+                tvHistory.text = history.joinToString("\n")
+
+            }
+        }
     }
 }
