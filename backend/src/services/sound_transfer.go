@@ -21,7 +21,7 @@ type SoundServer struct {
 	pb.UnimplementedSoundServiceServer
 }
 
-var whisperPort string = "whisper-server:7070"
+var whisperPort string = "localhost:7070"
 var WhisperServer pb.SoundServiceClient
 
 func ConnectToWhisperServer() error {

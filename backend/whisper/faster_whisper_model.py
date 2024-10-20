@@ -1,11 +1,11 @@
 from faster_whisper import WhisperModel
 from pathlib import Path
 import uuid
-import wave
-import pyaudio
 import os
 
-model_size = "small"
+import preprocess
+
+model_size = "tiny"
 
 class FasterWhisperHandler():
     
@@ -14,66 +14,68 @@ class FasterWhisperHandler():
         language='en',
         task='transcribe'
     ):
-        self.model = WhisperModel(model_size, device="cpu", compute_type="float32")
+        super(FasterWhisperHandler, self).__init__()
+        self.model = WhisperModel(model_size, device="cpu", compute_type="float32", cpu_threads=8)
         self.language = language
         self.task = task
+        self.silence = 1.5
 
 
-    def _saveFile(self, fileName, data):
-        p = pyaudio.PyAudio()
-        sampleWidth = p.get_sample_size(pyaudio.paInt16)
-        output = wave.open(str(fileName), 'wb')
-        output.setnchannels(1)
-        output.setsampwidth(sampleWidth)
-        output.setframerate(44100)
-        output.writeframes(b''.join([data]))
-        output.close()
-        return fileName
+    def preprocessStreaming(self, data, previousAudio, seconds, record):
+        print(seconds)
+        if seconds < 10:
+            data = previousAudio + data
+            seconds += 2
+        previousAudio = data
+        path = preprocess.saveFile(data, record)
+        isSilence = preprocess.detectSilence(path, self.silence)
+        return path, isSilence, previousAudio, seconds
+    
 
-
-    def preprocess(self, data, record):
-        path = ""
-        if record:
-            temp_file = Path(f'./tempFiles/{uuid.uuid4()}.wav')
-            with open(temp_file, "wb") as file:
-                file.write(data)
-            path = self._saveFile(temp_file, data)
-        else:
-            path = Path(f'./tempFiles/{uuid.uuid4()}')
-            with open(str(path), "wb") as file:
-                file.write(data)
-        return path
+    def preprocessRequest(self, data, record):
+        return preprocess.saveFile(data, record)
     
 
     def transcribe(self, data, previous=""):
-        print(f'Zapisane: {previous}')
+       #  print(f'Zapisane: {previous}')
         segments, info = self.model.transcribe(str(data), beam_size=5, language='pl', initial_prompt=previous)
         print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
 
         response = ""
         for segment in segments:
-            print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
+            # print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
             response += segment.text
         data.unlink()
+        # print(response)
         return response
     
 
-    def postprocess(self, data, prefix):
+    def postprocess(self, transcription, isSilence, segment, previousAudio, data, seconds):
         if (len(data) >= 3 and data[-3:] == '...'):
             data = data[0:-3]
-        print(f'Po: {data}')
-        prefix += data
-        return data, prefix
+        if isSilence or seconds >= 10:
+            print("10 second audio, dividing file...")
+            seconds = 0
+            isSilence = True
+        if isSilence:
+            segment += 1
+            previousAudio = b''
+            transcription.append("")
+        else:
+            transcription[segment] = data
+        return transcription, segment, previousAudio, data, isSilence, seconds
 
 
     async def handleFile(self, data, context, record):
-        text = self.preprocess(data, record)
+        text = self.preprocessRequest(data, record)
         result = self.transcribe(text)
         return result
     
 
-    def handleRecord(self, data, context, previous, record):
-        text = self.preprocess(data, record)
-        transcripted = self.transcribe(text, previous)
-        result, previous = self.postprocess(transcripted, previous) 
-        return result, previous
+    def handleRecord(self, data, transcription, previousAudio, segment, seconds, record):
+        text, isSilence, previousAudio, seconds = self.preprocessStreaming(data, previousAudio, seconds, record)
+        result = ""
+        if not isSilence:
+            result = self.transcribe(text, transcription[segment])
+        transcription, segment, previousAudio, result, isSilence, seconds = self.postprocess(transcription, isSilence, segment, previousAudio, result, seconds)
+        return result, transcription, previousAudio, segment, isSilence, seconds

@@ -10,6 +10,7 @@ import asyncio
 import logging
 import os
 
+
 _cleanup_coroutines = []
 
 class SoundService(Services.SoundServiceServicer):
@@ -40,15 +41,20 @@ class SoundService(Services.SoundServiceServicer):
 
 
     def StreamSoundFile(self, requestIter, context):
+        logging.info("Received record streaming.")
         def parse_request():
-            previous = ""
+            transcription, previousAudio, segment, seconds = [""], b'', 0, 0
             for request in requestIter:
                 try:
-                    result, previous = self.fastModel.handleRecord(request.sound_data, context, previous, True)
+                    newLine = False
+                    result, transcription, previousAudio, segment, newLine, seconds = self.fastModel.handleRecord(request.sound_data, transcription, previousAudio, segment, seconds, True)
                 except Exception as e:
-                    print(e)
-                yield Variables.SoundResponse(
-                    text=result
+                    logging.error(f'Exception caught: {e}')
+                flags=[str(newLine)]
+                # print(flags)
+                yield Variables.SoundStreamResponse(
+                    text=result,
+                    flags=flags
                 )
         return parse_request()
 

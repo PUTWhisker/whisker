@@ -39,33 +39,33 @@ class SoundServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.SendSoundFile = channel.unary_unary(
-                '/SoundService/SendSoundFile',
-                request_serializer=sound__transfer__pb2.SoundRequest.SerializeToString,
-                response_deserializer=sound__transfer__pb2.SoundResponse.FromString,
-                _registered_method=True)
         self.TestConnection = channel.unary_unary(
                 '/SoundService/TestConnection',
                 request_serializer=sound__transfer__pb2.TextMessage.SerializeToString,
                 response_deserializer=sound__transfer__pb2.TextMessage.FromString,
                 _registered_method=True)
+        self.SendSoundFile = channel.unary_unary(
+                '/SoundService/SendSoundFile',
+                request_serializer=sound__transfer__pb2.SoundRequest.SerializeToString,
+                response_deserializer=sound__transfer__pb2.SoundResponse.FromString,
+                _registered_method=True)
         self.StreamSoundFile = channel.stream_stream(
                 '/SoundService/StreamSoundFile',
                 request_serializer=sound__transfer__pb2.SoundRequest.SerializeToString,
-                response_deserializer=sound__transfer__pb2.SoundResponse.FromString,
+                response_deserializer=sound__transfer__pb2.SoundStreamResponse.FromString,
                 _registered_method=True)
 
 
 class SoundServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def SendSoundFile(self, request, context):
+    def TestConnection(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def TestConnection(self, request, context):
+    def SendSoundFile(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -80,20 +80,20 @@ class SoundServiceServicer(object):
 
 def add_SoundServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'SendSoundFile': grpc.unary_unary_rpc_method_handler(
-                    servicer.SendSoundFile,
-                    request_deserializer=sound__transfer__pb2.SoundRequest.FromString,
-                    response_serializer=sound__transfer__pb2.SoundResponse.SerializeToString,
-            ),
             'TestConnection': grpc.unary_unary_rpc_method_handler(
                     servicer.TestConnection,
                     request_deserializer=sound__transfer__pb2.TextMessage.FromString,
                     response_serializer=sound__transfer__pb2.TextMessage.SerializeToString,
             ),
+            'SendSoundFile': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendSoundFile,
+                    request_deserializer=sound__transfer__pb2.SoundRequest.FromString,
+                    response_serializer=sound__transfer__pb2.SoundResponse.SerializeToString,
+            ),
             'StreamSoundFile': grpc.stream_stream_rpc_method_handler(
                     servicer.StreamSoundFile,
                     request_deserializer=sound__transfer__pb2.SoundRequest.FromString,
-                    response_serializer=sound__transfer__pb2.SoundResponse.SerializeToString,
+                    response_serializer=sound__transfer__pb2.SoundStreamResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -105,33 +105,6 @@ def add_SoundServiceServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class SoundService(object):
     """Missing associated documentation comment in .proto file."""
-
-    @staticmethod
-    def SendSoundFile(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/SoundService/SendSoundFile',
-            sound__transfer__pb2.SoundRequest.SerializeToString,
-            sound__transfer__pb2.SoundResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
 
     @staticmethod
     def TestConnection(request,
@@ -161,6 +134,33 @@ class SoundService(object):
             _registered_method=True)
 
     @staticmethod
+    def SendSoundFile(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/SoundService/SendSoundFile',
+            sound__transfer__pb2.SoundRequest.SerializeToString,
+            sound__transfer__pb2.SoundResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
     def StreamSoundFile(request_iterator,
             target,
             options=(),
@@ -176,7 +176,7 @@ class SoundService(object):
             target,
             '/SoundService/StreamSoundFile',
             sound__transfer__pb2.SoundRequest.SerializeToString,
-            sound__transfer__pb2.SoundResponse.FromString,
+            sound__transfer__pb2.SoundStreamResponse.FromString,
             options,
             channel_credentials,
             insecure,

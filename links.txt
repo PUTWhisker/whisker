@@ -7,3 +7,4 @@ https://www.tensorflow.org/tfx/serving/serving_basic <- TensorFlow serving guide
 https://medium.com/@ashmi_banerjee/tutorial-introduction-to-ml-model-using-tensorflow-serving-and-grpc-de2235a633b2 <- Tensorflow serving guide with gRPC
 https://github.com/SYSTRAN/faster-whisper/blob/2b53dee6b697ba1364d7ba1b1c1ce3a6a2dc05df/faster_whisper/transcribe.py#L191-L194 <- Whisper Model flag
 https://blog.markvincze.com/how-to-use-envoy-as-a-load-balancer-in-kubernetes/ <- Envoy dockerfile config
+https://github.com/grpc/grpc/pull/26622/files <- Python asyncio graceful shutdown implementation

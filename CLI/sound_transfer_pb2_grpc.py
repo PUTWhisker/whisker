@@ -52,7 +52,7 @@ class SoundServiceStub(object):
         self.StreamSoundFile = channel.stream_stream(
                 '/SoundService/StreamSoundFile',
                 request_serializer=sound__transfer__pb2.SoundRequest.SerializeToString,
-                response_deserializer=sound__transfer__pb2.SoundResponse.FromString,
+                response_deserializer=sound__transfer__pb2.SoundStreamResponse.FromString,
                 _registered_method=True)
 
 
@@ -93,7 +93,7 @@ def add_SoundServiceServicer_to_server(servicer, server):
             'StreamSoundFile': grpc.stream_stream_rpc_method_handler(
                     servicer.StreamSoundFile,
                     request_deserializer=sound__transfer__pb2.SoundRequest.FromString,
-                    response_serializer=sound__transfer__pb2.SoundResponse.SerializeToString,
+                    response_serializer=sound__transfer__pb2.SoundStreamResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -176,7 +176,7 @@ class SoundService(object):
             target,
             '/SoundService/StreamSoundFile',
             sound__transfer__pb2.SoundRequest.SerializeToString,
-            sound__transfer__pb2.SoundResponse.FromString,
+            sound__transfer__pb2.SoundStreamResponse.FromString,
             options,
             channel_credentials,
             insecure,
