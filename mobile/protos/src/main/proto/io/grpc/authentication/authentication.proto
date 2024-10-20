@@ -1,1 +1,34 @@
-/Users/krzysztof/Documents/whisper-all/proto/authentication.proto
+syntax = "proto3";
+option go_package = "inzynierka/authentication";
+option java_multiple_files = true;
+option java_package = "io.grpc.authentication";
+option java_outer_classname = "AuthenticationProto";
+
+service ClientService {
+    rpc Login (UserCredits) returns (LoginResponse) {};
+    rpc GetTranslation (Empty) returns (stream TextHistory) {};
+    rpc Register (UserCredits) returns (StatusResponse) {};
+}
+
+message TextHistory {
+    string transcription = 1;
+}
+
+message UserCredits {
+    string username = 2;
+    string password = 3;
+}
+
+message StatusResponse {
+    string error = 4;
+    bool successful = 5;
+}
+
+message LoginResponse {
+    string JWT = 6;
+    bool successful = 7;
+}
+
+message Empty {
+
+}

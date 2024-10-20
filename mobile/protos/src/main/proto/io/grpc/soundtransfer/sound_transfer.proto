@@ -1,1 +1,29 @@
-/Users/krzysztof/Documents/whisper-all/proto/sound_transfer.proto
+syntax = "proto3";
+option go_package = "inzynierka/sound_transfer";
+option java_multiple_files = true;
+option java_package = "io.grpc.soundtransfer";
+option java_outer_classname = "SoundTransferProto";
+
+service SoundService {
+    rpc TestConnection(TextMessage) returns (TextMessage) {};
+    rpc SendSoundFile(SoundRequest) returns (SoundResponse) {};
+    rpc StreamSoundFile(stream SoundRequest) returns (stream SoundStreamResponse);
+}
+
+message SoundRequest {
+    bytes sound_data = 1;
+    repeated string flags = 2;
+}
+
+message SoundResponse {
+    string text = 3;
+}
+
+message TextMessage {
+    string text = 4;
+}
+
+message SoundStreamResponse {
+    string text = 5;
+    repeated string flags = 6;
+}
