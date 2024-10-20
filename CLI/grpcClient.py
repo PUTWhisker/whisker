@@ -31,7 +31,6 @@ class GrpcClient:
         try:
             self.channel = grpc.aio.insecure_channel(f'{self.host}:{self.port}')
             self.stub = Services.SoundServiceStub(self.channel) # Creating server stub, these are reusable 
-            print(f'seed is: {seed}')
             response = await self.stub.TestConnection( # sending generated number
                             Variables.TextMessage(text=seed))
             return response
@@ -65,7 +64,7 @@ class GrpcClient:
                 os.system('cls' if os.name=='nt' else 'clear') # Clear terminal to correct transcription
                 for transcript in transcription: # Displaying server's responses
                     print(transcript)
-                print(transcription)
+                print(transcription) # Delete?
 
         except (grpc.RpcError, Exception):
             raise

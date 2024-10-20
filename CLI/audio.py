@@ -3,6 +3,7 @@ import sound_transfer_pb2_grpc as Services
 import sound_transfer_pb2 as Variables
 import pyaudio
 import asyncio
+import logging
 import wave
 
 
@@ -34,14 +35,14 @@ class AudioRecorder():
                 await asyncio.sleep(0) # Check if while in record is ready to execute (probeTime has passed)
 
         except KeyboardInterrupt:
-            print("Detected interruption, ending recording.")
+            logging.info("Detected interruption, ending recording.")
             stream.stop_stream()
             stream.close()
             p.terminate()
 
 
     def _saveFile(self, sampleWidth: int):
-        if not self.save.endswith('.wav'): #TODO: look for any extension
+        if not self.save.endswith('.wav'):
             self.save += '.wav'
         output = wave.open(self.save, 'wb')
         output.setnchannels(self.channels)
@@ -60,7 +61,7 @@ class AudioRecorder():
                     sound_data=b''.join(self.frames),
                     flags=["a","b"] # TODO: resolve flags problem
                 )
-                if self.save != None: # Saving bytes if --save flag is raised
+                if self.save is not None: # Saving bytes if --save flag is raised
                     self.data += self.frames
                 self.frames = []
 
@@ -68,8 +69,7 @@ class AudioRecorder():
                 self._saveFile(self.sampleSize)
 
         except Exception as e:
-            print("Problem in record funtion")
-            print(e)
+            logging.error(f'Problem occured while recording audio: {e}')
         finally:
             yield Variables.SoundRequest( # Send recorded data after keyboard interruption
                     sound_data=b''.join(self.frames),
