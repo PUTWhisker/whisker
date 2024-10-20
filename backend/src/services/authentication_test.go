@@ -36,11 +36,12 @@ func (db *MockDb) getUserPassword(email string) (string, error) {
 	return "", sql.ErrNoRows
 }
 
-func (db *MockDb) isUserInDatabase(email string) bool {
-	return true
+func (db *MockDb) isUserInDatabase(email string) (bool, error) {
+	return true, nil
 }
 
-func (db *MockDb) addUserToDatabase(email string, password string) {
+func (db *MockDb) addUserToDatabase(email string, password string) error {
+	return nil
 }
 
 func (db *MockDb) getUserTranscriptionHistory(email string) (pgx.Rows, error) {

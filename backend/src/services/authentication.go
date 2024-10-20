@@ -81,32 +81,6 @@ func loadPublicECDSAKeyFromFile(filepath string) (*ecdsa.PublicKey, error) {
 	return ecdsaPubKey, nil
 }
 
-func verifyJWT(tokenString string) (*jwt.Token, error) {
-	publicKey, err := loadPublicECDSAKeyFromFile(os.Getenv("JWT_PUBLIC_KEY_PATH"))
-
-	if err != nil {
-		log.Panicf("Failed to load public key %v", err)
-	}
-
-	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return publicKey, nil
-	})
-	if err != nil {
-		return nil, err
-	} else if _, ok := token.Claims.(*UserClaims); ok {
-	} else {
-		return nil, status.Error(1, "unknown claims type, cannot proceed")
-	}
-
-	// Check if the token is valid
-	if !token.Valid {
-		return nil, fmt.Errorf("invalid token")
-	}
-
-	// Return the verified token
-	return token, nil
-}
-
 func loadPrivateECDSAKeyFromFile(filepath string) (*ecdsa.PrivateKey, error) {
 	keyData, err := os.ReadFile(filepath)
 	if err != nil {
@@ -154,11 +128,43 @@ func HashPassword(password string) (string, error) {
 }
 
 func (s *AuthenticationServer) Register(ctx context.Context, in *pb.UserCredits) (*pb.StatusResponse, error) {
-	if s.Db.isUserInDatabase(in.Username) {
+	if successful, err := s.Db.isUserInDatabase(in.Username); successful {
+		if err != nil {
+			return &pb.StatusResponse{Successful: false, Error: "Unknown error"}, nil
+		}
 		return &pb.StatusResponse{Successful: false, Error: "User already registered"}, nil
 	}
-	s.Db.addUserToDatabase(in.Username, in.Password)
+	err := s.Db.addUserToDatabase(in.Username, in.Password)
+	if err != nil {
+		return &pb.StatusResponse{Successful: false, Error: "Database error"}, nil
+	}
 	return &pb.StatusResponse{Successful: true}, nil
+}
+
+func verifyJWT(tokenString string) (*jwt.Token, error) {
+	publicKey, err := loadPublicECDSAKeyFromFile(os.Getenv("JWT_PUBLIC_KEY_PATH"))
+
+	if err != nil {
+		log.Panicf("Failed to load public key %v", err)
+	}
+
+	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return publicKey, nil
+	})
+	if err != nil {
+		return nil, err
+	} else if _, ok := token.Claims.(*UserClaims); ok {
+	} else {
+		return nil, status.Error(1, "unknown claims type, cannot proceed")
+	}
+
+	// Check if the token is valid
+	if !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	// Return the verified token
+	return token, nil
 }
 
 func GetUserNameFromMetadata(metadata metadata.MD) (string, error) {
