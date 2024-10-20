@@ -10,6 +10,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"time"
 
 	"inzynierka/server/services"
 
@@ -29,8 +30,19 @@ func createTCPListener() net.Listener {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	return lis
-}
+
+	connected := false
+	for !connected {
+		err = services.ConnectToWhisperServer()
+		if err != nil {
+			fmt.Printf("Couldn't connect to whisper server, retrying in 10 s")
+			time.Sleep(10 * time.Second)
+		} else {
+			connected = true
+		}
+	}
+
+	s := grpc.NewServer()
 
 func registerGrpcServices(server *grpc.Server) *pgxpool.Pool {
 	if os.Getenv("USE_DATABASE") == "True" {

@@ -5,7 +5,7 @@ import argparse
 import sys
 import asyncio
 import os.path
-
+import logging
 
 # FLAGS: language, modelSize, host, port, audioFile, record, saving
 
@@ -46,24 +46,31 @@ def parse() -> argparse.ArgumentParser:
             default="",
             metavar="file_path",
             help="Use this flag to save recorded file on your machine")
+    
+    parser.add_argument(
+            '--host',
+            type=str,
+            default="127.0.0.1",
+            metavar="APIserver IP",
+            help="Set it to the server's IP address (only available when using --local flag)")
 
     parser.add_argument(
             '--port',
             type=str,
             default=50051,
             metavar="",
-            help="Set it to the server's listening port number (only viable when using --local flag)")
+            help="Set it to the server's listening port number (only aviable when using --local flag)")
     
     parser.add_argument(
-        'fileName',
-        nargs='?',
-        default=None,
-        help='File to be transcripted')
+            'fileName',
+            nargs='?',
+            default=None,
+            help='File to be transcripted')
     
     parser.add_argument(
-        '--version', '-v',
-        action="version",
-        version='%(prog)s - Version 0.1')
+            '--version', '-v',
+            action="version",
+            version='%(prog)s - Version 0.1')
     
     return parser
 
@@ -73,33 +80,33 @@ async def main(parser: argparse.ArgumentParser):
 
     #read server's details
     if (args.local):
-        print("local option")
-        host = "127.0.0.1" #TODO: This may not work with docker, need to be tested
+        logging.info("local option")
+        host = args.host
         port = args.port
     else:
-        print("server option")
-        host = "1234123" # Here insert pp server address
-        port = "9090"
+        logging.info("server option")
+        host = "100.80.80.156" # Here insert pp server address
+        port = args.port
 
     # Check if file exists if it was passed as an argument
-    if (args.fileName != None):
+    if (args.fileName is not None):
         if (not os.path.isfile(args.fileName)):
-            print("Incorrect file name.")
+            logging.error("Incorrect file name.")
             return
 
     # Innitiate connection with the server
     console = ConsolePrinter(host, port, args.language, args.model, args.save)
     if not await console.startApp():
-        return
+       return
 
-    if (args.fileName != None): # If there is a valid audio file as an argument, initiate SendSoundFile method
+    if (args.fileName is not None): # If there is a valid audio file as an argument, initiate SendSoundFile method
         with open(args.fileName, 'rb') as file:
             audio = file.read() # read audio as bytes
         await console.sendFile(audio)
     elif (args.record): # If there is a record flag, initiate StreamSoundFile method (app can't do both, record and translate file)
         await console.record()
     else: # No action specified by the user
-        return;
+        return
 
 
 
