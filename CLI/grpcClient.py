@@ -3,6 +3,7 @@ from typing import Union
 import sound_transfer_pb2_grpc as Services
 import sound_transfer_pb2 as Variables
 import audio
+import os
 import grpc
 
 
@@ -50,12 +51,24 @@ class GrpcClient:
 
 
     async def streamSoundFile(self)  -> Union[bool, grpc.RpcError]:
+        transcription, iter = [""], 0
         try:
             recording = audio.AudioRecorder(self.save) # Initiate recording class
             responseIter = self.stub.StreamSoundFile(recording.record()) # Streaming recorded audio yield by record() funciton
+            print("Recording started. You may start talking now.")
             async for response in responseIter:
-                print(f'Received from server: {response.text}') # Displaying server's responses
-                
+                transcription[iter] = response.text
+                # os.system('cls' if os.name=='nt' else 'clear') # Clear terminal to correct transcription
+                #for transcript in transcription: # Displaying server's responses
+                    # print(transcript)
+                terminalWidth, _ = os.get_terminal_size()
+                print(' ' * terminalWidth, end='\r', flush=True)
+                print(transcription[iter], end='\r', flush=True) # Delete?
+                if response.flags[0] == "True":
+                    iter += 1
+                    transcription.append("")
+                    print()
+
         except (grpc.RpcError, Exception):
             raise
 
