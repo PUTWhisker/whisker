@@ -30,7 +30,13 @@ func (db *UserDb) getUserPassword(email string) (string, error) {
 func (db *UserDb) isUserInDatabase(email string) (bool, error) {
 	row := db.Pool.QueryRow(context.Background(), "SELECT email FROM app_user WHERE email=$1;", email)
 	err := row.Scan(&email)
-	return !(err == sql.ErrNoRows), err
+	if err == sql.ErrNoRows {
+		return false, nil
+	}
+	if err == nil {
+		return true, nil
+	}
+	return false, err
 }
 
 func (db *UserDb) addUserToDatabase(email string, password string) error {
