@@ -47,13 +47,19 @@ class SoundService(Services.SoundServiceServicer):
             for request in requestIter:
                 try:
                     newLine = False
+                    if seconds >= 10:
+                        segment += 1
+                        seconds = 0
                     result, transcription, previousAudio, segment, newLine, seconds = self.fastModel.handleRecord(request.sound_data, transcription, previousAudio, segment, seconds, True)
                 except Exception as e:
                     logging.error(f'Exception caught: {e}')
                 flags=[str(newLine)]
                 # print(flags)
+                print("About to send data")
+                print(result)
+                print(transcription[segment])
                 yield Variables.SoundStreamResponse(
-                    text=result,
+                    text=transcription[segment],
                     flags=flags
                 )
         return parse_request()

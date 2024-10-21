@@ -5,7 +5,7 @@ import os
 
 import preprocess
 
-model_size = "small"
+model_size = "tiny"
 
 class FasterWhisperHandler():
     
@@ -22,10 +22,7 @@ class FasterWhisperHandler():
 
 
     def preprocessStreaming(self, data, previousAudio, seconds, record):
-        print(seconds)
-        if seconds < 10:
-            data = previousAudio + data
-            seconds += 2
+        data = previousAudio + data
         previousAudio = data
         path = preprocess.saveFile(data, record)
         isSilence = preprocess.detectSilence(path, self.silence)
@@ -53,16 +50,14 @@ class FasterWhisperHandler():
     def postprocess(self, transcription, isSilence, segment, previousAudio, data, seconds):
         if (len(data) >= 3 and data[-3:] == '...'):
             data = data[0:-3]
+        seconds += 2
         if isSilence or seconds >= 10:
             print("10 second audio, dividing file...")
-            seconds = 0
             isSilence = True
         if isSilence:
-            segment += 1
             previousAudio = b''
             transcription.append("")
-        else:
-            transcription[segment] = data
+        transcription[segment] = data
         return transcription, segment, previousAudio, data, isSilence, seconds
 
 
