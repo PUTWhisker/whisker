@@ -54,7 +54,8 @@ class AuthenticationClient(uri: Uri) : Closeable {
         val metadata = Metadata()
         val key = Metadata.Key.of("JWT", Metadata.ASCII_STRING_MARSHALLER)
         metadata.put(key, jWT)
-        return transfer.getTranslation(empty {  }, metadata).map { it.toString() }.toList()
+        return transfer.getTranslation(empty { }, metadata).map { it.transcription }.toList()
+
     }
 }
 

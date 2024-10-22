@@ -94,6 +94,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
+            android:padding="16dp"
+            android:textAlignment="center"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/llLoginRegister">
         </TextView>
@@ -143,6 +145,10 @@
                 android:text="No file selected"
                 android:gravity="center"/>
         </LinearLayout>
+        
+        <Button
+            android:layout_width=""
+            android:layout_height=""
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

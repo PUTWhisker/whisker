@@ -228,7 +228,7 @@ class StartActivity : AppCompatActivity() {
         GlobalScope.launch(Dispatchers.IO) {
             val history = authClient.GetTranslations()  // Załaduj historię
             withContext(Dispatchers.Main) {
-                tvHistory.text = history.joinToString("\n")
+                tvHistory.text = history.joinToString("\n\n\n")
 
             }
         }
