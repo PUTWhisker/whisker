@@ -18,13 +18,15 @@ class GrpcClient:
         port:str = None,
         language:str = None,
         model:str = "small",
-        save:str = None
+        save:str = None,
+        translation:bool = False,
     ):
         self.host = host
         self.port = port
         self.language = language
         self.model = model
         self.save = save
+        self.translation = translation
 
 
     async def initiateConnection(self, seed:str) -> Union[bool, grpc.RpcError]:
@@ -40,11 +42,11 @@ class GrpcClient:
 
     async def sendSoundFile(self, audioFile: bytes) -> Union[bool, grpc.RpcError]:
         try:
-            flags = [self.language, self.model] # Seting flags for transcribing
+            metadata = (("language", self.language),("translation", str(self.translation)),)
             response = await self.stub.SendSoundFile(
                 Variables.SoundRequest(
                     sound_data=audioFile,
-                    flags=flags)) # Sending audio file to transcribe
+                    flags=None), metadata=metadata) # Sending audio file to transcribe
             return response
         except (grpc.RpcError, Exception):
             raise
@@ -54,17 +56,18 @@ class GrpcClient:
         transcription, iter = [""], 0
         try:
             recording = audio.AudioRecorder(self.save) # Initiate recording class
-            responseIter = self.stub.StreamSoundFile(recording.record()) # Streaming recorded audio yield by record() funciton
+            metadata = (("language", self.language),("translation", str(self.translation)),)
+            responseIter = self.stub.StreamSoundFile(recording.record(), metadata=metadata) # Streaming recorded audio yield by record() funciton
             print("Recording started. You may start talking now.")
             async for response in responseIter:
+                transcription[iter] = response.text
+                terminalWidth, _ = os.get_terminal_size()
+                print(' ' * terminalWidth, end='\r', flush=True)
+                print(transcription[iter], end='\r', flush=True) # Delete?
                 if response.flags[0] == "True":
                     iter += 1
                     transcription.append("")
-                transcription[iter] = response.text
-                os.system('cls' if os.name=='nt' else 'clear') # Clear terminal to correct transcription
-                for transcript in transcription: # Displaying server's responses
-                    print(transcript)
-                print(transcription) # Delete?
+                    print()
 
         except (grpc.RpcError, Exception):
             raise

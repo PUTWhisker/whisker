@@ -13,8 +13,7 @@ import logging
 def parse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
             prog='Whisper Wrapper',
-            description='Simple speach-to-text console application',
-            epilog='test test test')
+            description='Simple speach-to-text console application')
 
     parser.add_argument(
             '--record',
@@ -29,7 +28,7 @@ def parse() -> argparse.ArgumentParser:
     parser.add_argument(
             '--language',
             type=str,
-            default="English",
+            default=None,
             choices=sorted(list(dicts.LANGUAGES)) + sorted(list(dicts.LANGUAGES.values())),
             help="Set it to the audio language")
     
@@ -60,6 +59,11 @@ def parse() -> argparse.ArgumentParser:
             default=50051,
             metavar="",
             help="Set it to the server's listening port number (only aviable when using --local flag)")
+    
+    parser.add_argument(
+            '--trans',
+            action='store_true',
+            help="Use this flag to enable translation to English")
     
     parser.add_argument(
             'fileName',
@@ -95,7 +99,7 @@ async def main(parser: argparse.ArgumentParser):
             return
 
     # Innitiate connection with the server
-    console = ConsolePrinter(host, port, args.language, args.model, args.save)
+    console = ConsolePrinter(host, port, args.language, args.model, args.save, args.trans)
     if not await console.startApp():
        return
 

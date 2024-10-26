@@ -14,9 +14,10 @@ class ConsolePrinter:
             port:str = None, 
             language:str = None, 
             model:str = 'small',
-            save:str = None
+            save:str = None,
+            translation:bool = False
         ):
-        self.grpcClient = GrpcClient(host, port, language, model, save)
+        self.grpcClient = GrpcClient(host, port, language, model, save, translation)
 
     
     def _errorHandler(func):

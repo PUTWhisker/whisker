@@ -1,6 +1,6 @@
 from concurrent import futures
-from time import sleep
 from threading import Thread
+from transcrpitionData import TranscriptionData
 
 import sound_transfer_pb2_grpc as Services
 import sound_transfer_pb2 as Variables
@@ -10,8 +10,8 @@ import asyncio
 import logging
 import os
 
-
-_cleanup_coroutines = []
+logging.basicConfig(format="%(levelname)s:%(name)s:%(message)s", level=logging.INFO)
+_cleanup_coroutines = [] # Needed for asyncio graceful shutdown
 
 class SoundService(Services.SoundServiceServicer):
 
@@ -23,37 +23,64 @@ class SoundService(Services.SoundServiceServicer):
         except FileExistsError:
             pass
         except PermissionError:
-            print(f"Permission denied: Unable to create direcotry tempFiles.")
+            logging.error("Permission denied: Unable to create direcotry tempFiles.")
         except Exception as e:
-            print(f"An error occurred: {e}")
+            logging.error(f"An error occurred: {e}")
 
 
-    def TestConnection(self, request, context):
+    def _errorHandler(func:callable):
+        async def wrapper(*args, **kwargs):
+            try:
+                return await func(*args, **kwargs)
+            except FileNotFoundError:
+                logging.error("There was an internal error when saving your audio file.")
+            except Exception as e:
+                logging.error(f'An error occured while executing {func} function: {e} <Error type: {type(e)}>') #TODO: Debug and change for real error messages
+        return wrapper
+
+
+    @_errorHandler
+    async def TestConnection(self, request, context):
         return Variables.TextMessage(text=request.text)
     
     
+    @_errorHandler
     async def SendSoundFile(self, request, context):
-        print("Received audio file.")
-        print(type(request.sound_data)) # <- received audio file
-        print(request.flags) # <- received flags
-        result = await self.fastModel.handleFile(request.sound_data, context, False)
+        logging.info("Received audio file.")
+        transcriptionData = TranscriptionData()
+        try:
+            result = await self.fastModel.handleFile(request.sound_data, transcriptionData, context)
+        except Exception as e:
+            if transcriptionData.filePath.exists(): # To ensure tempFile gets deleted even when error occurs
+                transcriptionData.filePath.unlink()
+            raise e
         return Variables.SoundResponse(text=result)
 
 
+    # @_errorHandler    #TODO: Resolve async_generator problem to add errorHandler
     def StreamSoundFile(self, requestIter, context):
         logging.info("Received record streaming.")
         def parse_request():
-            transcription, previousAudio, segment, seconds = [""], b'', 0, 0
+            transcriptionData = TranscriptionData()
+            for key, value in context.invocation_metadata():
+                logging.info(f'{key} : {value}')
+            transcriptionData.processMetadata(context)
             for request in requestIter:
+                transcriptionData.isSilence = False
+                if transcriptionData.curSeconds >= 10:
+                    transcriptionData.curSegment += 1
+                    transcriptionData.curSeconds = 0
                 try:
-                    newLine = False
-                    result, transcription, previousAudio, segment, newLine, seconds = self.fastModel.handleRecord(request.sound_data, transcription, previousAudio, segment, seconds, True)
+                    transcriptionData = self.fastModel.handleRecord(request.sound_data, transcriptionData, context)
+                    logging.info(transcriptionData.transcription)
                 except Exception as e:
-                    logging.error(f'Exception caught: {e}')
-                flags=[str(newLine)]
-                # print(flags)
+                    if transcriptionData.filePath.exists(): # To ensure tempFile gets deleted even when error occurs
+                        transcriptionData.filePath.unlink()
+                    raise e
+                flags=[str(transcriptionData.isSilence)]
+                # print(f'{transcriptionData.isSilence} : {transcriptionData.curSeconds}')
                 yield Variables.SoundStreamResponse(
-                    text=result,
+                    text=transcriptionData.transcription[transcriptionData.curSegment],
                     flags=flags
                 )
         return parse_request()
@@ -72,11 +99,11 @@ async def server():
     server.add_insecure_port("[::]:" + port) # change to secure later
     await server.start()
     try:
-        print("Server started, listening on " + port)
+        logging.info("Server started, listening on " + port)
         await server.wait_for_termination()
     except KeyboardInterrupt:
         await server.stop(5)
-        print("Keybourd interruption detected, server closing...")
+        logging.info("Keybourd interruption detected, server closing...")
     await server.wait_for_termination()
 
 
