@@ -9,12 +9,20 @@ import grpc
 import asyncio
 import logging
 import os
+import diarizate
+import preprocess
+import concurrent.futures
 
 
 _cleanup_coroutines = []
 
-class SoundService(Services.SoundServiceServicer):
 
+def run_transcribe(file_path):
+    model = faster_whisper_model.FasterWhisperHandler()
+    return model.transcribe(str(file_path), return_fragments=True)
+
+
+class SoundService(Services.SoundServiceServicer):
     def __init__(self):
         self.number = 0
         self.fastModel = faster_whisper_model.FasterWhisperHandler()
@@ -27,55 +35,96 @@ class SoundService(Services.SoundServiceServicer):
         except Exception as e:
             print(f"An error occurred: {e}")
 
-
     def TestConnection(self, request, context):
         return Variables.TextMessage(text=request.text)
-    
-    
+
     async def SendSoundFile(self, request, context):
         print("Received audio file.")
-        print(type(request.sound_data)) # <- received audio file
-        print(request.flags) # <- received flags
+        print(type(request.sound_data))  # <- received audio file
+        print(request.flags)  # <- received flags
         result = await self.fastModel.handleFile(request.sound_data, context, False)
         return Variables.SoundResponse(text=result)
 
+    async def DiarizateSpeakers(self, request, context):
+        file_path = preprocess.saveFile(request.sound_data, False)
+        out = []
+        try:
+            with concurrent.futures.ProcessPoolExecutor() as executor:
+                futures = {
+                    "transcribe": executor.submit(run_transcribe, file_path),
+                    "diarize": executor.submit(
+                        diarizate.diarizate_speakers, str(file_path)
+                    ),
+                }
+                concurrent.futures.wait(futures.values())
+
+                print("Transcription")
+                for item in futures["transcribe"].result():
+                    print(item)
+
+                print("Diarization")
+                for item in futures["diarize"].result():
+                    print(item)
+
+                out = diarizate.combine(
+                    futures["transcribe"].result(), futures["diarize"].result()
+                )
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            out = []
+        finally:
+            file_path.unlink()
+        for elem in out:
+            yield Variables.SpeakerAndLine(
+                text=elem["text"], speakerName=elem["speaker"]
+            )
 
     def StreamSoundFile(self, requestIter, context):
         logging.info("Received record streaming.")
+
         def parse_request():
-            transcription, previousAudio, segment, seconds = [""], b'', 0, 0
+            transcription, previousAudio, segment, seconds = [""], b"", 0, 0
             for request in requestIter:
                 try:
                     newLine = False
                     if seconds >= 10:
                         segment += 1
                         seconds = 0
-                    result, transcription, previousAudio, segment, newLine, seconds = self.fastModel.handleRecord(request.sound_data, transcription, previousAudio, segment, seconds, True)
+                    result, transcription, previousAudio, segment, newLine, seconds = (
+                        self.fastModel.handleRecord(
+                            request.sound_data,
+                            transcription,
+                            previousAudio,
+                            segment,
+                            seconds,
+                            True,
+                        )
+                    )
                 except Exception as e:
-                    logging.error(f'Exception caught: {e}')
-                flags=[str(newLine)]
+                    logging.error(f"Exception caught: {e}")
+                flags = [str(newLine)]
                 # print(flags)
                 print("About to send data")
                 print(result)
                 print(transcription[segment])
                 yield Variables.SoundStreamResponse(
-                    text=transcription[segment],
-                    flags=flags
+                    text=transcription[segment], flags=flags
                 )
+
         return parse_request()
 
 
 async def server():
     port = "7070"
     server = grpc.aio.server(
-    futures.ThreadPoolExecutor(max_workers=10),
-    options=[
-        ('grpc.max_send_message_length', 50 * 1024 * 1024),  # 50MB
-        ('grpc.max_receive_message_length', 50 * 1024 * 1024)  # 50MB
-    ]
-)
+        futures.ThreadPoolExecutor(max_workers=10),
+        options=[
+            ("grpc.max_send_message_length", 50 * 1024 * 1024),  # 50MB
+            ("grpc.max_receive_message_length", 50 * 1024 * 1024),  # 50MB
+        ],
+    )
     Services.add_SoundServiceServicer_to_server(SoundService(), server)
-    server.add_insecure_port("[::]:" + port) # change to secure later
+    server.add_insecure_port("[::]:" + port)  # change to secure later
     await server.start()
     try:
         print("Server started, listening on " + port)
@@ -88,7 +137,6 @@ async def server():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     try:

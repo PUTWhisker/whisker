@@ -73,6 +73,10 @@ def parse() -> argparse.ArgumentParser:
             '--version', '-v',
             action="version",
             version='%(prog)s - Version 0.1')
+    parser.add_argument(
+            '--diarizate',
+            action='store_true',
+            help="Use this flag to enable speaker diarization")
     
     return parser
 
@@ -103,7 +107,10 @@ async def main(parser: argparse.ArgumentParser):
     if (args.fileName is not None): # If there is a valid audio file as an argument, initiate SendSoundFile method
         with open(args.fileName, 'rb') as file:
             audio = file.read() # read audio as bytes
-        await console.sendFile(audio)
+        if args.diarizate:
+            await console.diarizateSpeakers(audio)
+        else:
+            await console.sendFile(audio)
     elif (args.record): # If there is a record flag, initiate StreamSoundFile method (app can't do both, record and translate file)
         await console.record()
     else: # No action specified by the user

@@ -49,6 +49,18 @@ class GrpcClient:
         except (grpc.RpcError, Exception):
             raise
 
+    async def diarizateSpeakers(self, audioFile: bytes) -> Union[bool, grpc.RpcError]:
+        try:
+            flags = [self.language, self.model] # Seting flags for transcribing
+            responseIter = self.stub.DiarizateSpeakers(
+                Variables.SoundRequest(
+                    sound_data=audioFile,
+                    flags=flags))
+            async for response in responseIter:
+                print(f"{response.speakerName}: {response.text}")
+        except (grpc.RpcError, Exception):
+            raise
+
 
     async def streamSoundFile(self)  -> Union[bool, grpc.RpcError]:
         transcription, iter = [""], 0

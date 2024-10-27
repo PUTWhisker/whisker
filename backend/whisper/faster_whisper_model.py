@@ -1,13 +1,15 @@
 from faster_whisper import WhisperModel
-from pathlib import Path
 import uuid
 import os
+from diarizate import Clip
 
 import preprocess
 
 model_size = "tiny"
 
+
 class FasterWhisperHandler():
+    model = None
     
     def __init__(
         self, 
@@ -33,19 +35,24 @@ class FasterWhisperHandler():
         return preprocess.saveFile(data, record)
     
 
-    def transcribe(self, data, previous=""):
+    def transcribe(self, data, previous="", return_fragments = False):
        #  print(f'Zapisane: {previous}')
-        segments, info = self.model.transcribe(str(data), beam_size=5, language='pl', initial_prompt=previous)
+        segments, info = self.model.transcribe(str(data), beam_size=5, language='pl', initial_prompt=previous, word_timestamps=True)
         print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
-
+        if return_fragments:
+            response = []
+            for segment in segments:
+                response.append(Clip(segment.start, segment.end, "", segment.text))
+            return response
+        
         response = ""
         for segment in segments:
             # print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
             response += segment.text
         data.unlink()
-        # print(response)
         return response
     
+   
 
     def postprocess(self, transcription, isSilence, segment, previousAudio, data, seconds):
         if (len(data) >= 3 and data[-3:] == '...'):
@@ -61,9 +68,12 @@ class FasterWhisperHandler():
         return transcription, segment, previousAudio, data, isSilence, seconds
 
 
-    async def handleFile(self, data, context, record):
-        text = self.preprocessRequest(data, record)
-        result = self.transcribe(text)
+    async def handleFile(self, data, record, diarizate_speakers = False):
+        sound_file_path = self.preprocessRequest(data, record)
+        if diarizate_speakers:
+            result = self.transcribe(sound_file_path, return_fragments=True)
+        else:
+            result = self.transcribe(sound_file_path)
         return result
     
 

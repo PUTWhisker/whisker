@@ -64,6 +64,18 @@ class ConsolePrinter:
         script = sendTask.result() # Received transcribed text 
         print(script)
     
+    @_errorHandler
+    async def diarizateSpeakers(self, audio:bytes):
+        sendTask = asyncio.create_task(self.grpcClient.diarizateSpeakers(audio)) # Initiate sending file async
+        dot = 0
+        while not sendTask.done(): # Dot animation until connection task is finished
+            dot = self._waitingAnimation(dot)
+            await asyncio.sleep(0.1)
+        self._waitingAnimation(3)
+        script = sendTask.result() # Received transcribed text 
+        print(script)
+
+
 
     @_errorHandler
     async def record(self):
