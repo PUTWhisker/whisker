@@ -12,6 +12,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import io.grpc.authentication.AuthenticationClient
 import io.grpc.authentication.TextHistory
@@ -39,7 +41,8 @@ class StartActivity : AppCompatActivity() {
     private lateinit var tvHello: TextView
     private lateinit var btnLogout: Button
     private lateinit var btnHistory: TextView
-    private lateinit var tvHistory: TextView
+    private lateinit var rvTranscriptions: RecyclerView
+    private lateinit var transcriptionAdapter: TranscriptionAdapter
     private lateinit var llFileRecord: LinearLayout
     private val PICK_FILE_REQUEST_CODE = 1
 
@@ -67,8 +70,9 @@ class StartActivity : AppCompatActivity() {
         tvHello = findViewById(R.id.tvHello)
         btnHistory = findViewById(R.id.btnHistory)
         btnLogout = findViewById(R.id.btnLogout)
-        tvHistory = findViewById(R.id.tvHistory)
+        rvTranscriptions = findViewById(R.id.rvTranscriptions)
         llFileRecord = findViewById(R.id.llFileRecord)
+        rvTranscriptions.layoutManager = LinearLayoutManager(this)
 
 
         val bottomSheetL: LinearLayout = findViewById(R.id.bottomSheetL)
@@ -224,12 +228,16 @@ class StartActivity : AppCompatActivity() {
 
     private fun showTranslationHistory() {
         llFileRecord.visibility = View.GONE
+        rvTranscriptions.visibility = View.VISIBLE
 
         GlobalScope.launch(Dispatchers.IO) {
-            val history = authClient.GetTranslations()  // Załaduj historię
+            val history = authClient.GetTranslations()
             withContext(Dispatchers.Main) {
-                tvHistory.text = history.joinToString("\n\n\n")
-
+                transcriptionAdapter = TranscriptionAdapter(history) { transcription ->
+                    Toast.makeText(this@StartActivity, "Clicked: $transcription", Toast.LENGTH_SHORT).show()
+                    // tu detale
+                }
+                rvTranscriptions.adapter = transcriptionAdapter
             }
         }
     }
