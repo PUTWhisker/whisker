@@ -28,7 +28,7 @@ def parse() -> argparse.ArgumentParser:
     parser.add_argument(
             '--language',
             type=str,
-            default=None,
+            default="pl",
             choices=sorted(list(dicts.LANGUAGES)) + sorted(list(dicts.LANGUAGES.values())),
             help="Set it to the audio language")
     

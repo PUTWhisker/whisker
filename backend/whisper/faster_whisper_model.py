@@ -2,11 +2,13 @@ from faster_whisper import WhisperModel
 from pathlib import Path
 from typing import Union
 from transcrpitionData import TranscriptionData
+from translate import Translator
 import grpc
 import logging
+import time
 
 
-model_size = "tiny"
+model_size = "medium"
 
 class FasterWhisperHandler():
     
@@ -18,7 +20,7 @@ class FasterWhisperHandler():
         self.model = WhisperModel(model_size, device="cpu", compute_type="float32", cpu_threads=8)
         self.transcrpition = transcrpition
         self.silenceLength = 1.5
-    
+        self.translator = Translator()
 
     def preprocessStreaming(self, receivedAudio:bytes, data:TranscriptionData, context:grpc.ServicerContext) -> Union[Path, TranscriptionData]:
         data.appendData(receivedAudio)
@@ -35,20 +37,24 @@ class FasterWhisperHandler():
     
 
     def transcribe(self, data:Path, language:str, translation:bool) ->  str:
+        startTime = time.time()
         logging.info(data)
         if translation:
             logging.info("Translating audio.")
-            segments, info = self.model.transcribe(str(data), beam_size=3, language=language, task='translate') 
+            segments, info = self.model.transcribe(str(data), beam_size=3, language=language) 
         else:
             logging.info("Transcribing audio")
             segments, info = self.model.transcribe(str(data), beam_size=3, language=language)
         logging.info("Detected language '%s' with probability %f" % (info.language, info.language_probability))
-
         response = ""
         for segment in segments:
             logging.info("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
             response += segment.text
+        logging.info(f'Whsiper transcribing finished in: {time.time() - startTime}')
         data.unlink() # TODO: Instead of creating and deleting file all the time, just do it on one and delete it after all translations
+        if translation:
+            response = self.translator.translate(response, language, "en")[0]
+            logging.info(f'Translating finished in: {time.time() - startTime}')
         return response
     
 
