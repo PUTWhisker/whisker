@@ -72,8 +72,6 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
     async def SendSoundFile(self, request, context):
         logging.info("Received audio file.")
         transcriptionData = TranscriptionData()
-        for key, value in context.invocation_metadata():
-            print(f'{key} : {value}')
         try:
             result = await self.fastModel.handleFile(request.sound_data, transcriptionData, context)
         except Exception as e:

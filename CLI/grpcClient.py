@@ -27,7 +27,7 @@ class GrpcClient:
         language:str = None,
         model:str = "small",
         save:str = None,
-        translation:bool = False,
+        translation:str = None,
     ):
         self.host = host
         self.port = port
@@ -50,7 +50,7 @@ class GrpcClient:
 
     async def sendSoundFile(self, audioFile: bytes) -> Union[bool, grpc.RpcError]:
         try:
-            metadata = (("language", self.language),("translation", str(self.translation)),)
+            metadata = (("language", self.language),("translation", self.translation),)
             response = await self.stub.SendSoundFile(
                 Variables.SoundRequest(
                     sound_data=audioFile,
@@ -64,7 +64,7 @@ class GrpcClient:
         transcription, iter = [""], 0
         try:
             recording = audio.AudioRecorder(self.save) # Initiate recording class
-            metadata = (("language", self.language),("translation", str(self.translation)),)
+            metadata = (("language", self.language),("translation", self.translation),)
             responseIter = self.stub.StreamSoundFile(recording.record(), metadata=metadata) # Streaming recorded audio yield by record() funciton
             print("Recording started. You may start talking now.")
             async for response in responseIter:

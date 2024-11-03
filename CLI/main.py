@@ -69,8 +69,9 @@ def parse() -> argparse.ArgumentParser:
     
     parser.add_argument(
             '--trans',
-            action='store_true',
-            help="Use this flag to enable translation to English")
+            type=str,
+            default=None,
+            help="Use this flag to enable translation and set translation language")
     
     parser.add_argument(
             'fileName',

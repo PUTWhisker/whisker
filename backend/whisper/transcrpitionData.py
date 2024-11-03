@@ -21,7 +21,7 @@ class TranscriptionData():
                  curSeconds:int=0,
                  silenceAudio:bool=False,
                  language:str=None,
-                 translate:bool=False
+                 translate:str=None
                  ):
         self.transcription = transcription
         self.audio = audio
@@ -71,17 +71,16 @@ class TranscriptionData():
 
     def processMetadata(self, context:grpc.ServicerContext):
         for key, value in context.invocation_metadata():
-            if key == "language":
-                print(f'Jezyk: {value}, {type(value)}')
+            if key == "translation":
                 for languageKey, languageValue in languages.LANGUAGES.items():
                     if languageKey == value or languageValue == value:
-                        self.language = value
-                logging.info(f'{self.language}: {value}')
-                if self.language is None and value != "": # Raise error if chosen language is not in M2M100 available language list
+                        self.translate = value
+                logging.info(f'{self.translate}: {value}')
+                if self.translate is None and value != "": # Raise error if chosen language is not in M2M100 available language list
                     raise WrongLanguage("Given language is not supported for translation.")
+                self.translate = value
+            elif key == "language":
                 self.language = value
-            elif key == "translation" and value.lower() == "true":
-                self.translate = True
 
 
 

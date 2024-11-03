@@ -15,7 +15,7 @@ class ConsolePrinter:
             language:str = None, 
             model:str = 'small',
             save:str = None,
-            translation:bool = False
+            translation:str = None
         ):
         self.grpcClient = GrpcClient(host, port, language, model, save, translation)
 

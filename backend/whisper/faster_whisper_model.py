@@ -34,7 +34,7 @@ class FasterWhisperHandler():
         return transcriptionData.saveFile()
     
 
-    def transcribe(self, data:Path, language:str, translation:bool) ->  str:
+    def transcribe(self, data:Path, language:str, translationLanguage:str) ->  str:
         startTime = time.time()
         if language != '':
             segments, info = self.model.transcribe(str(data), beam_size=3, language=language) 
@@ -49,8 +49,8 @@ class FasterWhisperHandler():
             response += segment.text
         logging.info(f'Whsiper transcribing finished in: {time.time() - startTime}')
         data.unlink() # TODO: Instead of creating and deleting file all the time, just do it on one and delete it after all translations
-        if translation:
-            response = self.translator.translate(response, language, "en")[0]
+        if translationLanguage:
+            response = self.translator.translate(response, language, translationLanguage)[0]
             logging.info(f'Translating finished in: {time.time() - startTime}')
         return response
     
