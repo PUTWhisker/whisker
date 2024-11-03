@@ -1,6 +1,6 @@
 from concurrent import futures
 from threading import Thread
-from transcrpitionData import TranscriptionData
+from transcrpitionData import TranscriptionData, WrongLanguage
 import faster_whisper_model
 import grpc
 import asyncio
@@ -42,12 +42,24 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
 
     def _errorHandler(func:callable):
         async def wrapper(*args, **kwargs):
+            for arg in args:
+                if type(arg) is grpc._cython.cygrpc._ServicerContext:
+                    context = arg
             try:
                 return await func(*args, **kwargs)
             except FileNotFoundError:
-                logging.error("There was an internal error when saving your audio file.")
-            except Exception as e:
-                logging.error(f'An error occured while executing {func} function: {e} <Error type: {type(e)}>') #TODO: Debug and change for real error messages
+                errorCode = grpc.StatusCode.INTERNAL
+                errorMessage = "There was an internal error when saving your audio file."
+            except WrongLanguage as e:
+                errorCode = grpc.StatusCode.INVALID_ARGUMENT
+                errorMessage = "Supplied translate language is not currently supported."
+            except Exception as e: #TODO: Debug and change for real error messages
+                errorCode = grpc.StatusCode.INTERNAL
+                errorMessage = f'An error occured while executing {func} function: {e} <Error type: {type(e)}>'
+
+            logging.exception(errorMessage)
+            await context.abort(errorCode, errorMessage)
+            return
         return wrapper
 
 
@@ -60,6 +72,8 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
     async def SendSoundFile(self, request, context):
         logging.info("Received audio file.")
         transcriptionData = TranscriptionData()
+        for key, value in context.invocation_metadata():
+            print(f'{key} : {value}')
         try:
             result = await self.fastModel.handleFile(request.sound_data, transcriptionData, context)
         except Exception as e:
@@ -74,8 +88,6 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
         logging.info("Received record streaming.")
         def parse_request():
             transcriptionData = TranscriptionData()
-            for key, value in context.invocation_metadata():
-                logging.info(f'{key} : {value}')
             transcriptionData.processMetadata(context)
             for request in requestIter:
                 transcriptionData.isSilence = False

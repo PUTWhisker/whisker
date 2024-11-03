@@ -8,19 +8,18 @@ import logging
 import time
 
 
-model_size = "medium"
+model_size = "tiny"
 
 class FasterWhisperHandler():
     
     def __init__(
         self, 
-        transcrpition:TranscriptionData=TranscriptionData()
     ):
         super(FasterWhisperHandler, self).__init__()
         self.model = WhisperModel(model_size, device="cpu", compute_type="float32", cpu_threads=8)
-        self.transcrpition = transcrpition
         self.silenceLength = 1.5
         self.translator = Translator()
+
 
     def preprocessStreaming(self, receivedAudio:bytes, data:TranscriptionData, context:grpc.ServicerContext) -> Union[Path, TranscriptionData]:
         data.appendData(receivedAudio)
@@ -32,20 +31,18 @@ class FasterWhisperHandler():
     def preprocessRequest(self, data:bytes, transcriptionData:TranscriptionData, context:grpc.ServicerContext) -> Path:
         transcriptionData.processMetadata(context)
         transcriptionData.audio = data
-        print(transcriptionData.language)
         return transcriptionData.saveFile()
     
 
     def transcribe(self, data:Path, language:str, translation:bool) ->  str:
         startTime = time.time()
-        logging.info(data)
-        if translation:
-            logging.info("Translating audio.")
+        if language != '':
             segments, info = self.model.transcribe(str(data), beam_size=3, language=language) 
         else:
-            logging.info("Transcribing audio")
-            segments, info = self.model.transcribe(str(data), beam_size=3, language=language)
+            segments, info = self.model.transcribe(str(data), beam_size=3) 
         logging.info("Detected language '%s' with probability %f" % (info.language, info.language_probability))
+        if language == '':
+            language = info.language
         response = ""
         for segment in segments:
             logging.info("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))

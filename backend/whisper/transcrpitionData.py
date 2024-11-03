@@ -6,6 +6,10 @@ import wave
 import pyaudio
 import grpc
 import logging
+import languages
+
+class WrongLanguage(Exception):
+    pass
 
 class TranscriptionData():
 
@@ -26,8 +30,8 @@ class TranscriptionData():
         self.curSeconds = curSeconds
         self.silenceAudio = silenceAudio
         self.filePath = Path(f'./tempFiles/{uuid.uuid4()}.wav')
-        self.language = language
         self.translate = translate
+        self.language = language
 
 
     def appendData(self, receivedAudio:bytes):
@@ -68,11 +72,17 @@ class TranscriptionData():
     def processMetadata(self, context:grpc.ServicerContext):
         for key, value in context.invocation_metadata():
             if key == "language":
+                print(f'Jezyk: {value}, {type(value)}')
+                for languageKey, languageValue in languages.LANGUAGES.items():
+                    if languageKey == value or languageValue == value:
+                        self.language = value
+                logging.info(f'{self.language}: {value}')
+                if self.language is None and value != "": # Raise error if chosen language is not in M2M100 available language list
+                    raise WrongLanguage("Given language is not supported for translation.")
                 self.language = value
-                logging.info(f'Chosen language: {self.language}')
             elif key == "translation" and value.lower() == "true":
-                logging.info("Translation is on")
                 self.translate = True
+
 
 
     def incrementData(self):

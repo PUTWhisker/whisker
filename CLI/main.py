@@ -16,8 +16,6 @@ from proto import sound_transfer_pb2
 
 sys.path.insert(0, curDir)
 
-# FLAGS: language, modelSize, host, port, audioFile, record, saving
-
 # Read user's input flags and arguments
 def parse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -37,7 +35,7 @@ def parse() -> argparse.ArgumentParser:
     parser.add_argument(
             '--language',
             type=str,
-            default="pl",
+            default=None,
             choices=sorted(list(dicts.LANGUAGES)) + sorted(list(dicts.LANGUAGES.values())),
             help="Set it to the audio language")
     
