@@ -7,6 +7,15 @@ import asyncio
 import os.path
 import logging
 
+curDir = os.path.dirname(__file__)
+protoDir = os.path.join(curDir, "proto")
+sys.path.insert(0, protoDir)
+
+from proto import sound_transfer_pb2_grpc
+from proto import sound_transfer_pb2
+
+sys.path.insert(0, curDir)
+
 # FLAGS: language, modelSize, host, port, audioFile, record, saving
 
 # Read user's input flags and arguments

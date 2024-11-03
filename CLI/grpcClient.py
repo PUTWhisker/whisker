@@ -1,10 +1,18 @@
 from typing import Union
 
-import sound_transfer_pb2_grpc as Services
-import sound_transfer_pb2 as Variables
 import audio
 import os
+import sys
 import grpc
+
+curDir = os.path.dirname(__file__)
+protoDir = os.path.join(curDir, "proto")
+sys.path.insert(0, protoDir)
+
+from proto import sound_transfer_pb2_grpc as Services
+from proto import sound_transfer_pb2 as Variables
+
+sys.path.insert(0, curDir)
 
 
 # declare Keepalive pings

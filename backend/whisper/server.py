@@ -1,19 +1,31 @@
 from concurrent import futures
 from threading import Thread
 from transcrpitionData import TranscriptionData
-
-import sound_transfer_pb2_grpc as Services
-import sound_transfer_pb2 as Variables
 import faster_whisper_model
 import grpc
 import asyncio
 import logging
 import os
+import sys
+
+curDir = os.path.dirname(__file__)
+protoDir = os.path.join(curDir, "proto")
+sys.path.insert(0, protoDir)
+
+from proto import sound_transfer_pb2_grpc
+from proto import sound_transfer_pb2
+
+sys.path.insert(0, curDir)
+'''
+    Including proto libraries from proto folder. Have to change system directory, as sound_transfer_pb2_grpc imports sound_transfer_pb2 within itself,
+    and there will be error as sound_transfer_pb2 is in a different directory than executable file (server.py). Another solution would be changing import line in
+    sound_transfer_pb2_grpc, but would have to do that every time proto file is changed
+'''
 
 logging.basicConfig(format="%(levelname)s:%(name)s:%(message)s", level=logging.INFO)
 _cleanup_coroutines = [] # Needed for asyncio graceful shutdown
 
-class SoundService(Services.SoundServiceServicer):
+class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
 
     def __init__(self):
         self.number = 0
@@ -41,7 +53,7 @@ class SoundService(Services.SoundServiceServicer):
 
     @_errorHandler
     async def TestConnection(self, request, context):
-        return Variables.TextMessage(text=request.text)
+        return sound_transfer_pb2.TextMessage(text=request.text)
     
     
     @_errorHandler
@@ -54,7 +66,7 @@ class SoundService(Services.SoundServiceServicer):
             if transcriptionData.filePath.exists(): # To ensure tempFile gets deleted even when error occurs
                 transcriptionData.filePath.unlink()
             raise e
-        return Variables.SoundResponse(text=result)
+        return sound_transfer_pb2.SoundResponse(text=result)
 
 
     # @_errorHandler    #TODO: Resolve async_generator problem to add errorHandler
@@ -79,7 +91,7 @@ class SoundService(Services.SoundServiceServicer):
                     raise e
                 flags=[str(transcriptionData.isSilence)]
                 # print(f'{transcriptionData.isSilence} : {transcriptionData.curSeconds}')
-                yield Variables.SoundStreamResponse(
+                yield sound_transfer_pb2.SoundStreamResponse(
                     text=transcriptionData.transcription[transcriptionData.curSegment],
                     flags=flags
                 )
@@ -95,7 +107,7 @@ async def server():
         ('grpc.max_receive_message_length', 50 * 1024 * 1024)  # 50MB
     ]
 )
-    Services.add_SoundServiceServicer_to_server(SoundService(), server)
+    sound_transfer_pb2_grpc.add_SoundServiceServicer_to_server(SoundService(), server)
     server.add_insecure_port("[::]:" + port) # change to secure later
     await server.start()
     try:
