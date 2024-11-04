@@ -68,7 +68,7 @@ class FasterWhisperHandler():
         return result
     
 
-    def handleRecord(self, receivedAudio:bytes, data:TranscriptionData, context:grpc.ServicerContext) -> TranscriptionData:
+    async def handleRecord(self, receivedAudio:bytes, data:TranscriptionData, context:grpc.ServicerContext) -> TranscriptionData:
         processedAudio, data = self.preprocessStreaming(receivedAudio, data, context)
         if not data.silenceAudio:
             data.transcription[data.curSegment] = self.transcribe(processedAudio, data.language, data.translate)

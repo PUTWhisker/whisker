@@ -7,6 +7,7 @@ import asyncio
 import logging
 import os
 import sys
+import inspect
 
 curDir = os.path.dirname(__file__)
 protoDir = os.path.join(curDir, "proto")
@@ -16,6 +17,7 @@ from proto import sound_transfer_pb2_grpc
 from proto import sound_transfer_pb2
 
 sys.path.insert(0, curDir)
+
 '''
     Including proto libraries from proto folder. Have to change system directory, as sound_transfer_pb2_grpc imports sound_transfer_pb2 within itself,
     and there will be error as sound_transfer_pb2 is in a different directory than executable file (server.py). Another solution would be changing import line in
@@ -24,6 +26,20 @@ sys.path.insert(0, curDir)
 
 logging.basicConfig(format="%(levelname)s:%(name)s:%(message)s", level=logging.INFO)
 _cleanup_coroutines = [] # Needed for asyncio graceful shutdown
+
+
+def _errorMessages(e:Exception, func:callable):
+    if isinstance(e, FileNotFoundError):
+        errorCode = grpc.StatusCode.INTERNAL
+        errorMessage = "There was an internal error when saving your audio file."
+    if isinstance(e, WrongLanguage):
+        errorCode = grpc.StatusCode.INVALID_ARGUMENT
+        errorMessage = "Supplied translate language is not currently supported."
+    else: #TODO: Debug and change for real error messages
+        errorCode = grpc.StatusCode.INTERNAL
+        errorMessage = f'An error occured while executing {func} function: {e} <Error type: {type(e)}>'
+    return errorCode, errorMessage
+
 
 class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
 
@@ -40,35 +56,47 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
             logging.error(f"An error occurred: {e}")
 
 
-    def _errorHandler(func:callable):
+    def _errorUnaryHandler(func:callable):
         async def wrapper(*args, **kwargs):
-            for arg in args:
-                if type(arg) is grpc._cython.cygrpc._ServicerContext:
-                    context = arg
             try:
+                for arg in args:
+                    if type(arg) is grpc._cython.cygrpc._ServicerContext:
+                        context = arg
                 return await func(*args, **kwargs)
-            except FileNotFoundError:
-                errorCode = grpc.StatusCode.INTERNAL
-                errorMessage = "There was an internal error when saving your audio file."
-            except WrongLanguage as e:
-                errorCode = grpc.StatusCode.INVALID_ARGUMENT
-                errorMessage = "Supplied translate language is not currently supported."
-            except Exception as e: #TODO: Debug and change for real error messages
-                errorCode = grpc.StatusCode.INTERNAL
-                errorMessage = f'An error occured while executing {func} function: {e} <Error type: {type(e)}>'
+            except Exception as e:
+                errorCode, errorMessage = _errorMessages(e, func)
+                logging.exception(f'{errorCode}: {errorMessage}')
+                await context.abort(errorCode, errorMessage)
+                return 
+        return wrapper
+    
+    
+    def _errorStreamHandler(func:callable):
+        async def wrapper(*args, **kwargs):
+            try:
+                for arg in args:
+                    if type(arg) is grpc._cython.cygrpc._ServicerContext:
+                        context = arg
+                result = func(*args, **kwargs)
 
-            logging.exception(errorMessage)
-            await context.abort(errorCode, errorMessage)
-            return
+                if inspect.isasyncgen(result):
+                    async for res in result:
+                        yield res
+                return
+            except Exception as e:
+                errorCode, errorMessage = _errorMessages(e, func)
+                logging.exception(f'{errorCode}: {errorMessage}')
+                await context.abort(errorCode, errorMessage)
+                return 
         return wrapper
 
 
-    @_errorHandler
+    @_errorUnaryHandler
     async def TestConnection(self, request, context):
         return sound_transfer_pb2.TextMessage(text=request.text)
     
     
-    @_errorHandler
+    @_errorUnaryHandler
     async def SendSoundFile(self, request, context):
         logging.info("Received audio file.")
         transcriptionData = TranscriptionData()
@@ -81,31 +109,28 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
         return sound_transfer_pb2.SoundResponse(text=result)
 
 
-    # @_errorHandler    #TODO: Resolve async_generator problem to add errorHandler
-    def StreamSoundFile(self, requestIter, context):
+    @_errorStreamHandler    #TODO: Resolve async_generator problem to add errorHandler
+    async def StreamSoundFile(self, requestIter, context):
         logging.info("Received record streaming.")
-        def parse_request():
-            transcriptionData = TranscriptionData()
-            transcriptionData.processMetadata(context)
-            for request in requestIter:
-                transcriptionData.isSilence = False
-                if transcriptionData.curSeconds >= 10:
-                    transcriptionData.curSegment += 1
-                    transcriptionData.curSeconds = 0
-                try:
-                    transcriptionData = self.fastModel.handleRecord(request.sound_data, transcriptionData, context)
-                    logging.info(transcriptionData.transcription)
-                except Exception as e:
-                    if transcriptionData.filePath.exists(): # To ensure tempFile gets deleted even when error occurs
-                        transcriptionData.filePath.unlink()
-                    raise e
-                flags=[str(transcriptionData.isSilence)]
-                # print(f'{transcriptionData.isSilence} : {transcriptionData.curSeconds}')
-                yield sound_transfer_pb2.SoundStreamResponse(
-                    text=transcriptionData.transcription[transcriptionData.curSegment],
-                    flags=flags
-                )
-        return parse_request()
+        transcriptionData = TranscriptionData()
+        transcriptionData.processMetadata(context)
+        async for request in requestIter:
+            transcriptionData.isSilence = False
+            if transcriptionData.curSeconds >= 10:
+                transcriptionData.curSegment += 1
+                transcriptionData.curSeconds = 0
+            try:
+                transcriptionData = await self.fastModel.handleRecord(request.sound_data, transcriptionData, context)
+                logging.info(transcriptionData.transcription)
+            except Exception as e:
+                if transcriptionData.filePath.exists(): # To ensure tempFile gets deleted even when error occurs
+                    transcriptionData.filePath.unlink()
+                raise e
+            flags=[str(transcriptionData.isSilence)]
+            yield sound_transfer_pb2.SoundStreamResponse(
+                text=transcriptionData.transcription[transcriptionData.curSegment],
+                flags=flags
+            )
 
 
 async def server():
