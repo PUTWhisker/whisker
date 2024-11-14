@@ -145,10 +145,7 @@
                 android:text="No file selected"
                 android:gravity="center"/>
         </LinearLayout>
-        
-        <Button
-            android:layout_width=""
-            android:layout_height=""
+
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

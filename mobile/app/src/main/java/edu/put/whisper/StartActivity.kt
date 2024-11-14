@@ -229,7 +229,6 @@ class StartActivity : AppCompatActivity() {
             val history = authClient.GetTranslations()  // Załaduj historię
             withContext(Dispatchers.Main) {
                 tvHistory.text = history.joinToString("\n\n\n")
-
             }
         }
     }
