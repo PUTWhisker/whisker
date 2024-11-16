@@ -1,86 +1,128 @@
 from faster_whisper import WhisperModel
-import uuid
-import os
+from pathlib import Path
+from typing import Union
+from transcrpitionData import TranscriptionData
+from translate import Translator
+import grpc
+import logging
+import time
 from diarizate import Clip
 
-import preprocess
 
 model_size = "tiny"
 
 
-class FasterWhisperHandler():
+class FasterWhisperHandler:
     model = None
-    
+
     def __init__(
-        self, 
-        language='en',
-        task='transcribe'
+        self,
     ):
         super(FasterWhisperHandler, self).__init__()
-        self.model = WhisperModel(model_size, device="cpu", compute_type="float32", cpu_threads=8)
-        self.language = language
-        self.task = task
-        self.silence = 1.5
+        self.model = WhisperModel(
+            model_size, device="cpu", compute_type="float32", cpu_threads=8
+        )
+        self.silenceLength = 1.5
+        self.translator = Translator()
 
+    def preprocessStreaming(
+        self,
+        receivedAudio: bytes,
+        data: TranscriptionData,
+        context: grpc.ServicerContext,
+    ) -> Union[Path, TranscriptionData]:
+        data.appendData(receivedAudio)
+        filePath = data.saveFile()
+        data.isSilence = data.detectSilence(filePath, self.silenceLength)
+        return filePath, data
 
-    def preprocessStreaming(self, data, previousAudio, seconds, record):
-        data = previousAudio + data
-        previousAudio = data
-        path = preprocess.saveFile(data, record)
-        isSilence = preprocess.detectSilence(path, self.silence)
-        return path, isSilence, previousAudio, seconds
-    
+    def preprocessRequest(
+        self,
+        data: bytes,
+        transcriptionData: TranscriptionData,
+        context: grpc.ServicerContext,
+    ) -> Path:
+        transcriptionData.processMetadata(context)
+        transcriptionData.audio = data
+        return transcriptionData.saveFile()
 
-    def preprocessRequest(self, data, record):
-        return preprocess.saveFile(data, record)
-    
-
-    def transcribe(self, data, previous="", return_fragments = False):
-       #  print(f'Zapisane: {previous}')
-        segments, info = self.model.transcribe(str(data), beam_size=5, language='pl', initial_prompt=previous, word_timestamps=True)
-        print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
+    def transcribe(
+        self,
+        data: Path,
+        language: str,
+        translationLanguage: str,
+        return_fragments=False,
+    ) -> str:
+        startTime = time.time()
+        if language != "":
+            segments, info = self.model.transcribe(
+                str(data), beam_size=3, language=language, word_timestamps=True
+            )
+        else:
+            segments, info = self.model.transcribe(str(data), beam_size=3)
+        logging.info(
+            "Detected language '%s' with probability %f"
+            % (info.language, info.language_probability)
+        )
+        if language == "":
+            language = info.language
+        response = ""
         if return_fragments:
             response = []
             for segment in segments:
                 response.append(Clip(segment.start, segment.end, "", segment.text))
             return response
-        
-        response = ""
         for segment in segments:
-            # print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
+            logging.info(
+                "[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text)
+            )
             response += segment.text
-        data.unlink()
+        logging.info(f"Whsiper transcribing finished in: {time.time() - startTime}")
+        data.unlink()  # TODO: Instead of creating and deleting file all the time, just do it on one and delete it after all translations
+        if translationLanguage:
+            response = self.translator.translate(
+                response, language, translationLanguage
+            )[0]
+            logging.info(f"Translating finished in: {time.time() - startTime}")
         return response
-    
-   
 
-    def postprocess(self, transcription, isSilence, segment, previousAudio, data, seconds):
-        if (len(data) >= 3 and data[-3:] == '...'):
-            data = data[0:-3]
-        seconds += 2
-        if isSilence or seconds >= 10:
-            print("10 second audio, dividing file...")
-            isSilence = True
-        if isSilence:
-            previousAudio = b''
-            transcription.append("")
-        transcription[segment] = data
-        return transcription, segment, previousAudio, data, isSilence, seconds
+    def postprocess(self, data: TranscriptionData) -> TranscriptionData:
+        if (
+            len(data.transcription[data.curSegment]) >= 3
+            and data.transcription[data.curSegment][-3:] == "..."
+        ):
+            data.transcription[data.curSegment] = data.transcription[data.curSegment][
+                0:-3
+            ]
+        data.incrementData()
+        return data
 
-
-    async def handleFile(self, data, record, diarizate_speakers = False):
-        sound_file_path = self.preprocessRequest(data, record)
+    async def handleFile(
+        self,
+        receivedAudio: bytes,
+        data: TranscriptionData,
+        context: grpc.ServicerContext,
+        diarizate_speakers=False,
+    ) -> str:
+        filePath = self.preprocessRequest(receivedAudio, data, context)
         if diarizate_speakers:
-            result = self.transcribe(sound_file_path, return_fragments=True)
+            result = self.transcribe(filePath, data.language, data.translate)
         else:
-            result = self.transcribe(sound_file_path)
+            result = self.transcribe(
+                filePath, data.language, data.translate, return_fragments=True
+            )
         return result
-    
 
-    def handleRecord(self, data, transcription, previousAudio, segment, seconds, record):
-        text, isSilence, previousAudio, seconds = self.preprocessStreaming(data, previousAudio, seconds, record)
-        result = ""
-        if not isSilence:
-            result = self.transcribe(text, transcription[segment])
-        transcription, segment, previousAudio, result, isSilence, seconds = self.postprocess(transcription, isSilence, segment, previousAudio, result, seconds)
-        return result, transcription, previousAudio, segment, isSilence, seconds
+    async def handleRecord(
+        self,
+        receivedAudio: bytes,
+        data: TranscriptionData,
+        context: grpc.ServicerContext,
+    ) -> TranscriptionData:
+        processedAudio, data = self.preprocessStreaming(receivedAudio, data, context)
+        if not data.silenceAudio:
+            data.transcription[data.curSegment] = self.transcribe(
+                processedAudio, data.language, data.translate
+            )
+        data = self.postprocess(data)
+        return data
