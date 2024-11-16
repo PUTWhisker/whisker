@@ -1,0 +1,21 @@
+syntax = "proto3";
+option go_package = "inzynierka/server_services";
+
+service SoundService {
+    rpc SendSoundFile(SoundRequest) returns (SoundResponse) {};
+    rpc TestConnection(TextMessage) returns (TextMessage) {};
+    rpc StreamSoundFile(stream SoundRequest) returns (stream SoundResponse);
+}
+
+message SoundRequest {
+    bytes sound_data = 1;
+    repeated string flags = 2;
+}
+
+message SoundResponse {
+    string text = 3;
+}
+
+message TextMessage {
+    string text = 4;
+}

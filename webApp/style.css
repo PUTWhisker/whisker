@@ -1,0 +1,35 @@
+* {
+    background-color: darkgray;
+}
+
+#send_recording {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+#record {
+    background-color: green;
+}
+
+#stop {
+    background-color: red;
+}
+
+.button {
+    margin: 0px 10px 0px 10px;
+    border: solid black 1px;
+    font-size: 15px;
+    padding: 10px 20px;
+    color: white;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+audio {
+    margin: 10px 0px 10px 0px;
+}
+
+article {
+    display: flex;
+    flex-flow: column nowrap;
+}

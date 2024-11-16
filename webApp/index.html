@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>DEMO PAGE</title>
+    <script src="./dist/main.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="#">
+  </head>
+  <body>
+    <main>
+        <div>
+            <fieldset>
+              <legend>File upload</legend>
+              <form id="send_file">
+                  <label for="input_file">Upload an input file </label> <br />
+                  <input type="file" name="input_file" id="input_file"><br /><br />
+                  <input type="submit" value="Submit file" id="submit_file"/>
+              </form>
+            </fieldset>
+        </div>
+        <div>
+          <fieldset>
+            <legend>Transcript</legend>
+            <form id="receive_transcript">
+              <p id="transcriptedText"></p>
+            </form>
+          </fieldset>
+        </div>
+        <div>
+          <fieldset>
+            <legend>Audio record</legend>
+            <form id="send_recording">
+              <input type="button" value="record" id="record" class="button"/> <br />
+              <input type="button" value="stop" id="stop" class="button"/> <br />
+            </form>
+            <article id="clips">
+
+            </article>
+          </fieldset>
+        </div>
+    </main>
+  </body>
+</html>

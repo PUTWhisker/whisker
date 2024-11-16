@@ -1,10 +1,18 @@
 from typing import Union
 
-import sound_transfer_pb2_grpc as Services
-import sound_transfer_pb2 as Variables
 import audio
 import os
+import sys
 import grpc
+
+curDir = os.path.dirname(__file__)
+protoDir = os.path.join(curDir, "proto")
+sys.path.insert(0, protoDir)
+
+from proto import sound_transfer_pb2_grpc as Services
+from proto import sound_transfer_pb2 as Variables
+
+sys.path.insert(0, curDir)
 
 
 # declare Keepalive pings
@@ -18,13 +26,15 @@ class GrpcClient:
         port:str = None,
         language:str = None,
         model:str = "small",
-        save:str = None
+        save:str = None,
+        translation:str = None,
     ):
         self.host = host
         self.port = port
         self.language = language
         self.model = model
         self.save = save
+        self.translation = translation
 
 
     async def initiateConnection(self, seed:str) -> Union[bool, grpc.RpcError]:
@@ -34,33 +44,31 @@ class GrpcClient:
             response = await self.stub.TestConnection( # sending generated number
                             Variables.TextMessage(text=seed))
             return response
-        except (grpc.RpcError, Exception):
-            raise
+        except Exception as e:
+            raise e
 
 
     async def sendSoundFile(self, audioFile: bytes) -> Union[bool, grpc.RpcError]:
         try:
-            flags = [self.language, self.model] # Seting flags for transcribing
+            metadata = (("language", self.language),("translation", self.translation),)
             response = await self.stub.SendSoundFile(
                 Variables.SoundRequest(
                     sound_data=audioFile,
-                    flags=flags)) # Sending audio file to transcribe
+                    flags=None), metadata=metadata) # Sending audio file to transcribe
             return response
-        except (grpc.RpcError, Exception):
-            raise
+        except Exception as e:
+            raise e
 
 
     async def streamSoundFile(self)  -> Union[bool, grpc.RpcError]:
         transcription, iter = [""], 0
         try:
             recording = audio.AudioRecorder(self.save) # Initiate recording class
-            responseIter = self.stub.StreamSoundFile(recording.record()) # Streaming recorded audio yield by record() funciton
+            metadata = (("language", self.language),("translation", self.translation),)
+            responseIter = self.stub.StreamSoundFile(recording.record(), metadata=metadata) # Streaming recorded audio yield by record() funciton
             print("Recording started. You may start talking now.")
             async for response in responseIter:
                 transcription[iter] = response.text
-                # os.system('cls' if os.name=='nt' else 'clear') # Clear terminal to correct transcription
-                #for transcript in transcription: # Displaying server's responses
-                    # print(transcript)
                 terminalWidth, _ = os.get_terminal_size()
                 print(' ' * terminalWidth, end='\r', flush=True)
                 print(transcription[iter], end='\r', flush=True) # Delete?
