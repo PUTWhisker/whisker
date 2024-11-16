@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -20,83 +19,41 @@ import (
 )
 
 type AuthenticationServer struct {
-	DbPool *pgxpool.Pool
+	Db           UserDbModel
+	JwtGenerator TokenGenerator
 	pb.UnimplementedClientServiceServer
 }
 
-func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	return string(bytes), err
+type UserClaims struct {
+	Username string `json:"username"`
+	jwt.RegisteredClaims
 }
 
-func comparePasswords(hashedPassword string, plainPassword []byte) bool {
-	byteHash := []byte(hashedPassword)
-	err := bcrypt.CompareHashAndPassword(byteHash, plainPassword)
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-
-	return true
+type TokenGenerator interface {
+	generate(string) (string, error)
 }
 
-func AddUserToDatabase(email string, password string, pool *pgxpool.Pool) {
-	password_hash, err := hashPassword(password)
-	if err != nil {
-		log.Fatalf("failed to hash password")
-		return
-	}
-	_, err = pool.Exec(context.Background(), "INSERT INTO app_user(email, password_hash) VALUES ($1, $2);", email, password_hash)
-	if err != nil {
-		log.Fatal(err)
-	}
+type JWTGenerator struct {
+	PrivateKeyPath string
 }
 
-func IsUserInDatabase(email string, pool *pgxpool.Pool) bool {
-	rows, err := pool.Query(context.Background(), "SELECT email FROM app_user WHERE email=$1;", email)
-	if err != nil {
-		log.Fatal(err)
-		return false
-	}
-	return rows.Next()
-}
+func (g *JWTGenerator) generate(username string) (string, error) {
+	var t *jwt.Token
 
-func checkLoginPassword(email string, password string, pool *pgxpool.Pool) bool {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	rows, err := pool.Query(ctx, "SELECT password_hash FROM app_user WHERE email=$1;", email)
+	key, err := loadPrivateECDSAKeyFromFile(g.PrivateKeyPath)
 	if err != nil {
-		log.Fatal(err)
-		return false
-	}
-	if !rows.Next() {
-		return false
-	}
-	var password_hash string
-	err = rows.Scan(&password_hash)
-	if err != nil {
-		return false
-	}
-	return comparePasswords(password_hash, []byte(password))
-}
-
-func loadPrivateECDSAKeyFromFile(filepath string) (*ecdsa.PrivateKey, error) {
-	keyData, err := os.ReadFile(filepath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open key file")
+		log.Panicf("Failed to load private JWT key %v", err)
 	}
 
-	block, _ := pem.Decode(keyData)
-	if block == nil || block.Type != "EC PRIVATE KEY" {
-		return nil, fmt.Errorf("failed to decode PEM block containing ECDSA private key")
+	claims := UserClaims{
+		username,
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+			Issuer:    "krzysztof",
+		},
 	}
-
-	privateKey, err := x509.ParseECPrivateKey(block.Bytes)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse key")
-	}
-
-	return privateKey, nil
+	t = jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+	return t.SignedString(key)
 }
 
 func loadPublicECDSAKeyFromFile(filepath string) (*ecdsa.PublicKey, error) {
@@ -124,46 +81,77 @@ func loadPublicECDSAKeyFromFile(filepath string) (*ecdsa.PublicKey, error) {
 	return ecdsaPubKey, nil
 }
 
-type UserClaims struct {
-	Username string `json:"username"`
-	jwt.RegisteredClaims
+func loadPrivateECDSAKeyFromFile(filepath string) (*ecdsa.PrivateKey, error) {
+	keyData, err := os.ReadFile(filepath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open key file")
+	}
+
+	block, _ := pem.Decode(keyData)
+	if block == nil || block.Type != "EC PRIVATE KEY" {
+		return nil, fmt.Errorf("failed to decode PEM block containing ECDSA private key")
+	}
+
+	privateKey, err := x509.ParseECPrivateKey(block.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse key")
+	}
+
+	return privateKey, nil
 }
 
-func generateJWT(privateKeyPath string, username string) (string, error) {
-	var (
-		t *jwt.Token
-	)
-	key, err := loadPrivateECDSAKeyFromFile(privateKeyPath)
+func comparePasswords(hashedPassword string, plainPassword string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
+	return err == nil
+}
 
+func (s *AuthenticationServer) checkUserCredentials(email string, password string) bool {
+	password_hash, err := s.Db.getUserPassword(email)
 	if err != nil {
-		return "not", err
+		return false
 	}
+	return comparePasswords(password_hash, password)
+}
 
-	claims := UserClaims{
-		username,
-		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
-			Issuer:    "krzysztof",
-		},
+func (s *AuthenticationServer) Login(ctx context.Context, in *pb.UserCredits) (*pb.LoginResponse, error) {
+	if s.checkUserCredentials(in.Username, in.Password) {
+		token, _ := s.JwtGenerator.generate(in.Username)
+		return &pb.LoginResponse{Successful: true, JWT: token}, nil
+
 	}
+	return &pb.LoginResponse{Successful: false, JWT: ""}, nil
+}
 
-	t = jwt.NewWithClaims(jwt.SigningMethodES256, claims)
-	return t.SignedString(key)
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(bytes), err
+}
+
+func (s *AuthenticationServer) Register(ctx context.Context, in *pb.UserCredits) (*pb.StatusResponse, error) {
+	if successful, err := s.Db.isUserInDatabase(in.Username); successful {
+		if err != nil {
+			return &pb.StatusResponse{Successful: false, Error: "Unknown error"}, nil
+		}
+		return &pb.StatusResponse{Successful: false, Error: "User already registered"}, nil
+	}
+	err := s.Db.addUserToDatabase(in.Username, in.Password)
+	if err != nil {
+		return &pb.StatusResponse{Successful: false, Error: "Database error"}, nil
+	}
+	return &pb.StatusResponse{Successful: true}, nil
 }
 
 func verifyJWT(tokenString string) (*jwt.Token, error) {
 	publicKey, err := loadPublicECDSAKeyFromFile(os.Getenv("JWT_PUBLIC_KEY_PATH"))
 
 	if err != nil {
-		fmt.Println(err)
-		return nil, err
+		log.Panicf("Failed to load public key %v", err)
 	}
 
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return publicKey, nil
 	})
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	} else if _, ok := token.Claims.(*UserClaims); ok {
 	} else {
@@ -177,33 +165,6 @@ func verifyJWT(tokenString string) (*jwt.Token, error) {
 
 	// Return the verified token
 	return token, nil
-}
-
-func (s *AuthenticationServer) Login(ctx context.Context, in *pb.UserCredits) (*pb.LoginResponse, error) {
-	if checkLoginPassword(in.Username, in.Password, s.DbPool) {
-		token, _ := generateJWT(os.Getenv("JWT_PRIVATE_KEY_PATH"), in.Username)
-		return &pb.LoginResponse{Successful: true, JWT: token}, nil
-
-	}
-	return &pb.LoginResponse{Successful: false, JWT: ""}, nil
-}
-
-func (s *AuthenticationServer) Register(ctx context.Context, in *pb.UserCredits) (*pb.StatusResponse, error) {
-	if IsUserInDatabase(in.Username, s.DbPool) {
-		return &pb.StatusResponse{Successful: false}, nil
-	}
-	AddUserToDatabase(in.Username, in.Password, s.DbPool)
-	return &pb.StatusResponse{Successful: true}, nil
-}
-
-func GetTranslationFromDB(username string, pool *pgxpool.Pool) bool {
-	_, err := pool.Query(context.Background(), "SELECT * FROM transcription WHERE app_user_id=(select id from app_user where email='nowy@email.com' LIMIT 1);", username)
-	if err != nil {
-		log.Fatal(err)
-		return false
-	}
-	return true
-
 }
 
 func GetUserNameFromMetadata(metadata metadata.MD) (string, error) {
@@ -240,7 +201,7 @@ func (s *AuthenticationServer) GetTranslation(_ *pb.Empty, stream pb.ClientServi
 	header := metadata.New(map[string]string{"location": "MTV", "timestamp": time.Now().Format(timestampFormat)})
 	stream.SendHeader(header)
 
-	rows, err := s.DbPool.Query(context.Background(), "SELECT content FROM transcription WHERE app_user_id=(select id from app_user where email=$1 LIMIT 1);", username)
+	rows, err := s.Db.getUserTranscriptionHistory(username)
 	if err != nil {
 		log.Fatal(err)
 		return err

@@ -15,11 +15,12 @@ message TextHistory {
 }
 
 message UserCredits {
-    string username = 3;
-    string password = 4;
+    string username = 2;
+    string password = 3;
 }
 
 message StatusResponse {
+    string error = 4;
     bool successful = 5;
 }
 
