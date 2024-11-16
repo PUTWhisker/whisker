@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".StartActivity">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Choose or record a file to transcript"
+                android:gravity="center"
+                android:layout_marginBottom="32dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRecordActivity"
+                android:layout_width="140dp"
+                android:layout_height="60dp"
+                android:backgroundTint="@color/gray"
+                android:text="Record"
+                android:textColor="@color/grayDark"
+                app:cornerRadius="26dp"
+                app:rippleColor="@color/grayDark" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnChooseFile"
+                android:layout_width="140dp"
+                android:layout_height="60dp"
+                android:backgroundTint="@color/gray"
+                android:text="Choose File"
+                android:layout_marginTop="12dp"
+                android:textColor="@color/grayDark"
+                app:cornerRadius="26dp"
+                app:rippleColor="@color/grayDark" />
+
+            <TextView
+                android:id="@+id/tvSelectedFile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="No file selected"
+                android:gravity="center"/>
+        </LinearLayout>
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

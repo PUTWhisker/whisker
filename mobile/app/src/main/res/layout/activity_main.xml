@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/tvTranscript"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:layout_marginTop="46dp"
+            android:gravity="center"
+            android:visibility="invisible"
+            android:text="Your transcripted text will be here"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/btnCopy"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_copy"
+            android:layout_marginEnd="42dp"
+            android:layout_marginTop="24dp"
+            android:visibility="invisible"
+            android:onClick="btnCopyPressed"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvTranscript" />
+
+
+
+        <TextView
+            android:id="@+id/tvTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00:00"
+            android:textSize="50sp"
+            app:layout_constraintBottom_toTopOf="@+id/waveformView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.497"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginBottom="30dp"/>
+
+        <edu.put.whisper.WaveformView
+            android:id="@+id/waveformView"
+            android:layout_width="match_parent"
+            android:layout_height="300px"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="80dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="@id/linearButtons">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTranscript"
+                android:layout_width="140dp"
+                android:layout_height="60dp"
+                android:backgroundTint="@color/gray"
+                android:onClick="btnTranscriptPressed"
+                android:text="Transcript"
+                android:textColor="@color/grayDark"
+                android:visibility="invisible"
+                app:cornerRadius="26dp"
+                app:rippleColor="@color/grayDark" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="80dp">
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="@dimen/btn_size"
+                android:layout_height="@dimen/btn_size"
+                android:src="@drawable/ic_back"
+                android:background="@drawable/ic_ripple"
+                android:contentDescription="btn go back to record"/>
+            <ImageButton
+                android:id="@+id/btnDelete"
+                android:layout_width="@dimen/btn_size"
+                android:onClick="btnDeletePressed"
+                android:src="@drawable/ic_delete_disabled"
+                android:background="@drawable/ic_ripple"
+                android:layout_height="@dimen/btn_size"
+                android:visibility="gone"
+                android:contentDescription="btnDelete"/>
+
+            <ImageButton
+                android:id="@+id/btnRecord"
+                android:layout_width="66dp"
+                android:background="@drawable/ic_record"
+                android:onClick="btnRecordPressed"
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="30dp"
+                android:layout_height="66dp"
+                android:contentDescription="btnRecord"/>
+
+            <ImageButton
+                android:id="@+id/btnStop"
+                android:layout_width="66dp"
+                android:visibility="gone"
+                android:background="@drawable/ic_record"
+                android:onClick="btnStopPressed"
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="30dp"
+                android:layout_height="66dp"
+                android:contentDescription="btnStop"/>
+
+            <ImageButton
+                android:id="@+id/btnResume"
+                android:layout_width="66dp"
+                android:visibility="gone"
+                android:background="@drawable/ic_record"
+                android:onClick="btnResumePressed"
+                android:layout_marginStart="30dp"
+                android:layout_marginEnd="30dp"
+                android:layout_height="66dp"
+                android:contentDescription="btnResume"/>
+
+            <ImageButton
+                android:id="@+id/btnList"
+                android:layout_width="@dimen/btn_size"
+                android:src="@drawable/ic_list"
+                android:background="@drawable/ic_ripple"
+                android:layout_height="@dimen/btn_size"
+                android:contentDescription="btnList"/>
+
+            <ImageButton
+                android:id="@+id/btnSave"
+                android:visibility="gone"
+                android:layout_width="@dimen/btn_size"
+                android:onClick="btnSavePressed"
+                android:src="@drawable/ic_done"
+                android:background="@drawable/ic_ripple"
+                android:layout_height="@dimen/btn_size"/>
+        </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <View
+        android:id="@+id/bottomSheetBG"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/opaqueBG"/>
+
+    <include layout="@layout/bottom_popup"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

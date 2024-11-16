@@ -8,6 +8,7 @@ service SoundService {
     rpc TestConnection(TextMessage) returns (TextMessage) {};
     rpc SendSoundFile(SoundRequest) returns (SoundResponse) {};
     rpc StreamSoundFile(stream SoundRequest) returns (stream SoundStreamResponse);
+    rpc DiarizateSpeakers(SoundRequest) returns (stream SpeakerAndLine);
 }
 
 message SoundRequest {
@@ -27,3 +28,9 @@ message SoundStreamResponse {
     string text = 5;
     repeated string flags = 6;
 }
+
+message SpeakerAndLine {
+    string text = 7;
+    string speakerName = 8;
+}
+

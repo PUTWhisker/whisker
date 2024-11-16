@@ -32,3 +32,11 @@ class SoundStreamResponse(_message.Message):
     text: str
     flags: _containers.RepeatedScalarFieldContainer[str]
     def __init__(self, text: _Optional[str] = ..., flags: _Optional[_Iterable[str]] = ...) -> None: ...
+
+class SpeakerAndLine(_message.Message):
+    __slots__ = ("text", "speakerName")
+    TEXT_FIELD_NUMBER: _ClassVar[int]
+    SPEAKERNAME_FIELD_NUMBER: _ClassVar[int]
+    text: str
+    speakerName: str
+    def __init__(self, text: _Optional[str] = ..., speakerName: _Optional[str] = ...) -> None: ...

@@ -54,6 +54,11 @@ class SoundServiceStub(object):
                 request_serializer=sound__transfer__pb2.SoundRequest.SerializeToString,
                 response_deserializer=sound__transfer__pb2.SoundStreamResponse.FromString,
                 _registered_method=True)
+        self.DiarizateSpeakers = channel.unary_stream(
+                '/SoundService/DiarizateSpeakers',
+                request_serializer=sound__transfer__pb2.SoundRequest.SerializeToString,
+                response_deserializer=sound__transfer__pb2.SpeakerAndLine.FromString,
+                _registered_method=True)
 
 
 class SoundServiceServicer(object):
@@ -77,6 +82,12 @@ class SoundServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def DiarizateSpeakers(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_SoundServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -94,6 +105,11 @@ def add_SoundServiceServicer_to_server(servicer, server):
                     servicer.StreamSoundFile,
                     request_deserializer=sound__transfer__pb2.SoundRequest.FromString,
                     response_serializer=sound__transfer__pb2.SoundStreamResponse.SerializeToString,
+            ),
+            'DiarizateSpeakers': grpc.unary_stream_rpc_method_handler(
+                    servicer.DiarizateSpeakers,
+                    request_deserializer=sound__transfer__pb2.SoundRequest.FromString,
+                    response_serializer=sound__transfer__pb2.SpeakerAndLine.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -177,6 +193,33 @@ class SoundService(object):
             '/SoundService/StreamSoundFile',
             sound__transfer__pb2.SoundRequest.SerializeToString,
             sound__transfer__pb2.SoundStreamResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DiarizateSpeakers(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/SoundService/DiarizateSpeakers',
+            sound__transfer__pb2.SoundRequest.SerializeToString,
+            sound__transfer__pb2.SpeakerAndLine.FromString,
             options,
             channel_credentials,
             insecure,

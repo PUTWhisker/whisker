@@ -16,122 +16,139 @@ from proto import sound_transfer_pb2
 
 sys.path.insert(0, curDir)
 
-_cleanup_coroutines = [] # Needed for asyncio graceful shutdown
+_cleanup_coroutines = []  # Needed for asyncio graceful shutdown
+
 
 # Read user's input flags and arguments
 def parse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-            prog='Whisper Wrapper',
-            description='Simple speach-to-text console application')
+        prog="Whisper Wrapper", description="Simple speach-to-text console application"
+    )
 
     parser.add_argument(
-            '--record',
-            action='store_true',
-            help="Set true to record audio from microphone, false to input audio file")
-    
-    parser.add_argument(
-            '--local',
-            action='store_true',
-            help="Use this flag to use local Whisper server")
-    
-    parser.add_argument(
-            '--language',
-            type=str,
-            default=None,
-            choices=sorted(list(dicts.LANGUAGES)) + sorted(list(dicts.LANGUAGES.values())),
-            help="Set it to the audio language")
-    
-    parser.add_argument(
-            '--model',
-            type=str,
-            default='small',
-            choices=dicts.MODELS,
-            help="Set it to the desired Whisper model")
-    
-    parser.add_argument(
-            '--save',
-            type=str,
-            default="",
-            metavar="file_path",
-            help="Use this flag to save recorded file on your machine")
-    
-    parser.add_argument(
-            '--host',
-            type=str,
-            default="127.0.0.1",
-            metavar="APIserver IP",
-            help="Set it to the server's IP address (only available when using --local flag)")
+        "--record",
+        action="store_true",
+        help="Set true to record audio from microphone, false to input audio file",
+    )
 
     parser.add_argument(
-            '--port',
-            type=str,
-            default=50051,
-            metavar="",
-            help="Set it to the server's listening port number (only aviable when using --local flag)")
-    
+        "--local", action="store_true", help="Use this flag to use local Whisper server"
+    )
+
     parser.add_argument(
-            '--trans',
-            type=str,
-            default=None,
-            help="Use this flag to enable translation and set translation language")
-    
+        "--language",
+        type=str,
+        default=None,
+        choices=sorted(list(dicts.LANGUAGES)) + sorted(list(dicts.LANGUAGES.values())),
+        help="Set it to the audio language",
+    )
+
     parser.add_argument(
-            'fileName',
-            nargs='?',
-            default=None,
-            help='File to be transcripted')
-    
+        "--model",
+        type=str,
+        default="small",
+        choices=dicts.MODELS,
+        help="Set it to the desired Whisper model",
+    )
+
     parser.add_argument(
-            '--version', '-v',
-            action="version",
-            version='%(prog)s - Version 0.1')
-    
+        "--save",
+        type=str,
+        default="",
+        metavar="file_path",
+        help="Use this flag to save recorded file on your machine",
+    )
+
+    parser.add_argument(
+        "--host",
+        type=str,
+        default="127.0.0.1",
+        metavar="APIserver IP",
+        help="Set it to the server's IP address (only available when using --local flag)",
+    )
+
+    parser.add_argument(
+        "--port",
+        type=str,
+        default=50051,
+        metavar="",
+        help="Set it to the server's listening port number (only aviable when using --local flag)",
+    )
+
+    parser.add_argument(
+        "--trans",
+        type=str,
+        default=None,
+        help="Use this flag to enable translation and set translation language",
+    )
+
+    parser.add_argument(
+        "fileName", nargs="?", default=None, help="File to be transcripted"
+    )
+
+    parser.add_argument(
+        "--version", "-v", action="version", version="%(prog)s - Version 0.1"
+    )
+    parser.add_argument(
+        "--diarizate",
+        action="store_true",
+        help="Use this flag to enable speaker diarization",
+    )
+
     return parser
 
 
-async def handleException(e:Exception):
-	print(f'An exception occured: {type(e)}: {e}')
-	pass
+# async def handleException(e: Exception):
+#     print(f"An exception occured: {type(e)}: {e}")
+#     pass
 
 
 async def main(parser: argparse.ArgumentParser):
-	try:
-		args = parser.parse_args()
+    try:
+        args = parser.parse_args()
+        # read server's details
+        if args.local:
+            logging.info("local option")
+            host = args.host
+            port = args.port
+        else:
+            logging.info("server option")
+            host = "100.80.80.156"  # Here insert pp server address
+            port = args.port
 
-    #read server's details
-		if (args.local):
-			logging.info("local option")
-			host = args.host
-			port = args.port
-		else:
-			logging.info("server option")
-			host = "100.80.80.156" # Here insert pp server address
-			port = args.port
+        # Check if file exists if it was passed as an argument
+        if args.fileName is not None:
+            if not os.path.isfile(args.fileName):
+                logging.error("Incorrect file name.")
+                return
 
-		# Check if file exists if it was passed as an argument
-		if (args.fileName is not None):
-			if (not os.path.isfile(args.fileName)):
-				logging.error("Incorrect file name.")
-				return
+        # Innitiate connection with the server
+        console = ConsolePrinter(
+            host, port, args.language, args.model, args.save, args.trans
+        )
+        if not await console.startApp():
+            return
 
-		# Innitiate connection with the server
-		console = ConsolePrinter(host, port, args.language, args.model, args.save, args.trans)
-		if not await console.startApp():
-			return
-
-		if (args.fileName is not None): # If there is a valid audio file as an argument, initiate SendSoundFile method
-			with open(args.fileName, 'rb') as file:
-				audio = file.read() # read audio as bytes
-			await console.sendFile(audio)
-		elif (args.record): # If there is a record flag, initiate StreamSoundFile method (app can't do both, record and translate file)
-			await console.record()
-		else: # No action specified by the user
-			print("You have to specify an action (supply an audio file/initiate recording).")
-			return
-	except Exception as e:
-		await handleException(e)
-	return
-
+        if (
+            args.fileName is not None
+        ):  # If there is a valid audio file as an argument, initiate SendSoundFile method
+            with open(args.fileName, "rb") as file:
+                audio = file.read()  # read audio as bytes
+            if args.diarizate:
+                await console.diarizateSpeakers(audio)
+            else:
+                await console.sendFile(audio)
+        elif args.record:  # If there is a record flag, initiate StreamSoundFile method (app can't do both, record and translate file)
+            await console.record()
+        else:  # No action specified by the user
+            print(
+                "You have to specify an action (supply an audio file/initiate recording)."
+            )
+            return
+    except Exception as e:
+        raise e
+        # await handleException(e)
+    return
 
 
 if __name__ == "__main__":
@@ -145,9 +162,3 @@ if __name__ == "__main__":
     finally:
         loop.run_until_complete(asyncio.gather(*_cleanup_coroutines))
         loop.close()
-	
-    
-    
-
-
-
