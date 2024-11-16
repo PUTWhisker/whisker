@@ -16,6 +16,8 @@ from proto import sound_transfer_pb2
 
 sys.path.insert(0, curDir)
 
+_cleanup_coroutines = [] # Needed for asyncio graceful shutdown
+
 # Read user's input flags and arguments
 def parse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -87,44 +89,63 @@ def parse() -> argparse.ArgumentParser:
     return parser
 
 
+async def handleException(e:Exception):
+	print(f'An exception occured: {type(e)}: {e}')
+	pass
+
+
 async def main(parser: argparse.ArgumentParser):
-    args = parser.parse_args()
+	try:
+		args = parser.parse_args()
 
     #read server's details
-    if (args.local):
-        logging.info("local option")
-        host = args.host
-        port = args.port
-    else:
-        logging.info("server option")
-        host = "100.80.80.156" # Here insert pp server address
-        port = args.port
+		if (args.local):
+			logging.info("local option")
+			host = args.host
+			port = args.port
+		else:
+			logging.info("server option")
+			host = "100.80.80.156" # Here insert pp server address
+			port = args.port
 
-    # Check if file exists if it was passed as an argument
-    if (args.fileName is not None):
-        if (not os.path.isfile(args.fileName)):
-            logging.error("Incorrect file name.")
-            return
+		# Check if file exists if it was passed as an argument
+		if (args.fileName is not None):
+			if (not os.path.isfile(args.fileName)):
+				logging.error("Incorrect file name.")
+				return
 
-    # Innitiate connection with the server
-    console = ConsolePrinter(host, port, args.language, args.model, args.save, args.trans)
-    if not await console.startApp():
-       return
+		# Innitiate connection with the server
+		console = ConsolePrinter(host, port, args.language, args.model, args.save, args.trans)
+		if not await console.startApp():
+			return
 
-    if (args.fileName is not None): # If there is a valid audio file as an argument, initiate SendSoundFile method
-        with open(args.fileName, 'rb') as file:
-            audio = file.read() # read audio as bytes
-        await console.sendFile(audio)
-    elif (args.record): # If there is a record flag, initiate StreamSoundFile method (app can't do both, record and translate file)
-        await console.record()
-    else: # No action specified by the user
-        return
+		if (args.fileName is not None): # If there is a valid audio file as an argument, initiate SendSoundFile method
+			with open(args.fileName, 'rb') as file:
+				audio = file.read() # read audio as bytes
+			await console.sendFile(audio)
+		elif (args.record): # If there is a record flag, initiate StreamSoundFile method (app can't do both, record and translate file)
+			await console.record()
+		else: # No action specified by the user
+			print("You have to specify an action (supply an audio file/initiate recording).")
+			return
+	except Exception as e:
+		await handleException(e)
+	return
 
 
 
 if __name__ == "__main__":
     parser = parse()
-    asyncio.run(main(parser))
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        loop.run_until_complete(main(parser))
+    except KeyboardInterrupt:
+        logging.info("Detected keyboard interruption, shutting down...")
+    finally:
+        loop.run_until_complete(asyncio.gather(*_cleanup_coroutines))
+        loop.close()
+	
     
     
 

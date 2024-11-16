@@ -26,12 +26,14 @@ class ConsolePrinter:
             try:
                 return await func(*args, **kwargs)
             except grpc.RpcError as grpcError:
-                logging.error(f'Grpc connection failure: {grpcError.details()}') #TODO: when there is implemented secure connection, here handle those exceptions
+                print(f'Grpc connection failure: {grpcError.details()}') #TODO: when there is implemented secure connection, here handle those exceptions
+                return
             except Exception as e:
-                logging.error(f'This is an unhandled exception: {e}')
+                print(f'This is an unhandled exception: {e}')
+                return
             finally:
                 end = time.time()
-                logging.info(f'Execution time: {end - start}')
+                print(f'Execution time: {end - start}')
         return wrapper
     
 
@@ -47,10 +49,10 @@ class ConsolePrinter:
         await conTask
         connected = conTask.result()
         if connected.text != seed: # Unsuccessful if server returned different number
-            logging.error("Problem connecting to the server")
+            print("Problem connecting to the server")
             return False
         
-        logging.info("Connected to the server!")
+        print("Connected to the server!")
         return True
     
 

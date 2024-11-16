@@ -44,8 +44,8 @@ class GrpcClient:
             response = await self.stub.TestConnection( # sending generated number
                             Variables.TextMessage(text=seed))
             return response
-        except (grpc.RpcError, Exception):
-            raise
+        except Exception as e:
+            raise e
 
 
     async def sendSoundFile(self, audioFile: bytes) -> Union[bool, grpc.RpcError]:
@@ -56,8 +56,8 @@ class GrpcClient:
                     sound_data=audioFile,
                     flags=None), metadata=metadata) # Sending audio file to transcribe
             return response
-        except (grpc.RpcError, Exception):
-            raise
+        except Exception as e:
+            raise e
 
 
     async def streamSoundFile(self)  -> Union[bool, grpc.RpcError]:

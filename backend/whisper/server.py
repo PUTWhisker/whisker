@@ -138,8 +138,8 @@ async def server():
     server = grpc.aio.server(
     futures.ThreadPoolExecutor(max_workers=10),
     options=[
-        ('grpc.max_send_message_length', 50 * 1024 * 1024),  # 50MB
-        ('grpc.max_receive_message_length', 50 * 1024 * 1024)  # 50MB
+        ('grpc.max_send_message_length', 1 * 1024 * 1024),  # 50MB
+        ('grpc.max_receive_message_length', 1 * 1024 * 1024)  # 50MB
     ]
 )
     sound_transfer_pb2_grpc.add_SoundServiceServicer_to_server(SoundService(), server)
