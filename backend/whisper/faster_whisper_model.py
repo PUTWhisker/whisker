@@ -106,10 +106,12 @@ class FasterWhisperHandler:
     ) -> str:
         filePath = self.preprocessRequest(receivedAudio, data, context)
         if diarizate_speakers:
-            result = self.transcribe(filePath, data.language, data.translate)
-        else:
             result = self.transcribe(
                 filePath, data.language, data.translate, return_fragments=True
+            )
+        else:
+            result = self.transcribe(
+                filePath, data.language, data.translate, return_fragments=False
             )
         return result
 

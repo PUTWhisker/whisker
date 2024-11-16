@@ -98,9 +98,9 @@ def parse() -> argparse.ArgumentParser:
     return parser
 
 
-async def handleException(e: Exception):
-    print(f"An exception occured: {type(e)}: {e}")
-    pass
+# async def handleException(e: Exception):
+#     print(f"An exception occured: {type(e)}: {e}")
+#     pass
 
 
 async def main(parser: argparse.ArgumentParser):
@@ -146,7 +146,8 @@ async def main(parser: argparse.ArgumentParser):
             )
             return
     except Exception as e:
-        await handleException(e)
+        raise e
+        # await handleException(e)
     return
 
 

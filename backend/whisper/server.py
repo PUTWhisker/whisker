@@ -7,7 +7,6 @@ import asyncio
 import logging
 import os
 import diarizate
-import preprocess
 import concurrent.futures
 import sys
 import inspect
@@ -46,7 +45,10 @@ def _errorMessages(e: Exception, func: callable):
 
 def run_transcribe(file_path):
     model = faster_whisper_model.FasterWhisperHandler()
-    return model.transcribe(str(file_path), return_fragments=True)
+    # return model.transcribe(str(file_path), return_fragments=True)
+    return model.transcribe(
+        str(file_path), language="pl", translationLanguage="pl", return_fragments=True
+    )
 
 
 class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
@@ -98,7 +100,8 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
         return wrapper
 
     async def DiarizateSpeakers(self, request, context):
-        file_path = preprocess.saveFile(request.sound_data, False)
+        transcriptionData = TranscriptionData(audio=request.sound_data)
+        file_path = transcriptionData.saveFile()
         out = []
         try:
             with concurrent.futures.ProcessPoolExecutor() as executor:
@@ -109,15 +112,6 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
                     ),
                 }
                 concurrent.futures.wait(futures.values())
-
-                print("Transcription")
-                for item in futures["transcribe"].result():
-                    print(item)
-
-                print("Diarization")
-                for item in futures["diarize"].result():
-                    print(item)
-
                 out = diarizate.combine(
                     futures["transcribe"].result(), futures["diarize"].result()
                 )
@@ -141,7 +135,7 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
         transcriptionData = TranscriptionData()
         try:
             result = await self.fastModel.handleFile(
-                request.sound_data, transcriptionData, context
+                request.sound_data, transcriptionData, context, diarizate_speakers=False
             )
         except Exception as e:
             if (
@@ -149,6 +143,8 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
             ):  # To ensure tempFile gets deleted even when error occurs
                 transcriptionData.filePath.unlink()
             raise e
+        print(result)
+        print(type(result))
         return sound_transfer_pb2.SoundResponse(text=result)
 
     @_errorStreamHandler  # TODO: Resolve async_generator problem to add errorHandler
@@ -184,8 +180,8 @@ async def server():
     server = grpc.aio.server(
         futures.ThreadPoolExecutor(max_workers=10),
         options=[
-            ("grpc.max_send_message_length", 1 * 1024 * 1024),  # 50MB
-            ("grpc.max_receive_message_length", 1 * 1024 * 1024),  # 50MB
+            ("grpc.max_send_message_length", 50 * 1024 * 1024),  # 50MB
+            ("grpc.max_receive_message_length", 50 * 1024 * 1024),  # 50MB
         ],
     )
     sound_transfer_pb2_grpc.add_SoundServiceServicer_to_server(SoundService(), server)
