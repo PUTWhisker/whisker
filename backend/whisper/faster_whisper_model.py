@@ -6,24 +6,24 @@ from translate import Translator
 import grpc
 import logging
 import time
+import os
 from diarizate import Clip
-
-
-model_size = "tiny"
-
 
 class FasterWhisperHandler:
     model = None
 
     def __init__(
         self,
+        whisperSize:str,
+        translator:str
     ):
+        self.whisperSize = whisperSize
         super(FasterWhisperHandler, self).__init__()
         self.model = WhisperModel(
-            model_size, device="cpu", compute_type="float32", cpu_threads=8
+            self.whisperSize, device="cpu", compute_type="float32", cpu_threads=8
         )
         self.silenceLength = 1.5
-        self.translator = Translator()
+        self.translator = Translator(translator)
 
     def preprocessStreaming(
         self,

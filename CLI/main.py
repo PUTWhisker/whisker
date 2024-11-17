@@ -87,12 +87,20 @@ def parse() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "--version", "-v", action="version", version="%(prog)s - Version 0.1"
-    )
-    parser.add_argument(
         "--diarizate",
         action="store_true",
         help="Use this flag to enable speaker diarization",
+    )
+
+    parser.add_argument(
+        "--username",
+        type=str,
+        default=None,
+        help="Use this to retreive JWT token (first login attempt)"
+    )
+
+    parser.add_argument(
+        "--version", "-v", action="version", version="%(prog)s - Version 0.1"
     )
 
     return parser
@@ -128,6 +136,9 @@ async def main(parser: argparse.ArgumentParser):
         )
         if not await console.startApp():
             return
+
+        if args.username is not None:
+            await console.retreiveToken(args.username)
 
         if (
             args.fileName is not None

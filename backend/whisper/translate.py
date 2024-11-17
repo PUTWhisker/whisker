@@ -1,10 +1,11 @@
 from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
+import os
 
 class Translator:
 
-    def __init__(self):
-        self.model = M2M100ForConditionalGeneration.from_pretrained("facebook/m2m100_418M")
-        self.tokenizer = M2M100Tokenizer.from_pretrained("facebook/m2m100_418M")
+    def __init__(self, model:str):
+        self.model = M2M100ForConditionalGeneration.from_pretrained(model)
+        self.tokenizer = M2M100Tokenizer.from_pretrained(model)
 
 
     def translate(self, inputText: str, sourceLanguage: str, targetLanguage: str) -> str:
