@@ -6,11 +6,20 @@ import sys
 import grpc
 
 curDir = os.path.dirname(__file__)
-protoDir = os.path.join(curDir, "proto")
+protoDir = os.path.join(curDir, "proto/sound_transfer")
 sys.path.insert(0, protoDir)
 
-from proto import sound_transfer_pb2_grpc as Services
-from proto import sound_transfer_pb2 as Variables
+from proto.sound_transfer import sound_transfer_pb2_grpc as Services
+from proto.sound_transfer import sound_transfer_pb2 as Variables
+
+sys.path.insert(0, curDir)
+curDir = os.path.dirname(__file__)
+protoDir = os.path.join(curDir, "proto/authentication")
+sys.path.insert(0, protoDir)
+
+from proto.authentication import authentication_pb2_grpc
+from proto.authentication import authentication_pb2
+
 
 sys.path.insert(0, curDir)
 
@@ -77,8 +86,8 @@ class GrpcClient:
             )
             async for response in responseIter:
                 print(f"{response.speakerName}: {response.text}")
-        except (grpc.RpcError, Exception):
-            raise
+        except Exception as e:
+            raise e
 
     async def streamSoundFile(self) -> Union[bool, grpc.RpcError]:
         transcription, iter = [""], 0
@@ -101,9 +110,54 @@ class GrpcClient:
                     iter += 1
                     transcription.append("")
                     print()
+        except Exception as e:
+            raise e
 
-        except (grpc.RpcError, Exception):
-            raise
+
+    async def retreiveJWT(self, username:str, password:str) -> Union[bool, grpc.RpcError]:
+        try:
+            stub = authentication_pb2_grpc.ClientServiceStub(
+                self.channel
+            )
+            tokenJWT = await stub.Login(
+                authentication_pb2.UserCredits(username=username, password=password),
+            )
+            return tokenJWT
+        except Exception as e:
+            raise e
+    
+    
+    async def register(self, username:str, password:str) -> Union[bool, grpc.RpcError]:
+        try:
+            stub = authentication_pb2_grpc.ClientServiceStub(
+                self.channel
+            )
+            tokenJWT = await stub.GetTranslation(
+                authentication_pb2.UserCredits(username=username, password=password),
+            )
+            return tokenJWT
+        except Exception as e:
+            raise e
+        
+    
+    async def getTranslation(self, JWT:str) -> Union[list, grpc.RpcError]:
+        try:
+            stub = authentication_pb2_grpc.ClientServiceStub(
+                self.channel
+            )
+            metadata = (
+                ("jwt", JWT),
+            )
+            transcriptions = stub.GetTranslation(
+                authentication_pb2.Empty(),
+                metadata=metadata
+            )
+            res = list()
+            async for transcription in transcriptions:
+                res.append(transcription)
+            return res
+        except Exception as e:
+            raise e
 
 
 # python -m grpc_tools.protoc -I ./proto --python_out=./proto/ --pyi_out=./proto/ --grpc_python_out=./proto/ ./proto/sound_transfer.proto

@@ -1,5 +1,6 @@
 from grpcClient import GrpcClient
 from getpass import getpass
+from dotenv import load_dotenv, set_key
 
 import random
 import asyncio
@@ -8,7 +9,8 @@ import time
 import logging
 import os
 
-
+class LoginFailure(Exception):
+    pass
 
 class ConsolePrinter:
     def __init__(
@@ -87,12 +89,53 @@ class ConsolePrinter:
         script = sendTask.result()  # Received transcribed text
         print(script)
 
-    @_errorHandler
-    async def retreiveToken(self, username:str):
-        password = getpass(f"{username}'s password: ")
-        print(password)
+
+    async def register(self):
+        username = input("Enter your new username: ")
+        while True:
+            password1 = getpass("Enter your password: ")
+            password2 = getpass("Enter your password again: ")
+            if password1 == password2:
+                break
+            else:
+                print("Password mismatch, please try again.")
+        registered = await self.grpcClient.register(username, password1)
+        if not registered.successful:
+            print(registered.error)
+            raise LoginFailure
+        print("Successfully registered your account!")
+        return
             
-    
+
+    async def retreiveToken(self, username:str):
+        if os.getenv("JWT_TOKEN") == "":
+            password = getpass(f"{username}'s password: ")
+            env = ".env"
+            load_dotenv(env)
+            newTokenJWT = await self.grpcClient.retreiveJWT(username, password)
+            print(newTokenJWT.JWT)
+            print(newTokenJWT.successful)
+            if not newTokenJWT.successful:
+                raise LoginFailure
+            print("Successfully logged into your account!")
+            print(newTokenJWT.JWT)
+            set_key(env, "JWT_TOKEN", newTokenJWT.JWT)
+        else:
+            print("You already have retreived a token. Clear env file if you want to retreive a different one.")
+
+
+    async def getTranslation(self):
+        env = ".env"
+        load_dotenv(env)
+        token = os.getenv("JWT_TOKEN")
+        if token != "":
+            transcriptions = await self.grpcClient.getTranslation(token)
+        else:
+            print("Login into your account first!")
+        print(transcriptions)
+        return
+
+
     @_errorHandler
     async def record(self):
         await self.grpcClient.streamSoundFile()  # Initiate streaming file async
