@@ -1,6 +1,7 @@
 from concurrent import futures
 from threading import Thread
 from transcrpitionData import TranscriptionData, WrongLanguage
+from dotenv import load_dotenv
 import faster_whisper_model
 import grpc
 import asyncio
@@ -54,7 +55,10 @@ def run_transcribe(file_path):
 class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
     def __init__(self):
         self.number = 0
-        self.fastModel = faster_whisper_model.FasterWhisperHandler()
+        self.fastModel = faster_whisper_model.FasterWhisperHandler(
+            os.getenv("FASTER_WHISPER_MODEL"),
+            os.getenv("M2M100_MODEL")
+        )
         try:
             os.mkdir("tempFiles")
         except FileExistsError:
@@ -176,12 +180,13 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
 
 
 async def server():
-    port = "7070"
+    load_dotenv()
+    port = os.getenv("SERVER_PORT")
     server = grpc.aio.server(
         futures.ThreadPoolExecutor(max_workers=10),
         options=[
-            ("grpc.max_send_message_length", 50 * 1024 * 1024),  # 50MB
-            ("grpc.max_receive_message_length", 50 * 1024 * 1024),  # 50MB
+            ("grpc.max_send_message_length", os.getenv("MAX_FILE_MB") * 1024 * 1024),  # 50MB
+            ("grpc.max_receive_message_length", os.getenv("MAX_FILE_MB") * 1024 * 1024),  # 50MB
         ],
     )
     sound_transfer_pb2_grpc.add_SoundServiceServicer_to_server(SoundService(), server)

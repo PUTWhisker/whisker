@@ -1,10 +1,13 @@
 from grpcClient import GrpcClient
+from getpass import getpass
 
 import random
 import asyncio
 import grpc
 import time
 import logging
+import os
+
 
 
 class ConsolePrinter:
@@ -71,7 +74,7 @@ class ConsolePrinter:
         script = sendTask.result()  # Received transcribed text
         print(script)
 
-    # @_errorHandler
+    @_errorHandler
     async def diarizateSpeakers(self, audio: bytes):
         sendTask = asyncio.create_task(
             self.grpcClient.diarizateSpeakers(audio)
@@ -84,6 +87,12 @@ class ConsolePrinter:
         script = sendTask.result()  # Received transcribed text
         print(script)
 
+    @_errorHandler
+    async def retreiveToken(self, username:str):
+        password = getpass(f"{username}'s password: ")
+        print(password)
+            
+    
     @_errorHandler
     async def record(self):
         await self.grpcClient.streamSoundFile()  # Initiate streaming file async
