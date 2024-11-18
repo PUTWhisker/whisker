@@ -1,8 +1,28 @@
+# Python files
 *venv
 *__pycache__/
-soundFiles
-.env
+
+# Whisper server audio temp files
+tempFiles
+
+# node.js libraries
+node_modules/
+
+# Webpack generated code
+dist/
+
+# Generated Whisper models
+*.pth
+
+# Public/Private keys
+*.pem
+
+# Auto generated Mac/vscode files
 .DS_Store
 .vscode
-*.pem
-*.pth
+
+# Just env
+.env
+
+
+

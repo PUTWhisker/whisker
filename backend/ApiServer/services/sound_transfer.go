@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
@@ -18,8 +17,8 @@ import (
 
 type SoundServer struct {
 	SoundFileStoragePath string
-	DbPool               *pgxpool.Pool
 	pb.UnimplementedSoundServiceServer
+	Db UserDbModel
 }
 
 var whisperPort string = os.Getenv("WHISPER_SERVER") + ":7070"
@@ -46,42 +45,40 @@ func (s *SoundServer) TestConnection(ctx context.Context, in *pb.TextMessage) (*
 	return &pb.TextMessage{Text: in.GetText()}, nil
 }
 
-func SaveTextToHistory(text string, username string, pool *pgxpool.Pool) {
-	fmt.Println("Here")
-	_, err := pool.Exec(context.Background(), `
-    INSERT INTO transcription(app_user_id, content) 
-    VALUES ((SELECT id FROM app_user WHERE email = $1), $2);
-	`, username, text)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 func (s *SoundServer) SendSoundFile(ctx context.Context, in *pb.SoundRequest) (*pb.SoundResponse, error) {
 	log.Printf("Received: sound file")
-	res, err := WhisperServer.SendSoundFile(context.TODO(), in)
-	if err != nil {
-		return res, err
-	}
 
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.Errorf(codes.DataLoss, "Failed to get metadata")
 	}
+	newCtx := metadata.NewOutgoingContext(context.Background(), md)
+	res, err := WhisperServer.SendSoundFile(newCtx, in)
+	if err != nil {
+		return res, err
+	}
 	username, err := GetUserNameFromMetadata(md)
+
 	if err != nil {
 		return nil, err
 	}
 
-	if username != "" {
-		SaveTextToHistory(res.Text, username, s.DbPool)
+	if username != "" && s.Db != nil {
+		s.Db.saveTranscription(res.Text, username)
 	}
 
 	return res, nil
 }
 
 func (s *SoundServer) StreamSoundFile(stream pb.SoundService_StreamSoundFileServer) error {
-	whisperStream, _ := WhisperServer.StreamSoundFile(context.TODO())
+	md, ok := metadata.FromIncomingContext(stream.Context())
+	fmt.Println(md)
+	if !ok {
+		return status.Errorf(codes.DataLoss, "Failed to get metadata")
+	}
+	newCtx := metadata.NewOutgoingContext(context.Background(), md)
+	fmt.Println(newCtx)
+	whisperStream, _ := WhisperServer.StreamSoundFile(newCtx)
 	errChannel := make(chan error)
 
 	go func(whisperStream pb.SoundService_StreamSoundFileClient, errChannel chan error) {
@@ -93,7 +90,6 @@ func (s *SoundServer) StreamSoundFile(stream pb.SoundService_StreamSoundFileServ
 			}
 			if err != nil {
 				errChannel <- err
-				panic("Whisper server error")
 			}
 			stream.Send(whisperTranscription)
 		}
@@ -113,6 +109,7 @@ func (s *SoundServer) StreamSoundFile(stream pb.SoundService_StreamSoundFileServ
 			return err
 		}
 		if err := whisperStream.Send(in); err != nil {
+			log.Println(err)
 			return err
 		}
 		select {

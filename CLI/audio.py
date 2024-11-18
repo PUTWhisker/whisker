@@ -1,10 +1,18 @@
 
-import sound_transfer_pb2_grpc as Services
-import sound_transfer_pb2 as Variables
 import pyaudio
 import asyncio
 import logging
 import wave
+import os
+import sys
+
+curDir = os.path.dirname(__file__)
+protoDir = os.path.join(curDir, "proto")
+sys.path.insert(0, protoDir)
+
+from proto import sound_transfer_pb2 as Variables
+
+sys.path.insert(0, curDir)
 
 
 class AudioRecorder():
@@ -35,7 +43,8 @@ class AudioRecorder():
                 await asyncio.sleep(0) # Check if while in record is ready to execute (probeTime has passed)
 
         except KeyboardInterrupt:
-            logging.info("Detected interruption, ending recording.")
+            # logging.info("Detected interruption, ending recording.") TODO: Figure out how to print it nicely
+            print()
             stream.stop_stream()
             stream.close()
             p.terminate()

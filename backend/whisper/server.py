@@ -1,88 +1,211 @@
 from concurrent import futures
-from time import sleep
-from threading import Thread
-
-import sound_transfer_pb2_grpc as Services
-import sound_transfer_pb2 as Variables
+from transcrpitionData import TranscriptionData, WrongLanguage
+from dotenv import load_dotenv
 import faster_whisper_model
 import grpc
 import asyncio
 import logging
 import os
+import diarizate
+import concurrent.futures
+import sys
+import inspect
+
+curDir = os.path.dirname(__file__)
+protoDir = os.path.join(curDir, "proto")
+sys.path.insert(0, protoDir)
+
+from proto import sound_transfer_pb2_grpc
+from proto import sound_transfer_pb2
+
+sys.path.insert(0, curDir)
+
+"""
+    Including proto libraries from proto folder. Have to change system directory, as sound_transfer_pb2_grpc imports sound_transfer_pb2 within itself,
+    and there will be error as sound_transfer_pb2 is in a different directory than executable file (server.py). Another solution would be changing import line in
+    sound_transfer_pb2_grpc, but would have to do that every time proto file is changed
+"""
+
+logging.basicConfig(format="%(levelname)s:%(name)s:%(message)s", level=logging.INFO)
+_cleanup_coroutines = []  # Needed for asyncio graceful shutdown
 
 
-_cleanup_coroutines = []
+def _errorMessages(e: Exception, func: callable):
+    if isinstance(e, FileNotFoundError):
+        errorCode = grpc.StatusCode.INTERNAL
+        errorMessage = "There was an internal error when saving your audio file."
+    if isinstance(e, WrongLanguage):
+        errorCode = grpc.StatusCode.INVALID_ARGUMENT
+        errorMessage = "Supplied translate language is not currently supported."
+    else:  # TODO: Debug and change for real error messages
+        errorCode = grpc.StatusCode.INTERNAL
+        errorMessage = f"An error occured while executing {func} function: {e} <Error type: {type(e)}>"
+    return errorCode, errorMessage
 
-class SoundService(Services.SoundServiceServicer):
 
+def run_transcribe(file_path):
+    model = faster_whisper_model.FasterWhisperHandler(
+        os.getenv("FASTER_WHISPER_MODEL"), os.getenv("M2M100_MODEL")
+    )
+    return model.transcribe(
+        str(file_path), language="pl", translationLanguage="pl", return_fragments=True
+    )
+
+
+class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
     def __init__(self):
         self.number = 0
-        self.fastModel = faster_whisper_model.FasterWhisperHandler()
+        self.fastModel = faster_whisper_model.FasterWhisperHandler(
+            os.getenv("FASTER_WHISPER_MODEL"), os.getenv("M2M100_MODEL")
+        )
         try:
             os.mkdir("tempFiles")
         except FileExistsError:
             pass
         except PermissionError:
-            print("Permission denied: Unable to create direcotry tempFiles.")
+            logging.error("Permission denied: Unable to create direcotry tempFiles.")
+        except Exception as e:
+            logging.error(f"An error occurred: {e}")
+
+    def _errorUnaryHandler(func: callable):
+        async def wrapper(*args, **kwargs):
+            try:
+                for arg in args:
+                    if type(arg) is grpc._cython.cygrpc._ServicerContext:
+                        context = arg
+                return await func(*args, **kwargs)
+            except Exception as e:
+                errorCode, errorMessage = _errorMessages(e, func)
+                logging.exception(f"{errorCode}: {errorMessage}")
+                await context.abort(errorCode, errorMessage)
+                return
+
+        return wrapper
+
+    def _errorStreamHandler(func: callable):
+        async def wrapper(*args, **kwargs):
+            try:
+                for arg in args:
+                    if type(arg) is grpc._cython.cygrpc._ServicerContext:
+                        context = arg
+                result = func(*args, **kwargs)
+
+                if inspect.isasyncgen(result):
+                    async for res in result:
+                        yield res
+                return
+            except Exception as e:
+                errorCode, errorMessage = _errorMessages(e, func)
+                logging.exception(f"{errorCode}: {errorMessage}")
+                await context.abort(errorCode, errorMessage)
+                return
+
+        return wrapper
+
+    async def DiarizateSpeakers(self, request, context):
+        transcriptionData = TranscriptionData(audio=request.sound_data)
+        file_path = transcriptionData.saveFile(save_as_wav=False)
+        out = []
+        try:
+            with concurrent.futures.ProcessPoolExecutor() as executor:
+                futures = {
+                    "transcribe": executor.submit(run_transcribe, file_path),
+                    "diarize": executor.submit(
+                        diarizate.diarizate_speakers, str(file_path.resolve())
+                    ),
+                }
+                concurrent.futures.wait(futures.values())
+                out = diarizate.combine(
+                    futures["transcribe"].result(), futures["diarize"].result()
+                )
         except Exception as e:
             print(f"An error occurred: {e}")
+            out = []
+        finally:
+            file_path.unlink()
+        for elem in out:
+            yield sound_transfer_pb2.SpeakerAndLine(
+                text=elem["text"], speakerName=elem["speaker"]
+            )
 
+    @_errorUnaryHandler
+    async def TestConnection(self, request, context):
+        return sound_transfer_pb2.TextMessage(text=request.text)
 
-    def TestConnection(self, request, context):
-        return Variables.TextMessage(text=request.text)
-    
-    
+    @_errorUnaryHandler
     async def SendSoundFile(self, request, context):
-        print("Received audio file.")
-        print(type(request.sound_data)) # <- received audio file
-        print(request.flags) # <- received flags
-        result = await self.fastModel.handleFile(request.sound_data, context, False)
-        return Variables.SoundResponse(text=result)
+        logging.info("Received audio file.")
+        transcriptionData = TranscriptionData()
+        try:
+            result = await self.fastModel.handleFile(
+                request.sound_data, transcriptionData, context, diarizate_speakers=False
+            )
+        except Exception as e:
+            if (
+                transcriptionData.filePath.exists()
+            ):  # To ensure tempFile gets deleted even when error occurs
+                transcriptionData.filePath.unlink()
+            raise e
+        return sound_transfer_pb2.SoundResponse(text=result)
 
-
-    def StreamSoundFile(self, requestIter, context):
+    @_errorStreamHandler  # TODO: Resolve async_generator problem to add errorHandler
+    async def StreamSoundFile(self, requestIter, context):
         logging.info("Received record streaming.")
-        def parse_request():
-            transcription, previousAudio, segment, seconds = [""], b'', 0, 0
-            for request in requestIter:
-                try:
-                    newLine = False
-                    result, transcription, previousAudio, segment, newLine, seconds = self.fastModel.handleRecord(request.sound_data, transcription, previousAudio, segment, seconds, True)
-                except Exception as e:
-                    logging.error(f'Exception caught: {e}')
-                flags=[str(newLine)]
-                # print(flags)
-                yield Variables.SoundStreamResponse(
-                    text=result,
-                    flags=flags
+        transcriptionData = TranscriptionData()
+        transcriptionData.processMetadata(context)
+        async for request in requestIter:
+            transcriptionData.isSilence = False
+            if transcriptionData.curSeconds >= 10:
+                transcriptionData.curSegment += 1
+                transcriptionData.curSeconds = 0
+            try:
+                transcriptionData = await self.fastModel.handleRecord(
+                    request.sound_data, transcriptionData, context
                 )
-        return parse_request()
+                logging.info(transcriptionData.transcription)
+            except Exception as e:
+                if (
+                    transcriptionData.filePath.exists()
+                ):  # To ensure tempFile gets deleted even when error occurs
+                    transcriptionData.filePath.unlink()
+                raise e
+            flags = [str(transcriptionData.isSilence)]
+            yield sound_transfer_pb2.SoundStreamResponse(
+                text=transcriptionData.transcription[transcriptionData.curSegment],
+                flags=flags,
+            )
 
 
 async def server():
-    port = "7070"
+    load_dotenv()
+    port = os.getenv("SERVER_PORT")
     server = grpc.aio.server(
-    futures.ThreadPoolExecutor(max_workers=10),
-    options=[
-        ('grpc.max_send_message_length', 50 * 1024 * 1024),  # 50MB
-        ('grpc.max_receive_message_length', 50 * 1024 * 1024)  # 50MB
-    ]
-)
-    Services.add_SoundServiceServicer_to_server(SoundService(), server)
-    server.add_insecure_port("[::]:" + port) # change to secure later
+        futures.ThreadPoolExecutor(max_workers=10),
+        options=[
+            (
+                "grpc.max_send_message_length",
+                os.getenv("MAX_FILE_MB") * 1024 * 1024,
+            ),  # 50MB
+            (
+                "grpc.max_receive_message_length",
+                os.getenv("MAX_FILE_MB") * 1024 * 1024,
+            ),  # 50MB
+        ],
+    )
+    sound_transfer_pb2_grpc.add_SoundServiceServicer_to_server(SoundService(), server)
+    server.add_insecure_port("[::]:" + port)  # change to secure later
     await server.start()
     try:
-        print("Server started, listening on " + port)
+        logging.info("Server started, listening on " + port)
         await server.wait_for_termination()
     except KeyboardInterrupt:
         await server.stop(5)
-        print("Keybourd interruption detected, server closing...")
+        logging.info("Keybourd interruption detected, server closing...")
     await server.wait_for_termination()
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     try:
