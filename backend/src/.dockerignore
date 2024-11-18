@@ -1,3 +1,0 @@
-.env.example
-*.proto
-*_test.go
