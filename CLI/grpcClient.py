@@ -44,34 +44,20 @@ class GrpcClient:
         self.model = model
         self.save = save
         self.translation = translation
+        self.channel = grpc.aio.insecure_channel(f"{self.host}:{self.port}")
+        self.stub = Services.SoundServiceStub(
+            self.channel
+        )  # Creating server stub, these are reusable
 
     async def initiateConnection(self, seed: str) -> Union[bool, grpc.RpcError]:
         try:
-            self.channel = grpc.aio.insecure_channel(f"{self.host}:{self.port}")
-            self.stub = Services.SoundServiceStub(
-                self.channel
-            )  # Creating server stub, these are reusable
             response = await self.stub.TestConnection(  # sending generated number
                 Variables.TextMessage(text=seed)
             )
             return response
         except Exception as e:
             raise e
-
-    async def sendSoundFile(self, audioFile: bytes) -> Union[bool, grpc.RpcError]:
-        try:
-            metadata = (
-                ("language", self.language),
-                ("translation", self.translation),
-            )
-            response = await self.stub.SendSoundFile(
-                Variables.SoundRequest(sound_data=audioFile, flags=None),
-                metadata=metadata,
-            )  # Sending audio file to transcribe
-            return response
-        except Exception as e:
-            raise e
-
+        
     async def diarizateSpeakers(self, audioFile: bytes) -> Union[bool, grpc.RpcError]:
         try:
             flags = [
@@ -82,10 +68,43 @@ class GrpcClient:
             print(flags)
             # self.language =
             responseIter = self.stub.DiarizateSpeakers(
-                Variables.SoundRequest(sound_data=audioFile, flags=flags),
+                Variables.SoundRequest(sound_data=audioFile, flags=None),
             )
+            res = list()
             async for response in responseIter:
                 print(f"{response.speakerName}: {response.text}")
+                res.append(response)
+            return res
+        except Exception as e:
+            raise e
+
+    async def sendSoundFile(self, audioFile: bytes) -> Union[bool, grpc.RpcError]:
+        try:
+            metadata = (
+                ("language", self.language),
+            )
+            response = await self.stub.SendSoundFile(
+                Variables.SoundRequest(sound_data=audioFile, flags=None),
+                metadata=metadata,
+            )  # Sending audio file to transcribe
+            return response
+        except Exception as e:
+            raise e
+        
+    async def SendSoundFileTranslation(self, audioFile: bytes) -> Union[bool, grpc.RpcError]:
+        try:
+            metadata = (
+                ("language", self.language),
+                ("translation", self.translation),
+            )
+            responseIter = self.stub.SendSoundFileTranslation(
+                Variables.SoundRequest(sound_data=audioFile, flags=None),
+                metadata=metadata,
+            )
+            res = list()
+            async for response in responseIter:
+                res.append(response)
+            return res
         except Exception as e:
             raise e
 
@@ -158,6 +177,3 @@ class GrpcClient:
             return res
         except Exception as e:
             raise e
-
-
-# python -m grpc_tools.protoc -I ./proto --python_out=./proto/ --pyi_out=./proto/ --grpc_python_out=./proto/ ./proto/sound_transfer.proto

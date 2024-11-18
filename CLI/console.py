@@ -62,6 +62,20 @@ class ConsolePrinter:
 
         print("Connected to the server!")
         return True
+    
+    @_errorHandler
+    async def diarizateSpeakers(self, audio: bytes):
+        sendTask = asyncio.create_task(
+            self.grpcClient.diarizateSpeakers(audio)
+        )  # Initiate sending file async
+        dot = 0
+        while not sendTask.done():  # Dot animation until connection task is finished
+            dot = self._waitingAnimation(dot)
+            await asyncio.sleep(0.1)
+        self._waitingAnimation(3)
+        script = sendTask.result()  # Received transcribed text
+        print(script)
+
 
     @_errorHandler
     async def sendFile(self, audio: bytes):
@@ -76,18 +90,12 @@ class ConsolePrinter:
         script = sendTask.result()  # Received transcribed text
         print(script)
 
+
     @_errorHandler
-    async def diarizateSpeakers(self, audio: bytes):
-        sendTask = asyncio.create_task(
-            self.grpcClient.diarizateSpeakers(audio)
-        )  # Initiate sending file async
-        dot = 0
-        while not sendTask.done():  # Dot animation until connection task is finished
-            dot = self._waitingAnimation(dot)
-            await asyncio.sleep(0.1)
-        self._waitingAnimation(3)
-        script = sendTask.result()  # Received transcribed text
-        print(script)
+    async def sendFileTranslation(self, audio: bytes):
+        response = await self.grpcClient.SendSoundFileTranslation(audio)
+        print(f'Audio transcription: {response[0].text}\n')
+        print(f'Audio translation: {response[1].text}\n')
 
 
     async def register(self):

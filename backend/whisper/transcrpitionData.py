@@ -21,7 +21,8 @@ class TranscriptionData():
                  curSeconds:int=0,
                  silenceAudio:bool=False,
                  language:str=None,
-                 translate:str=None
+                 translate:str=None,
+                 diarizate:bool=False
                  ):
         self.transcription = transcription
         self.audio = audio
@@ -32,6 +33,7 @@ class TranscriptionData():
         self.filePath = Path(f'./tempFiles/{uuid.uuid4()}.wav')
         self.translate = translate
         self.language = language
+        self.diarizate = diarizate
 
 
     def appendData(self, receivedAudio:bytes):

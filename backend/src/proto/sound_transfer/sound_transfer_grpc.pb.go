@@ -25,6 +25,8 @@ type SoundServiceClient interface {
 	TestConnection(ctx context.Context, in *TextMessage, opts ...grpc.CallOption) (*TextMessage, error)
 	SendSoundFile(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (*SoundResponse, error)
 	StreamSoundFile(ctx context.Context, opts ...grpc.CallOption) (SoundService_StreamSoundFileClient, error)
+	SendSoundFileTranslation(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (SoundService_SendSoundFileTranslationClient, error)
+	DiarizateSpeakers(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (SoundService_DiarizateSpeakersClient, error)
 }
 
 type soundServiceClient struct {
@@ -84,6 +86,70 @@ func (x *soundServiceStreamSoundFileClient) Recv() (*SoundStreamResponse, error)
 	return m, nil
 }
 
+func (c *soundServiceClient) SendSoundFileTranslation(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (SoundService_SendSoundFileTranslationClient, error) {
+	stream, err := c.cc.NewStream(ctx, &SoundService_ServiceDesc.Streams[1], "/SoundService/SendSoundFileTranslation", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &soundServiceSendSoundFileTranslationClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type SoundService_SendSoundFileTranslationClient interface {
+	Recv() (*SoundStreamResponse, error)
+	grpc.ClientStream
+}
+
+type soundServiceSendSoundFileTranslationClient struct {
+	grpc.ClientStream
+}
+
+func (x *soundServiceSendSoundFileTranslationClient) Recv() (*SoundStreamResponse, error) {
+	m := new(SoundStreamResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *soundServiceClient) DiarizateSpeakers(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (SoundService_DiarizateSpeakersClient, error) {
+	stream, err := c.cc.NewStream(ctx, &SoundService_ServiceDesc.Streams[2], "/SoundService/DiarizateSpeakers", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &soundServiceDiarizateSpeakersClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type SoundService_DiarizateSpeakersClient interface {
+	Recv() (*SpeakerAndLine, error)
+	grpc.ClientStream
+}
+
+type soundServiceDiarizateSpeakersClient struct {
+	grpc.ClientStream
+}
+
+func (x *soundServiceDiarizateSpeakersClient) Recv() (*SpeakerAndLine, error) {
+	m := new(SpeakerAndLine)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // SoundServiceServer is the server API for SoundService service.
 // All implementations must embed UnimplementedSoundServiceServer
 // for forward compatibility
@@ -91,6 +157,8 @@ type SoundServiceServer interface {
 	TestConnection(context.Context, *TextMessage) (*TextMessage, error)
 	SendSoundFile(context.Context, *SoundRequest) (*SoundResponse, error)
 	StreamSoundFile(SoundService_StreamSoundFileServer) error
+	SendSoundFileTranslation(*SoundRequest, SoundService_SendSoundFileTranslationServer) error
+	DiarizateSpeakers(*SoundRequest, SoundService_DiarizateSpeakersServer) error
 	mustEmbedUnimplementedSoundServiceServer()
 }
 
@@ -106,6 +174,12 @@ func (UnimplementedSoundServiceServer) SendSoundFile(context.Context, *SoundRequ
 }
 func (UnimplementedSoundServiceServer) StreamSoundFile(SoundService_StreamSoundFileServer) error {
 	return status.Errorf(codes.Unimplemented, "method StreamSoundFile not implemented")
+}
+func (UnimplementedSoundServiceServer) SendSoundFileTranslation(*SoundRequest, SoundService_SendSoundFileTranslationServer) error {
+	return status.Errorf(codes.Unimplemented, "method SendSoundFileTranslation not implemented")
+}
+func (UnimplementedSoundServiceServer) DiarizateSpeakers(*SoundRequest, SoundService_DiarizateSpeakersServer) error {
+	return status.Errorf(codes.Unimplemented, "method DiarizateSpeakers not implemented")
 }
 func (UnimplementedSoundServiceServer) mustEmbedUnimplementedSoundServiceServer() {}
 
@@ -182,6 +256,48 @@ func (x *soundServiceStreamSoundFileServer) Recv() (*SoundRequest, error) {
 	return m, nil
 }
 
+func _SoundService_SendSoundFileTranslation_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SoundRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(SoundServiceServer).SendSoundFileTranslation(m, &soundServiceSendSoundFileTranslationServer{stream})
+}
+
+type SoundService_SendSoundFileTranslationServer interface {
+	Send(*SoundStreamResponse) error
+	grpc.ServerStream
+}
+
+type soundServiceSendSoundFileTranslationServer struct {
+	grpc.ServerStream
+}
+
+func (x *soundServiceSendSoundFileTranslationServer) Send(m *SoundStreamResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _SoundService_DiarizateSpeakers_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SoundRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(SoundServiceServer).DiarizateSpeakers(m, &soundServiceDiarizateSpeakersServer{stream})
+}
+
+type SoundService_DiarizateSpeakersServer interface {
+	Send(*SpeakerAndLine) error
+	grpc.ServerStream
+}
+
+type soundServiceDiarizateSpeakersServer struct {
+	grpc.ServerStream
+}
+
+func (x *soundServiceDiarizateSpeakersServer) Send(m *SpeakerAndLine) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // SoundService_ServiceDesc is the grpc.ServiceDesc for SoundService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -204,6 +320,16 @@ var SoundService_ServiceDesc = grpc.ServiceDesc{
 			Handler:       _SoundService_StreamSoundFile_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
+		},
+		{
+			StreamName:    "SendSoundFileTranslation",
+			Handler:       _SoundService_SendSoundFileTranslation_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "DiarizateSpeakers",
+			Handler:       _SoundService_DiarizateSpeakers_Handler,
+			ServerStreams: true,
 		},
 	},
 	Metadata: "backend/src/proto/sound_transfer/sound_transfer.proto",

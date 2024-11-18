@@ -8,6 +8,7 @@ service SoundService {
     rpc TestConnection(TextMessage) returns (TextMessage) {};
     rpc SendSoundFile(SoundRequest) returns (SoundResponse) {};
     rpc StreamSoundFile(stream SoundRequest) returns (stream SoundStreamResponse);
+    rpc SendSoundFileTranslation(SoundRequest) returns (stream SoundStreamResponse);
     rpc DiarizateSpeakers(SoundRequest) returns (stream SpeakerAndLine);
 }
 
