@@ -48,6 +48,9 @@ func (db *MockDb) getUserTranscriptionHistory(email string) (pgx.Rows, error) {
 	return nil, nil
 }
 
+func (db *MockDb) saveTranscription(a string, b string) {
+}
+
 func compareLoginResponse(a *pb.LoginResponse, b *pb.LoginResponse) bool {
 	return a.Successful == b.Successful && a.JWT == b.JWT
 }
