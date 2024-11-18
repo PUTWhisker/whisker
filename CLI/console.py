@@ -74,7 +74,10 @@ class ConsolePrinter:
             await asyncio.sleep(0.1)
         self._waitingAnimation(3)
         script = sendTask.result()  # Received transcribed text
-        print(script)
+        speaker = list(script.speakerName)
+        text = list(script.text)
+        for i in range(0, len(speaker)):
+            print(f"{speaker[i]}: {text[i]}")
 
 
     @_errorHandler

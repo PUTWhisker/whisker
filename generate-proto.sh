@@ -29,6 +29,6 @@ cp ./proto/authentication.proto ./backend/src/proto/authentication
 protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative ./backend/src/proto/sound_transfer/sound_transfer.proto
 protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative ./backend/src/proto/authentication/authentication.proto
 
-#TODO: Add Web and Mobile's protoc (And maybe proto installing if possible)
+#TODO: Add Web and Mobile's protoc (And maybe protoc installing if possible)
 
 rm -r venv

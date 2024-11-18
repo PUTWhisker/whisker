@@ -127,13 +127,16 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
                     futures["transcribe"].result(), futures["diarize"].result()
                 )
         except Exception as e:
-            print(f"An error occurred: {e}")
+            logging.exception(f"An error occurred: {e}")
             out = []
         finally:
             file_path.unlink()
+        transcription, speaker = [], []
         for elem in out:
-            yield sound_transfer_pb2.SpeakerAndLine(
-                text=elem["text"], speakerName=elem["speaker"]
+            transcription.append(elem["text"])
+            speaker.append(elem["speaker"])
+        return sound_transfer_pb2.SpeakerAndLine(
+                text=transcription, speakerName=speaker
             )
 
 
@@ -151,8 +154,6 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
             ):  # To ensure tempFile gets deleted even when error occurs
                 transcriptionData.filePath.unlink()
             raise e
-        print(result)
-        print(type(result))
         return sound_transfer_pb2.SoundResponse(text=result)
     
     

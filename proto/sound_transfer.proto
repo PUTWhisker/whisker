@@ -9,7 +9,7 @@ service SoundService {
     rpc SendSoundFile(SoundRequest) returns (SoundResponse) {};
     rpc StreamSoundFile(stream SoundRequest) returns (stream SoundStreamResponse);
     rpc SendSoundFileTranslation(SoundRequest) returns (stream SoundStreamResponse);
-    rpc DiarizateSpeakers(SoundRequest) returns (stream SpeakerAndLine);
+    rpc DiarizateSpeakers(SoundRequest) returns (SpeakerAndLine);
 }
 
 message SoundRequest {
@@ -31,7 +31,7 @@ message SoundStreamResponse {
 }
 
 message SpeakerAndLine {
-    string text = 7;
-    string speakerName = 8;
+    repeated string text = 7;
+    repeated string speakerName = 8;
 }
 

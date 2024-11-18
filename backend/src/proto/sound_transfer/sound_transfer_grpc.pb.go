@@ -26,7 +26,7 @@ type SoundServiceClient interface {
 	SendSoundFile(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (*SoundResponse, error)
 	StreamSoundFile(ctx context.Context, opts ...grpc.CallOption) (SoundService_StreamSoundFileClient, error)
 	SendSoundFileTranslation(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (SoundService_SendSoundFileTranslationClient, error)
-	DiarizateSpeakers(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (SoundService_DiarizateSpeakersClient, error)
+	DiarizateSpeakers(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (*SpeakerAndLine, error)
 }
 
 type soundServiceClient struct {
@@ -118,36 +118,13 @@ func (x *soundServiceSendSoundFileTranslationClient) Recv() (*SoundStreamRespons
 	return m, nil
 }
 
-func (c *soundServiceClient) DiarizateSpeakers(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (SoundService_DiarizateSpeakersClient, error) {
-	stream, err := c.cc.NewStream(ctx, &SoundService_ServiceDesc.Streams[2], "/SoundService/DiarizateSpeakers", opts...)
+func (c *soundServiceClient) DiarizateSpeakers(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (*SpeakerAndLine, error) {
+	out := new(SpeakerAndLine)
+	err := c.cc.Invoke(ctx, "/SoundService/DiarizateSpeakers", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &soundServiceDiarizateSpeakersClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type SoundService_DiarizateSpeakersClient interface {
-	Recv() (*SpeakerAndLine, error)
-	grpc.ClientStream
-}
-
-type soundServiceDiarizateSpeakersClient struct {
-	grpc.ClientStream
-}
-
-func (x *soundServiceDiarizateSpeakersClient) Recv() (*SpeakerAndLine, error) {
-	m := new(SpeakerAndLine)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 // SoundServiceServer is the server API for SoundService service.
@@ -158,7 +135,7 @@ type SoundServiceServer interface {
 	SendSoundFile(context.Context, *SoundRequest) (*SoundResponse, error)
 	StreamSoundFile(SoundService_StreamSoundFileServer) error
 	SendSoundFileTranslation(*SoundRequest, SoundService_SendSoundFileTranslationServer) error
-	DiarizateSpeakers(*SoundRequest, SoundService_DiarizateSpeakersServer) error
+	DiarizateSpeakers(context.Context, *SoundRequest) (*SpeakerAndLine, error)
 	mustEmbedUnimplementedSoundServiceServer()
 }
 
@@ -178,8 +155,8 @@ func (UnimplementedSoundServiceServer) StreamSoundFile(SoundService_StreamSoundF
 func (UnimplementedSoundServiceServer) SendSoundFileTranslation(*SoundRequest, SoundService_SendSoundFileTranslationServer) error {
 	return status.Errorf(codes.Unimplemented, "method SendSoundFileTranslation not implemented")
 }
-func (UnimplementedSoundServiceServer) DiarizateSpeakers(*SoundRequest, SoundService_DiarizateSpeakersServer) error {
-	return status.Errorf(codes.Unimplemented, "method DiarizateSpeakers not implemented")
+func (UnimplementedSoundServiceServer) DiarizateSpeakers(context.Context, *SoundRequest) (*SpeakerAndLine, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DiarizateSpeakers not implemented")
 }
 func (UnimplementedSoundServiceServer) mustEmbedUnimplementedSoundServiceServer() {}
 
@@ -277,25 +254,22 @@ func (x *soundServiceSendSoundFileTranslationServer) Send(m *SoundStreamResponse
 	return x.ServerStream.SendMsg(m)
 }
 
-func _SoundService_DiarizateSpeakers_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(SoundRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
+func _SoundService_DiarizateSpeakers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SoundRequest)
+	if err := dec(in); err != nil {
+		return nil, err
 	}
-	return srv.(SoundServiceServer).DiarizateSpeakers(m, &soundServiceDiarizateSpeakersServer{stream})
-}
-
-type SoundService_DiarizateSpeakersServer interface {
-	Send(*SpeakerAndLine) error
-	grpc.ServerStream
-}
-
-type soundServiceDiarizateSpeakersServer struct {
-	grpc.ServerStream
-}
-
-func (x *soundServiceDiarizateSpeakersServer) Send(m *SpeakerAndLine) error {
-	return x.ServerStream.SendMsg(m)
+	if interceptor == nil {
+		return srv.(SoundServiceServer).DiarizateSpeakers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/SoundService/DiarizateSpeakers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SoundServiceServer).DiarizateSpeakers(ctx, req.(*SoundRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 // SoundService_ServiceDesc is the grpc.ServiceDesc for SoundService service.
@@ -313,6 +287,10 @@ var SoundService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "SendSoundFile",
 			Handler:    _SoundService_SendSoundFile_Handler,
 		},
+		{
+			MethodName: "DiarizateSpeakers",
+			Handler:    _SoundService_DiarizateSpeakers_Handler,
+		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
@@ -324,11 +302,6 @@ var SoundService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "SendSoundFileTranslation",
 			Handler:       _SoundService_SendSoundFileTranslation_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "DiarizateSpeakers",
-			Handler:       _SoundService_DiarizateSpeakers_Handler,
 			ServerStreams: true,
 		},
 	},

@@ -54,7 +54,7 @@ class SoundServiceStub(object):
                 request_serializer=sound__transfer__pb2.SoundRequest.SerializeToString,
                 response_deserializer=sound__transfer__pb2.SoundStreamResponse.FromString,
                 _registered_method=True)
-        self.DiarizateSpeakers = channel.unary_stream(
+        self.DiarizateSpeakers = channel.unary_unary(
                 '/SoundService/DiarizateSpeakers',
                 request_serializer=sound__transfer__pb2.SoundRequest.SerializeToString,
                 response_deserializer=sound__transfer__pb2.SpeakerAndLine.FromString,
@@ -117,7 +117,7 @@ def add_SoundServiceServicer_to_server(servicer, server):
                     request_deserializer=sound__transfer__pb2.SoundRequest.FromString,
                     response_serializer=sound__transfer__pb2.SoundStreamResponse.SerializeToString,
             ),
-            'DiarizateSpeakers': grpc.unary_stream_rpc_method_handler(
+            'DiarizateSpeakers': grpc.unary_unary_rpc_method_handler(
                     servicer.DiarizateSpeakers,
                     request_deserializer=sound__transfer__pb2.SoundRequest.FromString,
                     response_serializer=sound__transfer__pb2.SpeakerAndLine.SerializeToString,
@@ -252,7 +252,7 @@ class SoundService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(
+        return grpc.experimental.unary_unary(
             request,
             target,
             '/SoundService/DiarizateSpeakers',
