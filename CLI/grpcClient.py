@@ -129,6 +129,7 @@ class GrpcClient:
                     iter += 1
                     transcription.append("")
                     print()
+            print() # Because sometimes the print "Execution time..." overlaps with the last line (idk why)
         except Exception as e:
             raise e
 

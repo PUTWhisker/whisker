@@ -44,7 +44,7 @@ class AudioRecorder():
 
         except KeyboardInterrupt:
             # logging.info("Detected interruption, ending recording.") TODO: Figure out how to print it nicely
-            print()
+            # print()
             stream.stop_stream()
             stream.close()
             p.terminate()
