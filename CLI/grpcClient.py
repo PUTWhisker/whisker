@@ -49,6 +49,7 @@ class GrpcClient:
             self.channel
         )  # Creating server stub, these are reusable
 
+
     async def initiateConnection(self, seed: str) -> Union[bool, grpc.RpcError]:
         try:
             response = await self.stub.TestConnection(  # sending generated number
@@ -57,6 +58,7 @@ class GrpcClient:
             return response
         except Exception as e:
             raise e
+        
         
     async def diarizateSpeakers(self, audioFile: bytes) -> Union[bool, grpc.RpcError]:
         try:
@@ -70,13 +72,11 @@ class GrpcClient:
             responseIter = self.stub.DiarizateSpeakers(
                 Variables.SoundRequest(sound_data=audioFile, flags=None),
             )
-            res = list()
             async for response in responseIter:
                 print(f"{response.speakerName}: {response.text}")
-                res.append(response)
-            return res
         except Exception as e:
             raise e
+        
 
     async def sendSoundFile(self, audioFile: bytes) -> Union[bool, grpc.RpcError]:
         try:
@@ -91,6 +91,7 @@ class GrpcClient:
         except Exception as e:
             raise e
         
+        
     async def SendSoundFileTranslation(self, audioFile: bytes) -> Union[bool, grpc.RpcError]:
         try:
             metadata = (
@@ -101,15 +102,13 @@ class GrpcClient:
                 Variables.SoundRequest(sound_data=audioFile, flags=None),
                 metadata=metadata,
             )
-            res = list()
             async for response in responseIter:
-                res.append(response)
-            return res
+                yield response
         except Exception as e:
             raise e
+        
 
     async def streamSoundFile(self) -> Union[bool, grpc.RpcError]:
-        transcription, iter = [""], 0
         try:
             recording = audio.AudioRecorder(self.save)  # Initiate recording class
             metadata = (
@@ -121,15 +120,7 @@ class GrpcClient:
             )  # Streaming recorded audio yield by record() funciton
             print("Recording started. You may start talking now.")
             async for response in responseIter:
-                transcription[iter] = response.text
-                terminalWidth, _ = os.get_terminal_size()
-                print(" " * terminalWidth, end="\r", flush=True)
-                print(transcription[iter], end="\r", flush=True)  # Delete?
-                if response.flags[0] == "True":
-                    iter += 1
-                    transcription.append("")
-                    print()
-            print() # Because sometimes the print "Execution time..." overlaps with the last line (idk why)
+                yield response
         except Exception as e:
             raise e
 

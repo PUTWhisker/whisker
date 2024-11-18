@@ -93,9 +93,12 @@ class ConsolePrinter:
 
     @_errorHandler
     async def sendFileTranslation(self, audio: bytes):
-        response = await self.grpcClient.SendSoundFileTranslation(audio)
-        print(f'Audio transcription: {response[0].text}\n')
-        print(f'Audio translation: {response[1].text}\n')
+        responseIter = self.grpcClient.SendSoundFileTranslation(audio)
+        async for response in responseIter:
+            if "transcription" in response.flags:
+                print(f'\033[1mAudio transcription: \033[0m{response.text}')
+            elif "translation" in response.flags:
+                print(f'\033[1mAudio translation: \033[0m{response.text}')
 
 
     async def register(self):
@@ -146,7 +149,18 @@ class ConsolePrinter:
 
     @_errorHandler
     async def record(self):
-        await self.grpcClient.streamSoundFile()  # Initiate streaming file async
+        transcription, iter = [""], 0
+        responseIter = self.grpcClient.streamSoundFile()  # Initiate streaming file async
+        async for response in responseIter:
+            transcription[iter] = response.text
+            terminalWidth, _ = os.get_terminal_size()
+            print(" " * terminalWidth, end="\r", flush=True)
+            print(transcription[iter], end="\r", flush=True)  # Delete?
+            if response.flags[0] == "True":
+                iter += 1
+                transcription.append("")
+                print()
+        print() # Because sometimes the print "Execution time..." overlaps with the last line (idk why)
 
     def _waitingAnimation(self, dot: int) -> int:
         if dot == 3:

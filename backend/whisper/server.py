@@ -168,12 +168,14 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
         )
         yield sound_transfer_pb2.SoundStreamResponse(
                 text=transcription,
+                flags=["transcription",],
             )
         translation = self.translator.translate(
             transcription, transcriptionData.language, transcriptionData.translate
         )[0]
         yield sound_transfer_pb2.SoundStreamResponse(
                 text=translation,
+                flags=["translation",],
             )
 
 
