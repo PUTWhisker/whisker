@@ -126,8 +126,8 @@ class MainActivity : AppCompatActivity() {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             bottomSheetBG.visibility = View.GONE
 
-            setVisibility(View.GONE, btnStop, btnResume, btnSave)
-            setVisibility(View.VISIBLE, btnRecord, btnList)
+            setVisibility(View.GONE, btnStop, btnResume, btnSave, btnDelete)
+            setVisibility(View.VISIBLE, btnRecord, btnList, btnBack)
             tvTimer.text = "00:00:00"
             waveformView.clearAmplitudes()
 
@@ -220,6 +220,13 @@ class MainActivity : AppCompatActivity() {
 
         setVisibility(View.GONE, tvTimer, btnRecord, btnList, btnResume, btnStop, btnCancel, btnSave, btnDelete, waveformView, btnTranscript)
         setVisibility(View.VISIBLE, tvTranscript, btnBack)
+
+        lifecycleScope.launch {
+            val filePath = tempFilePath ?: return@launch
+            uploadRecording(filePath)
+        }
+
+
 
     }
 
@@ -349,8 +356,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getRecordingFilePath(fileName: String): String {
-        val contextWrapper = ContextWrapper(applicationContext)
-        val musicDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+        val musicDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC)
+        if (!musicDirectory.exists()) {
+            musicDirectory.mkdirs() // Utwórz katalog, jeśli nie istnieje
+        }
         val file = File(musicDirectory, "$fileName.mp3")
         return file.path
     }
@@ -414,6 +423,13 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+    fun chooseFile(v: View) {
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "audio/*" // Filtruj tylko pliki dźwiękowe
+            putExtra(Intent.EXTRA_LOCAL_ONLY, true) // Tylko lokalne pliki
+        }
+        startActivityForResult(Intent.createChooser(intent, "Choose an audio file"), 100)
     }
 
     private val timerRunnable: Runnable = object : Runnable {

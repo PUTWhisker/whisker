@@ -89,6 +89,7 @@
                 android:visibility="gone" />
         </LinearLayout>
 
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTranscriptions"
             android:layout_width="0dp"

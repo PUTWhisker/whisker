@@ -62,6 +62,7 @@ class AuthenticationClient(uri: Uri) : Closeable {
         val key = Metadata.Key.of("JWT", Metadata.ASCII_STRING_MARSHALLER)
         metadata.put(key, jWT)
         return transfer.getTranslation(empty { }, metadata).map {
+            Log.d("DEBUG", "Received timestamp: seconds=${it.createdAt.seconds}, nanos=${it.createdAt.nanos}")
             TranscriptionElement(it.transcription, Instant.ofEpochSecond(it.createdAt.seconds, it.createdAt.nanos.toLong()))
         }.toList()
     }

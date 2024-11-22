@@ -12,6 +12,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import io.grpc.authentication.AuthenticationClient
 import io.grpc.authentication.TextHistory
@@ -39,7 +41,8 @@ class StartActivity : AppCompatActivity() {
     private lateinit var tvHello: TextView
     private lateinit var btnLogout: Button
     private lateinit var btnHistory: TextView
-    private lateinit var tvHistory: TextView
+    private lateinit var rvTranscriptions: RecyclerView
+    private lateinit var transcriptionAdapter: TranscriptionAdapter
     private lateinit var llFileRecord: LinearLayout
     private val PICK_FILE_REQUEST_CODE = 1
 
@@ -67,8 +70,9 @@ class StartActivity : AppCompatActivity() {
         tvHello = findViewById(R.id.tvHello)
         btnHistory = findViewById(R.id.btnHistory)
         btnLogout = findViewById(R.id.btnLogout)
-        //tvHistory = findViewById(R.id.tvHistory)
+        rvTranscriptions = findViewById(R.id.rvTranscriptions)
         llFileRecord = findViewById(R.id.llFileRecord)
+        rvTranscriptions.layoutManager = LinearLayoutManager(this)
 
 
         val bottomSheetL: LinearLayout = findViewById(R.id.bottomSheetL)
@@ -186,14 +190,28 @@ class StartActivity : AppCompatActivity() {
         }
 
         btnChooseFile.setOnClickListener {
-            val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                type = "audio/*"
-                addCategory(Intent.CATEGORY_OPENABLE)
+            val musicDirectory = File("/storage/emulated/0/Music")
+            if (musicDirectory.exists() && musicDirectory.isDirectory) {
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(Uri.parse(musicDirectory.toURI().toString()), "*/*")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(
+                        this@StartActivity,
+                        "No app available to view this directory",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } else {
+                Toast.makeText(
+                    this@StartActivity,
+                    "Music directory not found",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
-            startActivityForResult(
-                Intent.createChooser(intent, "Choose a file"),
-                PICK_FILE_REQUEST_CODE
-            )
         }
     }
 
@@ -224,12 +242,19 @@ class StartActivity : AppCompatActivity() {
 
     private fun showTranslationHistory() {
         llFileRecord.visibility = View.GONE
+        rvTranscriptions.visibility = View.VISIBLE
 
         GlobalScope.launch(Dispatchers.IO) {
-            val history = authClient.GetTranslations()  // Załaduj historię
+            val history = authClient.GetTranslations()
+            val formattedHistory = history.map { "${it.text}, ${it.timestamp}" } // Format each element
             withContext(Dispatchers.Main) {
-                tvHistory.text = history.joinToString("\n\n\n")
+                transcriptionAdapter = TranscriptionAdapter(formattedHistory) { transcription ->
+                    Toast.makeText(this@StartActivity, "Clicked: $transcription", Toast.LENGTH_SHORT).show()
+                    // Handle item click here
+                }
+                rvTranscriptions.adapter = transcriptionAdapter
             }
         }
     }
+
 }
