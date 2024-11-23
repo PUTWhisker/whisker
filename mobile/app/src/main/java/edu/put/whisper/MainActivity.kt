@@ -161,21 +161,6 @@ class MainActivity : AppCompatActivity() {
 
 //    /storage/emulated/0/Android/data/edu.put.whisper/files/Music/test.mp3
     fun btnRecordPressed(v: View) {
-        Log.i("auth", resources.getString(R.string.server_url))
-        val authenticationClient = AuthenticationClient(Uri.parse(resources.getString(R.string.server_url)))
-        lifecycleScope.launch(Dispatchers.IO) {
-            authenticationClient.Login("Krzysztof", "Krzysztof")
-            val out = authenticationClient.GetTranslations()
-            Log.i("auth", out.toString())
-            val filePath = getRecordingFilePath("testowenagranie")
-            val transfer = SoundTransferGrpc(Uri.parse(resources.getString(R.string.server_url)))
-            val output: String? = transfer.sendSoundFile(filePath)
-            if (output != null) {
-                Log.i("auth", output)
-            } else {
-                Log.i("auth", "Nie dziala")
-            }
-        }
         tempFilePath = getTempRecordingFilePath()
         setVisibility(View.GONE, btnList, btnRecord, btnBack)
         setVisibility(View.VISIBLE, btnSave, btnStop, btnTranscript, btnDelete)
@@ -461,6 +446,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun uploadRecording(filePath: String) {
+        Log.i("auth", filePath)
         try {
             val transfer = SoundTransferGrpc(Uri.parse(resources.getString(R.string.server_url)))
             val output: String? = transfer.sendSoundFile(filePath)

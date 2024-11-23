@@ -38,7 +38,9 @@ class SoundTransferGrpc(uri: Uri) : Closeable {
         try {
             val metadata = Metadata()
             val key = Metadata.Key.of("JWT", Metadata.ASCII_STRING_MARSHALLER)
-            metadata.put(key, jWT)
+            if (jWT != ""){
+                metadata.put(key, jWT)
+            }
             val bytes = File(filePath).readBytes().toByteString()
             val request = soundRequest { this.soundData = bytes  }
             val response = transferer.sendSoundFile(request, metadata)
