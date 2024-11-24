@@ -21,7 +21,10 @@ export function button_login(e)
 export function button_getTranslation(e)
 {
     e.preventDefault()
-    getTranslation("Test token, request will fail")
+    const stream = getTranslation("Token here")
+    for (const res of stream) {
+        console.log(res)
+    }
 }
 
 
@@ -66,15 +69,16 @@ function login(username, password) {
 }
 
 
-function getTranslation(jwtToken) {
+function *getTranslation(jwtToken) {
     console.log("AAAA")
     let request = new Empty()
     let metadata = {'jwt': jwtToken}
     console.log("Am in getTranslation")
     let stream = authenticationClient.getTranslation(request, metadata)
 
-    stream.on('data', (response) => {
+    yield stream.on('data', (response) => {
         console.log(`Received response: ${response.getTranscription()}`);
+        return "I received something"
     });
 
     // Handle stream end

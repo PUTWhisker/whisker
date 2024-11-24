@@ -13,15 +13,15 @@ const _validFileExtensions = [".mp3", ".wav"];
 export function setupConnection() {
     connectionTest()
 
-    // const form = document.getElementById('send_file')
-    // form.onsubmit = validateAndSend;
+    const form = document.getElementById('send_file')
+    form.onsubmit = validateAndSend;
     //TODO: down from here are buttons from test.html
-    const register = document.getElementById('register')
-    register.onsubmit = button_register;
-    const login = document.getElementById('login')
-    login.onsubmit = button_login;
-    const getTransl = document.getElementById('getTranslation')
-    getTransl.onsubmit = button_getTranslation;
+//     const register = document.getElementById('register')
+//     register.onsubmit = button_register;
+//     const login = document.getElementById('login')
+//     login.onsubmit = button_login;
+//     const getTransl = document.getElementById('getTranslation')
+//     getTransl.onsubmit = button_getTranslation;
 }
 
 
