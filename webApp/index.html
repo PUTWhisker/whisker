@@ -4,39 +4,54 @@
     <meta charset="UTF-8">
     <title>DEMO PAGE</title>
     <script src="./dist/main.js"></script>
+    <script> 
+      function showTransBox(){
+        document.getElementById("show_transcript").style.display = 'block';
+      }
+    </script>
     <link rel="stylesheet" href="style.css">
     <link rel="shortcut icon" href="#">
   </head>
   <body>
     <main>
-        <div>
-            <fieldset>
-              <legend>File upload</legend>
-              <form id="send_file">
-                  <label for="input_file">Upload an input file </label> <br />
-                  <input type="file" name="input_file" id="input_file"><br /><br />
-                  <input type="submit" value="Submit file" id="submit_file"/>
-              </form>
-            </fieldset>
+      <div>
+        <a href="http://127.0.0.1:5500/webApp/record.html">
+          <button> GO TO LIVE RECORDING</button>
+        </a>
+      </div>
+        <div id = "main_field">
+          <div id = "submit_container">
+              <fieldset id = "choose_file">
+                <form id="send_file">
+                  <div>
+                    <label id = "upload_msg" for="input_file">Drag and drop an audio file or</label>
+                    <br />
+                    <input type="file" name="input_file" id="input_file"><br /><br />
+                  </div>
+                </form>
+              </fieldset>
+          </div>
+          <div id="main_buttons">
+            <select id="choose_lang"> 
+              <option disabled selected>Choose language</option>
+              <option>Polish</option>
+              <option>English</option>
+              <option>German</option>
+            </select>
+            <label>
+              <input type="checkbox" id="show_translation_tic"/>
+              <span class="custom_check">Show translation</span>
+            </label>
+            <button type="submit" value="Submit file" id="submit_file" onclick="showTransBox()">Transcribe!</button>
+          </div>
         </div>
         <div>
-          <fieldset>
+          <fieldset id = "show_transcript">
             <legend>Transcript</legend>
             <form id="receive_transcript">
+              <button id="copy_button">Copy</button>
               <p id="transcriptedText"></p>
             </form>
-          </fieldset>
-        </div>
-        <div>
-          <fieldset>
-            <legend>Audio record</legend>
-            <form id="send_recording">
-              <input type="button" value="record" id="record" class="button"/> <br />
-              <input type="button" value="stop" id="stop" class="button"/> <br />
-            </form>
-            <article id="clips">
-
-            </article>
           </fieldset>
         </div>
     </main>
