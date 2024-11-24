@@ -1,4 +1,4 @@
-from console import ConsolePrinter
+from console import ConsolePrinter, LoginFailure
 
 import dicts
 import argparse
@@ -8,11 +8,11 @@ import os.path
 import logging
 
 curDir = os.path.dirname(__file__)
-protoDir = os.path.join(curDir, "proto")
+protoDir = os.path.join(curDir, "proto/sound_transfer")
 sys.path.insert(0, protoDir)
 
-from proto import sound_transfer_pb2_grpc
-from proto import sound_transfer_pb2
+from proto.sound_transfer import sound_transfer_pb2_grpc
+from proto.sound_transfer import sound_transfer_pb2
 
 sys.path.insert(0, curDir)
 
@@ -83,10 +83,6 @@ def parse() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "fileName", nargs="?", default=None, help="File to be transcripted"
-    )
-
-    parser.add_argument(
         "--diarizate",
         action="store_true",
         help="Use this flag to enable speaker diarization",
@@ -96,7 +92,23 @@ def parse() -> argparse.ArgumentParser:
         "--username",
         type=str,
         default=None,
-        help="Use this to retreive JWT token (first login attempt)"
+        help="Use this when registering or with your first logging"
+    )
+
+    parser.add_argument(
+        "--register",
+        action="store_true",
+        help="Use this flag when creating a new account"
+    )
+
+    parser.add_argument(
+        "--retrieve", "-r",
+        action="store_true",
+        help="Set this flag to retreive transcription history from your account"
+    )
+
+    parser.add_argument(
+        "fileName", nargs="?", default=None, help="File to be transcripted"
     )
 
     parser.add_argument(
@@ -106,9 +118,12 @@ def parse() -> argparse.ArgumentParser:
     return parser
 
 
-# async def handleException(e: Exception):
-#     print(f"An exception occured: {type(e)}: {e}")
-#     pass
+async def handleException(e: Exception):
+    if isinstance(e, LoginFailure):
+        print("Error occured when logging into your account.")
+    else:
+        print(f"An exception occured: {type(e)}: {e}")
+    pass
 
 
 async def main(parser: argparse.ArgumentParser):
@@ -137,28 +152,32 @@ async def main(parser: argparse.ArgumentParser):
         if not await console.startApp():
             return
 
-        if args.username is not None:
+        if args.register:
+            await console.register()
+        elif args.retrieve:
+            await console.getTranslation()
+        elif args.username is not None:
             await console.retreiveToken(args.username)
-
-        if (
+        elif (
             args.fileName is not None
         ):  # If there is a valid audio file as an argument, initiate SendSoundFile method
             with open(args.fileName, "rb") as file:
                 audio = file.read()  # read audio as bytes
             if args.diarizate:
                 await console.diarizateSpeakers(audio)
+            elif args.trans:
+                await console.sendFileTranslation(audio)
             else:
                 await console.sendFile(audio)
         elif args.record:  # If there is a record flag, initiate StreamSoundFile method (app can't do both, record and translate file)
             await console.record()
         else:  # No action specified by the user
             print(
-                "You have to specify an action (supply an audio file/initiate recording)."
+                "You have to specify an action (supply an audio file/initiate recording/register/retreive transcripts)."
             )
             return
     except Exception as e:
-        raise e
-        # await handleException(e)
+        await handleException(e)
     return
 
 

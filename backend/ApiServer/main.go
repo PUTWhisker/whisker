@@ -46,14 +46,14 @@ func registerGrpcServices(server *grpc.Server) *pgxpool.Pool {
 		AuthenticationProto.RegisterClientServiceServer(
 			server,
 			&services.AuthenticationServer{
-				Db:           &services.UserDb{Pool: pool},
+				Db:           services.NewUserDb(pool),
 				JwtGenerator: &services.JWTGenerator{PrivateKeyPath: os.Getenv("JWT_PRIVATE_KEY_PATH")},
 			},
 		)
-		SoundTransferProto.RegisterSoundServiceServer(server, &services.SoundServer{SoundFileStoragePath: os.Getenv("SOUND_FILES_FOLDER_PATH"), DbPool: pool})
+		SoundTransferProto.RegisterSoundServiceServer(server, &services.SoundServer{SoundFileStoragePath: os.Getenv("SOUND_FILES_FOLDER_PATH"), Db: services.NewUserDb(pool)})
 		return pool
 	} else {
-		SoundTransferProto.RegisterSoundServiceServer(server, &services.SoundServer{SoundFileStoragePath: os.Getenv("SOUND_FILES_FOLDER_PATH"), DbPool: nil})
+		SoundTransferProto.RegisterSoundServiceServer(server, &services.SoundServer{SoundFileStoragePath: os.Getenv("SOUND_FILES_FOLDER_PATH")})
 	}
 	return nil
 }
@@ -73,6 +73,7 @@ func main() {
 			connected = true
 		}
 	}
+	fmt.Printf("🟢 Connected to whisper server, retrying in 10 s")
 	if dbPool != nil {
 		defer dbPool.Close()
 	}

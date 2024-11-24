@@ -7,10 +7,10 @@ import os
 import sys
 
 curDir = os.path.dirname(__file__)
-protoDir = os.path.join(curDir, "proto")
+protoDir = os.path.join(curDir, "proto/sound_transfer")
 sys.path.insert(0, protoDir)
 
-from proto import sound_transfer_pb2 as Variables
+from proto.sound_transfer import sound_transfer_pb2 as Variables
 
 sys.path.insert(0, curDir)
 
@@ -44,7 +44,7 @@ class AudioRecorder():
 
         except KeyboardInterrupt:
             # logging.info("Detected interruption, ending recording.") TODO: Figure out how to print it nicely
-            print()
+            # print()
             stream.stop_stream()
             stream.close()
             p.terminate()
