@@ -4,10 +4,12 @@ services:
     build:
       context: ../backend/whisper
       dockerfile: Dockerfile
+    environment:
+     - HUGGING_FACE_API_KEY="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"
 
   golang-server:
     build:
-      context: ../backend/src
+      context: ../backend/ApiServer
       dockerfile: Dockerfile
     environment:
       - SERVER_PORT=9900
@@ -16,6 +18,9 @@ services:
       - WHISPER_SERVER=whisper-server
     depends_on: # Change depends_on to healthcheck
       - whisper-server
+      - postgres
+    ports:
+      - 9900:9900
     
   proxy:
     build:
@@ -38,18 +43,17 @@ services:
     environment:
       - POSTGRES_PASSWORD=password
 
-  client:
-    build:
-      context: ../webApp
-      dockerfile: docker/Dockerfile
-      args:
-        no-cache: "true"
-    ports:
-      - "8080:8080"
+  # client:
+  #   build:
+  #     context: ../webApp
+  #     dockerfile: docker/Dockerfile
+  #     args:
+  #       no-cache: "true"
+  #   ports:
+  #     - "8080:8080"
       
 volumes:
   postgres_data:
-
 
 
 
