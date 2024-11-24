@@ -15,8 +15,6 @@ export function setupConnection() {
 
     const form = document.getElementById('send_file')
     form.onsubmit = validateAndSend;
-    const form = document.getElementById('send_file')
-    form.onsubmit = validateAndSend;
     //TODO: down from here are buttons from test.html
 //     const register = document.getElementById('register')
 //     register.onsubmit = button_register;
@@ -30,11 +28,14 @@ export function setupConnection() {
 async function validateAndSend(e) {
     e.preventDefault()
     validate(e)
-    .then(result => {
-      if (result) {
-        showTranscriptedText(result); 
-      }
-    })
+    // .then(result => {
+    //   if (result) {
+    //     showTranscriptedText(result); 
+    //   }else {
+    //     // showTranscriptedText(result); 
+    //     // showTranslatededText(result); 
+    //   }
+    // })
     //TODO: uncomment upper code, I use this function for testing
     // SoundTranslationFunction
     //     validate(e)
@@ -94,8 +95,15 @@ async function validate(e) { // Validate input file format
                 return false
             } else {
                 let answer = sendFileTranslation(input.files[0], 'en', 'pl')
+                let answer_flag = false;
                 for await (const res of answer) {
                     console.log(res)
+                    if(!answer_flag){
+                        showTranscriptedText(res);
+                        answer_flag = true;
+                    } else {
+                        showTranslatedText(res);
+                    } 
                 }
                 return "A"
             }
@@ -152,7 +160,7 @@ async function *sendFileTranslation(file, fileLanguage, translationLanguage) {
     // Handle responses
     yield stream.on('data', (response) => {
         console.log(`Received response: ${response.getText()}`);
-        return "Something"
+        return response.getText()
     });
 
     // Handle stream end
