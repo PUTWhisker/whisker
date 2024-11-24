@@ -1,6 +1,7 @@
 from concurrent import futures
 from transcrpitionData import TranscriptionData, WrongLanguage
 from dotenv import load_dotenv
+from translate import Translator
 import faster_whisper_model
 import grpc
 import asyncio
@@ -43,12 +44,10 @@ def _errorMessages(e: Exception, func: callable):
     return errorCode, errorMessage
 
 
-def run_transcribe(file_path):
-    model = faster_whisper_model.FasterWhisperHandler(
-        os.getenv("FASTER_WHISPER_MODEL"), os.getenv("M2M100_MODEL")
-    )
+def run_transcribe(file_path, data:TranscriptionData):
+    model = faster_whisper_model.FasterWhisperHandler(os.getenv("FASTER_WHISPER_MODEL"))
     return model.transcribe(
-        str(file_path), language="pl", translationLanguage="pl", return_fragments=True
+        str(file_path), data
     )
 
 
@@ -56,8 +55,9 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
     def __init__(self):
         self.number = 0
         self.fastModel = faster_whisper_model.FasterWhisperHandler(
-            os.getenv("FASTER_WHISPER_MODEL"), os.getenv("M2M100_MODEL")
+            os.getenv("FASTER_WHISPER_MODEL"),
         )
+        self.translator = Translator(os.getenv("M2M100_MODEL"))
         try:
             os.mkdir("tempFiles")
         except FileExistsError:
@@ -66,6 +66,7 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
             logging.error("Permission denied: Unable to create direcotry tempFiles.")
         except Exception as e:
             logging.error(f"An error occurred: {e}")
+
 
     def _errorUnaryHandler(func: callable):
         async def wrapper(*args, **kwargs):
@@ -79,8 +80,8 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
                 logging.exception(f"{errorCode}: {errorMessage}")
                 await context.abort(errorCode, errorMessage)
                 return
-
         return wrapper
+    
 
     def _errorStreamHandler(func: callable):
         async def wrapper(*args, **kwargs):
@@ -99,17 +100,23 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
                 logging.exception(f"{errorCode}: {errorMessage}")
                 await context.abort(errorCode, errorMessage)
                 return
-
         return wrapper
-
+    
+    
+    @_errorUnaryHandler
+    async def TestConnection(self, request, context):
+        return sound_transfer_pb2.TextMessage(text=request.text)
+    
+    @_errorUnaryHandler
     async def DiarizateSpeakers(self, request, context):
-        transcriptionData = TranscriptionData(audio=request.sound_data)
+        transcriptionData = TranscriptionData(audio=request.sound_data, diarizate=True)
         file_path = transcriptionData.saveFile(save_as_wav=False)
+        print(file_path)
         out = []
         try:
             with concurrent.futures.ProcessPoolExecutor() as executor:
                 futures = {
-                    "transcribe": executor.submit(run_transcribe, file_path),
+                    "transcribe": executor.submit(run_transcribe, file_path, transcriptionData),
                     "diarize": executor.submit(
                         diarizate.diarizate_speakers, str(file_path.resolve())
                     ),
@@ -119,26 +126,26 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
                     futures["transcribe"].result(), futures["diarize"].result()
                 )
         except Exception as e:
-            print(f"An error occurred: {e}")
+            logging.exception(f"An error occurred: {e}")
             out = []
         finally:
             file_path.unlink()
+        transcription, speaker = [], []
         for elem in out:
-            yield sound_transfer_pb2.SpeakerAndLine(
-                text=elem["text"], speakerName=elem["speaker"]
+            transcription.append(elem["text"])
+            speaker.append(elem["speaker"])
+        return sound_transfer_pb2.SpeakerAndLine(
+                text=transcription, speakerName=speaker
             )
 
-    @_errorUnaryHandler
-    async def TestConnection(self, request, context):
-        return sound_transfer_pb2.TextMessage(text=request.text)
 
     @_errorUnaryHandler
     async def SendSoundFile(self, request, context):
-        logging.info("Received audio file.")
+        logging.info("Received audio file for transcription.")
         transcriptionData = TranscriptionData()
         try:
-            result = await self.fastModel.handleFile(
-                request.sound_data, transcriptionData, context, diarizate_speakers=False
+            result, _ = await self.fastModel.handleFile(
+                request.sound_data, transcriptionData, context
             )
         except Exception as e:
             if (
@@ -147,6 +154,30 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
                 transcriptionData.filePath.unlink()
             raise e
         return sound_transfer_pb2.SoundResponse(text=result)
+    
+    
+    @_errorStreamHandler
+    async def SendSoundFileTranslation(self, request, context):
+        logging.info("Received audio file for translation")
+        transcriptionData = TranscriptionData()
+        transcriptionData.processMetadata(context)
+        if transcriptionData.translate is None:
+            raise # TODO: Here raise error when not specified to what language text should be translated (Transcription is good cause whisper has autodetect)
+        transcription, transcriptionData = await self.fastModel.handleFile(
+            request.sound_data, transcriptionData, context
+        )
+        yield sound_transfer_pb2.SoundStreamResponse(
+                text=transcription,
+                flags=["transcription",],
+            )
+        translation = self.translator.translate(
+            transcription, transcriptionData.language, transcriptionData.translate
+        )[0]
+        yield sound_transfer_pb2.SoundStreamResponse(
+                text=translation,
+                flags=["translation",],
+            )
+
 
     @_errorStreamHandler  # TODO: Resolve async_generator problem to add errorHandler
     async def StreamSoundFile(self, requestIter, context):

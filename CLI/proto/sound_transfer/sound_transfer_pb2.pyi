@@ -37,6 +37,6 @@ class SpeakerAndLine(_message.Message):
     __slots__ = ("text", "speakerName")
     TEXT_FIELD_NUMBER: _ClassVar[int]
     SPEAKERNAME_FIELD_NUMBER: _ClassVar[int]
-    text: str
-    speakerName: str
-    def __init__(self, text: _Optional[str] = ..., speakerName: _Optional[str] = ...) -> None: ...
+    text: _containers.RepeatedScalarFieldContainer[str]
+    speakerName: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, text: _Optional[_Iterable[str]] = ..., speakerName: _Optional[_Iterable[str]] = ...) -> None: ...

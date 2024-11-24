@@ -12,28 +12,29 @@ import languages
 class WrongLanguage(Exception):
     pass
 
+class TranscriptionData():
 
-class TranscriptionData:
-    def __init__(
-        self,
-        transcription: list = [""],
-        audio: bytes = b"",
-        previousAudio: bytes = b"",
-        curSegment: int = 0,
-        curSeconds: int = 0,
-        silenceAudio: bool = False,
-        language: str = None,
-        translate: str = None,
-    ):
+    def __init__(self,
+                 transcription:list=[""],
+                 audio:bytes=b'',
+                 previousAudio:bytes=b'',
+                 curSegment:int=0,
+                 curSeconds:int=0,
+                 silenceAudio:bool=False,
+                 language:str=None,
+                 translate:str=None,
+                 diarizate:bool=False
+                 ):
         self.transcription = transcription
         self.audio = audio
         self.previousAudio = previousAudio
         self.curSegment = curSegment
         self.curSeconds = curSeconds
         self.silenceAudio = silenceAudio
-        self.filePath = Path(f"./tempFiles/{uuid.uuid4()}.wav")
+        self.filePath = Path(f"./tempFiles/{uuid.uuid4()}")
         self.translate = translate
         self.language = language
+        self.diarizate = diarizate
 
     def appendData(self, receivedAudio: bytes):
         if self.curSeconds < 10:
@@ -53,11 +54,11 @@ class TranscriptionData:
 
     def saveFile(self, save_as_wav=True) -> Path:
         if save_as_wav:
+            self.filePath = self.filePath.with_suffix(".wav")
             self._saveAudioFile(self.filePath, self.audio)
         else:
-            with self.filePath.open() as file:
+            with self.filePath.open("wb") as file:
                 file.write(self.audio)
-            self.filePath.rename(self.filePath.with_suffix(""))
         return self.filePath
 
     def detectSilence(self, path: Path, silenceLength: int) -> bool:
