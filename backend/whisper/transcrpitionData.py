@@ -31,7 +31,7 @@ class TranscriptionData():
         self.curSegment = curSegment
         self.curSeconds = curSeconds
         self.silenceAudio = silenceAudio
-        self.filePath = Path(f"./tempFiles/{uuid.uuid4()}.wav")
+        self.filePath = Path(f"./tempFiles/{uuid.uuid4()}")
         self.translate = translate
         self.language = language
         self.diarizate = diarizate
@@ -54,11 +54,11 @@ class TranscriptionData():
 
     def saveFile(self, save_as_wav=True) -> Path:
         if save_as_wav:
+            self.filePath = self.filePath.with_suffix(".wav")
             self._saveAudioFile(self.filePath, self.audio)
         else:
-            with self.filePath.open() as file:
+            with self.filePath.open("wb") as file:
                 file.write(self.audio)
-            self.filePath.rename(self.filePath.with_suffix(""))
         return self.filePath
 
     def detectSilence(self, path: Path, silenceLength: int) -> bool:

@@ -46,7 +46,6 @@ def _errorMessages(e: Exception, func: callable):
 
 def run_transcribe(file_path, data:TranscriptionData):
     model = faster_whisper_model.FasterWhisperHandler(os.getenv("FASTER_WHISPER_MODEL"))
-    # return model.transcribe(str(file_path), return_fragments=True)
     return model.transcribe(
         str(file_path), data
     )
@@ -112,6 +111,7 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
     async def DiarizateSpeakers(self, request, context):
         transcriptionData = TranscriptionData(audio=request.sound_data, diarizate=True)
         file_path = transcriptionData.saveFile(save_as_wav=False)
+        print(file_path)
         out = []
         try:
             with concurrent.futures.ProcessPoolExecutor() as executor:
