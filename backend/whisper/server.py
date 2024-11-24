@@ -1,5 +1,4 @@
 from concurrent import futures
-from threading import Thread
 from transcrpitionData import TranscriptionData, WrongLanguage
 from dotenv import load_dotenv
 from translate import Translator
@@ -112,14 +111,14 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
     @_errorUnaryHandler
     async def DiarizateSpeakers(self, request, context):
         transcriptionData = TranscriptionData(audio=request.sound_data, diarizate=True)
-        file_path = transcriptionData.saveFile()
+        file_path = transcriptionData.saveFile(save_as_wav=False)
         out = []
         try:
             with concurrent.futures.ProcessPoolExecutor() as executor:
                 futures = {
                     "transcribe": executor.submit(run_transcribe, file_path, transcriptionData),
                     "diarize": executor.submit(
-                        diarizate.diarizate_speakers, str(file_path)
+                        diarizate.diarizate_speakers, str(file_path.resolve())
                     ),
                 }
                 concurrent.futures.wait(futures.values())
@@ -214,8 +213,14 @@ async def server():
     server = grpc.aio.server(
         futures.ThreadPoolExecutor(max_workers=10),
         options=[
-            ("grpc.max_send_message_length", os.getenv("MAX_FILE_MB") * 1024 * 1024),  # 50MB
-            ("grpc.max_receive_message_length", os.getenv("MAX_FILE_MB") * 1024 * 1024),  # 50MB
+            (
+                "grpc.max_send_message_length",
+                os.getenv("MAX_FILE_MB") * 1024 * 1024,
+            ),  # 50MB
+            (
+                "grpc.max_receive_message_length",
+                os.getenv("MAX_FILE_MB") * 1024 * 1024,
+            ),  # 50MB
         ],
     )
     sound_transfer_pb2_grpc.add_SoundServiceServicer_to_server(SoundService(), server)

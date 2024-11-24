@@ -24,6 +24,7 @@ def diarizate_speakers(path: str) -> list[Clip]:
     diarization = pipeline(path)
     out = []
     current_speaker = None
+
     for turn, _, speaker in diarization.itertracks(yield_label=True):
         if current_speaker != speaker:
             out.append(Clip(turn.start, turn.end, speaker, ""))
@@ -33,15 +34,6 @@ def diarizate_speakers(path: str) -> list[Clip]:
     if out:
         out[0].start = 0
     return out
-
-
-def preprocess_segments(transcription_segments: list[Clip], diarization: list[Clip]):
-    transcription_segments[0].start = 0
-    diarization[0].start = 0
-    if transcription_segments[-1].end > diarization[-1].end:
-        diarization[-1].end = transcription_segments[-1].end
-    else:
-        transcription_segments[-1].end = diarization[-1].end
 
 
 def count_coverage(line: Clip, speaker: Clip) -> float:
