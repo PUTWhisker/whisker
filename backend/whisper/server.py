@@ -109,7 +109,7 @@ class SoundService(sound_transfer_pb2_grpc.SoundServiceServicer):
     async def TestConnection(self, request, context):
         return sound_transfer_pb2.TextMessage(text=request.text)
     
-
+    @_errorUnaryHandler
     async def DiarizateSpeakers(self, request, context):
         transcriptionData = TranscriptionData(audio=request.sound_data, diarizate=True)
         file_path = transcriptionData.saveFile()

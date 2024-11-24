@@ -21,6 +21,7 @@ export function button_login(e)
 export function button_getTranslation(e)
 {
     e.preventDefault()
+    getTranslation("Test token, request will fail")
 }
 
 
@@ -66,7 +67,23 @@ function login(username, password) {
 
 
 function getTranslation(jwtToken) {
+    console.log("AAAA")
     let request = new Empty()
-    let meta = new grpc.Metadata()
-    meta.add('jwt', jwtToken)
+    let metadata = {'jwt': jwtToken}
+    console.log("Am in getTranslation")
+    let stream = authenticationClient.getTranslation(request, metadata)
+
+    stream.on('data', (response) => {
+        console.log(`Received response: ${response.getTranscription()}`);
+    });
+
+    // Handle stream end
+    stream.on('end', () => {
+        console.log('Received everything, stream ended.');
+    });
+
+    // Handle errors
+    stream.on('error', (err) => {
+        console.log(`There was an error: ${err.code}: ${err.message}`);
+    });
 }
