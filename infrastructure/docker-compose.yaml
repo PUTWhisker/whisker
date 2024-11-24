@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile
     environment:
      - HUGGING_FACE_API_KEY="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"
+    # ports:
+    #  - 7070:7070
 
   golang-server:
     build:
@@ -43,14 +45,14 @@ services:
     environment:
       - POSTGRES_PASSWORD=password
 
-  # client:
-  #   build:
-  #     context: ../webApp
-  #     dockerfile: docker/Dockerfile
-  #     args:
-  #       no-cache: "true"
-  #   ports:
-  #     - "8080:8080"
+  client:
+    build:
+      context: ../webApp
+      dockerfile: docker/Dockerfile
+      args:
+        no-cache: "true"
+    ports:
+      - "8080:8080"
       
 volumes:
   postgres_data:

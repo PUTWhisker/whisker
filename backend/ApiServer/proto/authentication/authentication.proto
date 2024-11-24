@@ -7,13 +7,16 @@ import "google/protobuf/timestamp.proto";
 
 service ClientService {
     rpc Login (UserCredits) returns (LoginResponse) {};
-    rpc GetTranslation (Empty) returns (stream TextHistory) {};
     rpc Register (UserCredits) returns (StatusResponse) {};
+    rpc GetTranslation (Empty) returns (stream TextHistory) {};
+    rpc EditTranscription(NewContent) returns (StatusResponse) {};
+    rpc DeleteTranscription(Id) returns (StatusResponse) {};
 }
 
 message TextHistory {
     string transcription = 1;
     google.protobuf.Timestamp created_at = 2;
+    int32 id = 3;
 }
 
 message UserCredits {
@@ -29,6 +32,15 @@ message StatusResponse {
 message LoginResponse {
     string JWT = 1;
     bool successful = 2;
+}
+
+message Id {
+    int32 id = 1;
+}
+
+message NewContent {
+    int32 id = 1;
+    string content = 2;
 }
 
 message Empty {

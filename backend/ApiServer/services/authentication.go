@@ -211,15 +211,49 @@ func (s *AuthenticationServer) GetTranslation(_ *pb.Empty, stream pb.ClientServi
 	for rows.Next() {
 		var transcirptionText string
 		var time_added time.Time
-		err = rows.Scan(&transcirptionText, &time_added)
+		var id int32
+		err = rows.Scan(&id, &transcirptionText, &time_added)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err := stream.Send(&pb.TextHistory{Transcription: transcirptionText, CreatedAt: timestamppb.New(time_added)})
+		err := stream.Send(&pb.TextHistory{Transcription: transcirptionText, CreatedAt: timestamppb.New(time_added), Id: id})
 		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func (s *AuthenticationServer) EditTranscription(ctx context.Context, in *pb.NewContent) (*pb.StatusResponse, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Errorf(codes.DataLoss, "Failed to get metadata")
+	}
+
+	username, err := GetUserNameFromMetadata(md)
+
+	err = s.Db.editTranscription(int(in.Id), username, in.Content)
+
+	if err == nil {
+		return &pb.StatusResponse{Successful: true, Error: ""}, err
+	} else {
+		log.Panic(err)
+	}
+	return &pb.StatusResponse{Successful: false, Error: "Error while editing"}, err
+}
+
+func (s *AuthenticationServer) DeleteTranscription(ctx context.Context, in *pb.Id) (*pb.StatusResponse, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Errorf(codes.DataLoss, "Failed to get metadata")
+	}
+
+	username, err := GetUserNameFromMetadata(md)
+
+	err = s.Db.deleteTranscription(int(in.Id), username)
+	if err == nil {
+		return &pb.StatusResponse{Successful: true, Error: ""}, err
+	}
+	return &pb.StatusResponse{Successful: false, Error: "Error while deleting"}, nil
 }

@@ -58,18 +58,18 @@ func (s *SoundServer) TranscribeFile(ctx context.Context, in *pb.TranscriptionRe
 	if err != nil {
 		return res, err
 	}
+	username, err := GetUserNameFromMetadata(md)
+	language := ""
+	if md["language"] != nil {
+		language = md["language"][0]
+	}
+	if err != nil {
+		return nil, err
+	}
 
-	//Commented this code, as server tries to save to database even when env variable USE_DATABASE=False
-
-	// username, err := GetUserNameFromMetadata(md)
-
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// if username != "" && s.Db != nil {
-	// 	s.Db.saveTranscription(res.Text, username)
-	// }
+	if username != "" && s.Db != nil {
+		s.Db.saveTranscription(res.Text, username, false, language)
+	}
 
 	return res, nil
 }
@@ -91,9 +91,13 @@ func (s *SoundServer) DiarizateFile(ctx context.Context, in *pb.TranscriptionReq
 	// if err != nil {
 	// 	return nil, err
 	// }
-	//TODO: Save to database result, needs to refractor database and save function for that
+	// language := ""
+	// if md["language"] != nil {
+	// 	language = md["language"][0]
+	// }
+
 	// if username != "" {
-	// 	SaveTextToHistory(res.Text, username, s.DbPool)
+	// 	s.Db.saveDiarization(res.Text, res.SpeakerName, username, language)
 	// }
 
 	return res, nil

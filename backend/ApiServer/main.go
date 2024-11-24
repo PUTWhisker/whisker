@@ -67,13 +67,12 @@ func main() {
 	for !connected {
 		err := services.ConnectToWhisperServer()
 		if err != nil {
-			fmt.Printf("Couldn't connect to whisper server, retrying in 10 s")
+			fmt.Println("Couldn't connect to whisper server, retrying in 10 s")
 			time.Sleep(10 * time.Second)
 		} else {
 			connected = true
 		}
 	}
-	fmt.Printf("🟢 Connected to whisper server")
 	if dbPool != nil {
 		defer dbPool.Close()
 	}
