@@ -13,8 +13,8 @@ const _validFileExtensions = [".mp3", ".wav"];
 export function setupConnection() {
     connectionTest()
 
-    const form = document.getElementById('send_file')
-    form.onsubmit = validateAndSend;
+    const send_button = document.getElementById('submit_file')
+    send_button.onclick = validateAndSend;
     //TODO: down from here are buttons from test.html
 //     const register = document.getElementById('register')
 //     register.onsubmit = button_register;
@@ -46,16 +46,20 @@ async function validateAndSend(e) {
     // })
 }
 
-function showTranscriptedText(text) {
+async function showTranscriptedText(text) {
     var transcripted = document.getElementById("transciptedText");
     console.log(typeof(text))
-    transcripted.innerText = text;
+    console.log('szapka')
+    console.log(text)
+    transcripted.innerText = text
 }
 
-function showTranslatedText(text) {
+async function showTranslatedText(text) {
     var translated = document.getElementById("translatedText");
     console.log(typeof(text))
-    translated.innerText = text;
+    console.log('a')
+    console.log(text)
+    translated.innerText = text
 }
 
 function connectionTest() { // Verify whether we can connect with the Whisper server
@@ -98,6 +102,7 @@ async function validate(e) { // Validate input file format
                 let answer_flag = false;
                 for await (const res of answer) {
                     console.log(res)
+                    if (!res) continue
                     if(!answer_flag){
                         showTranscriptedText(res);
                         answer_flag = true;
@@ -143,11 +148,11 @@ function sendFile(file) { // Send file to the server and return the answer
 async function *sendFileTranslation(file, fileLanguage, translationLanguage) {
     const reader = (file) =>
         new Promise((resolve, reject) => {
-          const fr = new FileReader();
-          fr.onload = () => resolve(fr);
-          fr.onerror = (err) => reject(err);
-          fr.readAsArrayBuffer(file);
-        });
+          const fr = new FileReader()
+          fr.onload = () => resolve(fr)
+          fr.onerror = (err) => reject(err)
+          fr.readAsArrayBuffer(file)
+        })
     let e = await reader(file)
     let buffer = e.result
     let byteArray = new Uint8Array(buffer)
@@ -159,17 +164,18 @@ async function *sendFileTranslation(file, fileLanguage, translationLanguage) {
 
     // Handle responses
     yield stream.on('data', (response) => {
-        console.log(`Received response: ${response.getText()}`);
-        return response.getText()
+        let text = response.getText()
+        console.log(`Received response: ${text}`)
+        return text
     });
 
     // Handle stream end
     stream.on('end', () => {
-        console.log('Received everything, stream ended.');
+        console.log('Received everything, stream ended.')
     });
 
     // Handle errors
     stream.on('error', (err) => {
-        console.log(`There was an error: ${err.code}: ${err.message}`);
+        console.log(`There was an error: ${err.code}: ${err.message}`)
     });
 }
