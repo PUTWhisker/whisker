@@ -8,16 +8,26 @@
       function showTransBox(){
         document.getElementById("show_transcript").style.display = 'block';
       }
+
+      function showTranslateBox(){
+        var box = document.getElementById("show_translation_checkbox");
+        var div_style = "none";
+          if(box.checked){
+            div_style = "block";
+        }
+        document.getElementById("show_translation").style.display = div_style;
+        document.getElementById("choose_trans_lang").style.display = div_style;
+      }
     </script>
     <link rel="stylesheet" href="style.css">
     <link rel="shortcut icon" href="#">
   </head>
   <body>
     <main>
-      <div>
-        <a href="http://127.0.0.1:5500/webApp/record.html">
-          <button> GO TO LIVE RECORDING</button>
-        </a>
+      <div id="top_menu">
+        <a href="http://127.0.0.1:5500/webApp/record.html">Switch to dictate</a>
+        <a href="http://127.0.0.1:5500/webApp/login.html">Log in</a>
+        <a href="http://127.0.0.1:5500/webApp/signup.html">Sign up</a>
       </div>
         <div id = "main_field">
           <div id = "submit_container">
@@ -38,10 +48,18 @@
               <option>English</option>
               <option>German</option>
             </select>
-            <label>
-              <input type="checkbox" id="show_translation_tic"/>
-              <span class="custom_check">Show translation</span>
-            </label>
+            <div id="translation_options">
+              <label>
+                <input type="checkbox" id="show_translation_checkbox" onclick="showTranslateBox()"/>
+                <span class="custom_check">Show translation</span>
+              </label>
+              <select id="choose_trans_lang"> 
+                <option disabled selected>Translate to:</option>
+                <option>Polish</option>
+                <option>English</option>
+                <option>German</option>
+              </select>
+            </div>
             <button type="submit" value="Submit file" id="submit_file" onclick="showTransBox()">Transcribe!</button>
           </div>
         </div>
@@ -49,8 +67,18 @@
           <fieldset id = "show_transcript">
             <legend>Transcript</legend>
             <form id="receive_transcript">
-              <button id="copy_button">Copy</button>
+              <!-- <button id="copy_button">Copy</button> -->
               <p id="transcriptedText"></p>
+            </form>
+          </fieldset>
+        </div>
+        <br />
+        <div>
+          <fieldset id = "show_translation">
+            <legend>Translation</legend>
+            <form id="receive_translation">
+              <!-- <button id="copy_button">Copy</button> -->
+              <p id="translatedText"></p>
             </form>
           </fieldset>
         </div>

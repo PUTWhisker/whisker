@@ -13,15 +13,15 @@ const _validFileExtensions = [".mp3", ".wav"];
 export function setupConnection() {
     connectionTest()
 
-    // const form = document.getElementById('send_file')
-    // form.onsubmit = validateAndSend;
+    const form = document.getElementById('send_file')
+    form.onsubmit = validateAndSend;
     //TODO: down from here are buttons from test.html
-    const register = document.getElementById('register')
-    register.onsubmit = button_register;
-    const login = document.getElementById('login')
-    login.onsubmit = button_login;
-    const getTransl = document.getElementById('getTranslation')
-    getTransl.onsubmit = button_getTranslation;
+    // const register = document.getElementById('register')
+    // register.onsubmit = button_register;
+    // const login = document.getElementById('login')
+    // login.onsubmit = button_login;
+    // const getTransl = document.getElementById('getTranslation')
+    // getTransl.onsubmit = button_getTranslation;
 }
 
 
@@ -47,6 +47,12 @@ function showTranscriptedText(text) {
     var transcripted = document.getElementById("transciptedText");
     console.log(typeof(text))
     transcripted.innerText = text;
+}
+
+function showTranslatedText(text) {
+    var translated = document.getElementById("translatedText");
+    console.log(typeof(text))
+    translated.innerText = text;
 }
 
 function connectionTest() { // Verify whether we can connect with the Whisper server
@@ -91,6 +97,8 @@ async function validate(e) { // Validate input file format
         }
     }
 }
+
+
 
 function sendFile(file) { // Send file to the server and return the answer
     let reader = new FileReader()

@@ -42,6 +42,23 @@ fieldset {
     
 }
 
+#top_menu{
+    background-color:rgb(86, 58, 156);
+    overflow: hidden;
+}
+
+#top_menu a {
+    /* float: left; */
+    font-size: 20px;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    color: rgb(255,247,209);
+    background-color: rgb(86, 58, 156);
+    padding: 14px 16px;
+    margin: auto;
+    display: inline-block;
+    text-decoration: none;
+}
+
 #choose_file {
     border-style: dotted;
     border-width: 7px;
@@ -81,7 +98,7 @@ fieldset {
 
 #main_field{
     display: flex;
-    padding: 10px;
+    padding: 5% 5%;
     /* margin: 5%; */
     
 }
@@ -109,7 +126,24 @@ fieldset {
     margin: 20px;
 }
 
-#show_translation_tic{
+#choose_trans_lang{
+    appearance: none;
+    -webkit-appearance: none; 
+    -moz-appearance: none; 
+    background-color: rgb(255, 247, 209); 
+    color: rgb(86, 58, 156); 
+    width: 200px; 
+    height: 100px; 
+    border-radius: 4px; 
+    font-size: 20px; 
+    border: 2px solid rgb(27, 27, 27, 0.8); 
+    padding: 10px; 
+    cursor: pointer;
+    text-align: center;
+    margin: 20px;
+}
+
+#show_translation_checkbox{
     display: none;
 }
 
@@ -162,6 +196,19 @@ input[type="checkbox"]:checked + .custom_check {
 #show_transcript{
     display: none;
     border-radius: 5px;
+}
+
+#translation_options{
+display: flex;
+}
+
+#show_translation{
+    display: none;
+    border-radius: 5px;
+}
+
+#choose_trans_lang{
+    display: none;
 }
 
 audio {
