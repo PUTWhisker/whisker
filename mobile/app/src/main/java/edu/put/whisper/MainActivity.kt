@@ -21,6 +21,7 @@ import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import edu.put.whisper.ui.theme.Utilities
 import io.grpc.authentication.AuthenticationClient
 import io.grpc.soundtransfer.SoundTransferGrpc
 import kotlinx.coroutines.Dispatchers
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnCopy: ImageButton
     private lateinit var btnBack: ImageButton
     private lateinit var tvTranscript: TextView
+    private lateinit var utilities: Utilities
     private var isRecordingStopped: Boolean = false
     private var currentFileName: String? = null
     private var tempFilePath: String? = null
@@ -69,9 +71,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-
-
+        utilities = Utilities(this)
         tvTimer = findViewById(R.id.tvTimer)
         waveformView = findViewById(R.id.waveformView)
 
@@ -409,13 +409,6 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
     }
-    fun chooseFile(v: View) {
-        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-            type = "audio/*" // Filtruj tylko pliki dźwiękowe
-            putExtra(Intent.EXTRA_LOCAL_ONLY, true) // Tylko lokalne pliki
-        }
-        startActivityForResult(Intent.createChooser(intent, "Choose an audio file"), 100)
-    }
 
     private val timerRunnable: Runnable = object : Runnable {
         override fun run() {
@@ -446,23 +439,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun uploadRecording(filePath: String) {
-        Log.i("auth", filePath)
-        try {
-            val transfer = SoundTransferGrpc(Uri.parse(resources.getString(R.string.server_url)))
-            val output: String? = transfer.sendSoundFile(filePath)
-
+        utilities.uploadRecording(filePath) { output ->
             runOnUiThread {
                 if (output != null) {
                     tvTranscript.text = output
-                    setVisibility( View.VISIBLE, btnCopy)
+                    setVisibility(View.VISIBLE, btnCopy)
                 } else {
                     tvTranscript.text = "Transkrypcja nie jest dostępna."
                 }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            runOnUiThread {
-                tvTranscript.text = "Błąd podczas transkrypcji: ${e.message}"
             }
         }
     }

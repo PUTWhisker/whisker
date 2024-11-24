@@ -12,9 +12,11 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import edu.put.whisper.ui.theme.Utilities
 import io.grpc.authentication.AuthenticationClient
 import io.grpc.authentication.TextHistory
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +30,7 @@ class StartActivity : AppCompatActivity() {
     private lateinit var btnRecordActivity: Button
     private lateinit var btnChooseFile: Button
     private lateinit var tvSelectedFile: TextView
+    private lateinit var tvTranscriptedFile: TextView
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
     private lateinit var bottomSheetLogin: View
     private lateinit var bottomSheetTitle: TextView
@@ -44,6 +47,8 @@ class StartActivity : AppCompatActivity() {
     private lateinit var rvTranscriptions: RecyclerView
     private lateinit var transcriptionAdapter: TranscriptionAdapter
     private lateinit var llFileRecord: LinearLayout
+    private lateinit var utilities: Utilities
+    private var tempFilePath: String? = null
     private val PICK_FILE_REQUEST_CODE = 1
 
     private lateinit var authClient: AuthenticationClient
@@ -54,10 +59,12 @@ class StartActivity : AppCompatActivity() {
 
         val serverUri = Uri.parse("http://100.80.80.156:50051/")
         authClient = AuthenticationClient(serverUri)
+        utilities = Utilities(this)
 
         btnRecordActivity = findViewById(R.id.btnRecordActivity)
         btnChooseFile = findViewById(R.id.btnChooseFile)
         tvSelectedFile = findViewById(R.id.tvSelectedFile)
+        tvTranscriptedFile = findViewById(R.id.tvTranscriptedFile)
         btnLogin = findViewById(R.id.btnLogin)
         loginInput = findViewById(R.id.loginInput)
         passwordInput = findViewById(R.id.passwordInput)
@@ -190,28 +197,11 @@ class StartActivity : AppCompatActivity() {
         }
 
         btnChooseFile.setOnClickListener {
-            val musicDirectory = File("/storage/emulated/0/Music")
-            if (musicDirectory.exists() && musicDirectory.isDirectory) {
-                val intent = Intent(Intent.ACTION_VIEW).apply {
-                    setDataAndType(Uri.parse(musicDirectory.toURI().toString()), "*/*")
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                } else {
-                    Toast.makeText(
-                        this@StartActivity,
-                        "No app available to view this directory",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            } else {
-                Toast.makeText(
-                    this@StartActivity,
-                    "Music directory not found",
-                    Toast.LENGTH_SHORT
-                ).show()
+            val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                type = "audio/*"  // Tylko pliki audio
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
+            startActivityForResult(intent, PICK_FILE_REQUEST_CODE)
         }
     }
 
@@ -222,12 +212,44 @@ class StartActivity : AppCompatActivity() {
                 val fileName = getFileNameFromUri(uri)
                 if (fileName != null) {
                     tvSelectedFile.text = "$fileName is being transcripted"
+                    lifecycleScope.launch {
+                        val filePath = getFilePathFromUri(uri)
+                        if (filePath != null) {
+                            utilities.uploadRecording(filePath) { transcription ->
+                                runOnUiThread {
+                                    if (transcription != null) {
+                                        tvTranscriptedFile.text = transcription
+                                    } else {
+                                        Toast.makeText(this@StartActivity, "Transcription failed.", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        } else {
+                            Toast.makeText(this@StartActivity, "Unable to get path", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 } else {
                     Toast.makeText(this, "Unable to get file name", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
+
+
+
+    private fun getFilePathFromUri(uri: Uri): String? {
+        var inputStream = contentResolver.openInputStream(uri)
+        return if (inputStream != null) {
+            val tempFile = File.createTempFile("temp_audio", ".mp3", cacheDir)
+            inputStream.copyTo(FileOutputStream(tempFile))
+            tempFile.absolutePath // Zwracamy ścieżkę do tymczasowego pliku
+        } else {
+            null
+        }
+    }
+
+
+
 
     private fun getFileNameFromUri(uri: Uri): String? {
         var fileName: String? = null
