@@ -15,13 +15,15 @@ export function setupConnection() {
 
     const form = document.getElementById('send_file')
     form.onsubmit = validateAndSend;
+    const form = document.getElementById('send_file')
+    form.onsubmit = validateAndSend;
     //TODO: down from here are buttons from test.html
-    // const register = document.getElementById('register')
-    // register.onsubmit = button_register;
-    // const login = document.getElementById('login')
-    // login.onsubmit = button_login;
-    // const getTransl = document.getElementById('getTranslation')
-    // getTransl.onsubmit = button_getTranslation;
+//     const register = document.getElementById('register')
+//     register.onsubmit = button_register;
+//     const login = document.getElementById('login')
+//     login.onsubmit = button_login;
+//     const getTransl = document.getElementById('getTranslation')
+//     getTransl.onsubmit = button_getTranslation;
 }
 
 
@@ -91,8 +93,11 @@ async function validate(e) { // Validate input file format
                 alert("Sorry, " + sFileName.split('\\').pop() + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "))
                 return false
             } else {
-                let answer = await sendFile(input.files[0], 'en', 'pl')
-                return answer
+                let answer = sendFileTranslation(input.files[0], 'en', 'pl')
+                for await (const res of answer) {
+                    console.log(res)
+                }
+                return "A"
             }
         }
     }
@@ -127,34 +132,36 @@ function sendFile(file) { // Send file to the server and return the answer
 }
 
 
-async function sendFileTranslation(file, fileLanguage, translationLanguage) {
-    let reader = new FileReader()
-    console.log('asd')
-    reader.readAsArrayBuffer(file)
-    reader.onload = function(e) {
-        console.log("A")
-        let buffer = e.target.result
-        let byteArray = new Uint8Array(buffer)
-        console.log(byteArray)
-        let metadata = {'language': fileLanguage, 'translation': translationLanguage}
-        let request = new SoundRequest()
-        request.setSoundData(byteArray)
-        let stream = soundClient.sendSoundFileTranslation(request, metadata)
-
-        // Handle responses
-        stream.on('data', (response) => {
-            console.log(`Received response: ${response.getText()}`);
+async function *sendFileTranslation(file, fileLanguage, translationLanguage) {
+    const reader = (file) =>
+        new Promise((resolve, reject) => {
+          const fr = new FileReader();
+          fr.onload = () => resolve(fr);
+          fr.onerror = (err) => reject(err);
+          fr.readAsArrayBuffer(file);
         });
+    let e = await reader(file)
+    let buffer = e.result
+    let byteArray = new Uint8Array(buffer)
+    console.log(byteArray)
+    let metadata = {'language': fileLanguage, 'translation': translationLanguage}
+    let request = new SoundRequest()
+    request.setSoundData(byteArray)
+    let stream = soundClient.sendSoundFileTranslation(request, metadata)
 
-        // Handle stream end
-        stream.on('end', () => {
-            console.log('Received everything, stream ended.');
-        });
+    // Handle responses
+    yield stream.on('data', (response) => {
+        console.log(`Received response: ${response.getText()}`);
+        return "Something"
+    });
 
-        // Handle errors
-        stream.on('error', (err) => {
-            console.log(`There was an error: ${err.code}: ${err.message}`);
-        });
-    }
-    return
+    // Handle stream end
+    stream.on('end', () => {
+        console.log('Received everything, stream ended.');
+    });
+
+    // Handle errors
+    stream.on('error', (err) => {
+        console.log(`There was an error: ${err.code}: ${err.message}`);
+    });
 }
