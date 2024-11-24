@@ -198,7 +198,7 @@ input[type="checkbox"]:checked + .custom_check {
 }
 
 #show_transcript{
-    display: none;
+    display: block;
     border-radius: 5px;
 }
 
