@@ -1,7 +1,31 @@
 
-const { SoundServiceClient } = require('./proto/sound_transfer_grpc_web_pb.js')
-const { SoundRequest, SoundResponse, TextMessage } = require('./proto/sound_transfer_pb.js')
 
-const client = new SoundServiceClient('100.80.80.156' + ':50051', null, null)
+const { SoundServiceClient } = require('./proto/sound_transfer/sound_transfer_grpc_web_pb.js')
+const { SoundRequest, 
+        SoundResponse, 
+        TextMessage, 
+        SoundStreamResponse, 
+        SpeakerAndLine } = require('./proto/sound_transfer/sound_transfer_pb.js')
 
-module.exports = { SoundRequest, SoundResponse, TextMessage, client }
+const { ClientServiceClient } = require('./proto/authentication/authentication_grpc_web_pb.js')
+const { TextHistory, 
+        UserCredits, 
+        StatusResponse, 
+        LoginResponse, 
+        Empty } = require('./proto/authentication/authentication_pb.js')
+
+const soundClient = new SoundServiceClient('http://100.80.80.156:50051')
+const authenticationClient = new ClientServiceClient('http://100.80.80.156:50051')
+
+module.exports = { soundClient, 
+                   SoundRequest, 
+                   SoundResponse, 
+                   TextMessage,
+                   SoundStreamResponse,
+                   SpeakerAndLine,
+                   authenticationClient,
+                   TextHistory,
+                   UserCredits,
+                   StatusResponse,
+                   LoginResponse,
+                   Empty }
