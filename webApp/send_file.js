@@ -1,5 +1,11 @@
+import { Metadata } from 'grpc-web';
 
-const {client, SoundRequest, TextMessage} = require('./consts.js')
+const { soundClient,
+        SoundRequest, 
+        SoundResponse, 
+        TextMessage, 
+        SoundStreamResponse, 
+        SpeakerAndLine} = require('./consts.js')
 
 const _validFileExtensions = [".mp3", ".wav"];
 
@@ -10,6 +16,7 @@ export function setupConnection() {
     form.onsubmit = validateAndSend;
 }
 
+
 async function validateAndSend(e) {
     e.preventDefault()
     validate(e)
@@ -18,6 +25,13 @@ async function validateAndSend(e) {
         showTranscriptedText(result); 
       }
     })
+    //TODO: uncomment upper code, I use this function for testing
+    //     validate(e)
+    // .then(result => {
+    //   if (result) {
+    //     sendFileTranslation(document.getElementById('input_file'), 'en', 'pl')
+    //   }
+    // })
 }
 
 function showTranscriptedText(text) {
@@ -30,7 +44,7 @@ function connectionTest() { // Verify whether we can connect with the Whisper se
     let randomNum = Math.random()
     let request = new TextMessage();
     request.setText(randomNum.toString())
-    client.testConnection(request, {}, (err, response) => {
+    soundClient.testConnection(request, {}, (err, response) => {
         if (err) {
             console.log(`Could not connect to the server: code = ${err.code}, message = ${err.message}`)
             return false;
@@ -62,7 +76,7 @@ async function validate(e) { // Validate input file format
                 alert("Sorry, " + sFileName.split('\\').pop() + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "))
                 return false
             } else {
-                let answer = await sendFile(input.files[0])
+                let answer = await  sendFileTranslation(input.files[0], 'en', 'pl')
                 return answer
             }
         }
@@ -82,7 +96,7 @@ function sendFile(file) { // Send file to the server and return the answer
         request.setSoundData(byteArray)
         request.setFlagsList("model: small")
         request.setFlagsList("language: english")
-        client.sendSoundFile(request, {}, (err, response) => {
+        soundClient.sendSoundFile(request, {}, (err, response) => {
             if (err) {
                 console.log(`Could not send files to the server: code = ${err.code}, message = ${err.message}`)
                 return
@@ -93,4 +107,37 @@ function sendFile(file) { // Send file to the server and return the answer
             return answer
         })
     }
+}
+
+
+async function sendFileTranslation(file, fileLanguage, translationLanguage) {
+    let reader = new FileReader()
+    console.log('asd')
+    reader.readAsArrayBuffer(file)
+    reader.onload = function(e) {
+        console.log("A")
+        let buffer = e.target.result
+        let byteArray = new Uint8Array(buffer)
+        console.log(byteArray)
+        let metadata = {'language': fileLanguage, 'translation': translationLanguage}
+        let request = new SoundRequest()
+        request.setSoundData(byteArray)
+        let stream = soundClient.sendSoundFileTranslation(request, metadata)
+
+        // Handle responses
+        stream.on('data', (response) => {
+            console.log(`Received response: ${response.getText()}`);
+        });
+
+        // Handle stream end
+        stream.on('end', () => {
+            console.log('Received everything, stream ended.');
+        });
+
+        // Handle errors
+        stream.on('error', (err) => {
+            console.log(`There was an error: ${err.code}: ${err.message}`);
+        });
+    }
+    return
 }
