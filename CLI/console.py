@@ -1,3 +1,4 @@
+#TODO: waiting animation for SendFileTranslation and diarization doesn't work for reasons
 from grpcClient import GrpcClient
 from getpass import getpass
 from dotenv import load_dotenv, set_key
@@ -30,9 +31,11 @@ class ConsolePrinter:
             try:
                 return await func(*args, **kwargs)
             except grpc.RpcError as grpcError:
-                print(
-                    f"Grpc connection failure: {grpcError.details()}"
-                )  # TODO: when there is implemented secure connection, here handle those exceptions
+                print(f"Grpc connection failure: {grpcError.details()}") # <- custom message sent by server
+                print(f"{grpcError.code()}") # <- one of the 17 rpcError status codes
+                print(f"{grpcError.debug_error_string()}") # <- Error message string, Usefull might be IP address and created_time
+                print(f"{grpcError.initial_metadata()}") # <- No idea the difference, but metadata sent with the error message
+                print(f"{grpcError.trailing_metadata()}") # <- No idea the difference, but metadata sent with the error message
                 return
             except Exception as e:
                 print(f"This is an unhandled exception: {e}")
@@ -97,6 +100,8 @@ class ConsolePrinter:
     @_errorHandler
     async def sendFileTranslation(self, audio: bytes):
         responseIter = self.grpcClient.SendSoundFileTranslation(audio)
+        dot = 0
+        
         async for response in responseIter:
             if "transcription" in response.flags:
                 print(f'\033[1mAudio transcription: \033[0m{response.text}')

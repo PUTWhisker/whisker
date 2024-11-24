@@ -135,10 +135,10 @@ class GrpcClient:
             stub = authentication_pb2_grpc.ClientServiceStub(
                 self.channel
             )
-            tokenJWT = await stub.GetTranslation(
+            response = await stub.Register(
                 authentication_pb2.UserCredits(username=username, password=password),
             )
-            return tokenJWT
+            return response
         except Exception as e:
             raise e
         

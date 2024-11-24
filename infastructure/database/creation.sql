@@ -16,4 +16,3 @@ CREATE TABLE transcription (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-

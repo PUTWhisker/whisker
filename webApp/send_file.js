@@ -7,6 +7,8 @@ const { soundClient,
         SoundStreamResponse, 
         SpeakerAndLine} = require('./consts.js')
 
+const { button_register, button_login, button_getTranslation } = require('./authentication.js')
+
 const _validFileExtensions = [".mp3", ".wav"];
 
 export function setupConnection() {
@@ -14,6 +16,13 @@ export function setupConnection() {
 
     const form = document.getElementById('send_file')
     form.onsubmit = validateAndSend;
+    //TODO: down from here are buttons from test.html
+    // const register = document.getElementById('register')
+    // register.onsubmit = button_register;
+    // const login = document.getElementById('login')
+    // login.onsubmit = button_login;
+    // const getTransl = document.getElementById('getTranslation')
+    // getTransl.onsubmit = button_getTranslation;
 }
 
 
@@ -26,6 +35,7 @@ async function validateAndSend(e) {
       }
     })
     //TODO: uncomment upper code, I use this function for testing
+    // SoundTranslationFunction
     //     validate(e)
     // .then(result => {
     //   if (result) {
@@ -76,7 +86,7 @@ async function validate(e) { // Validate input file format
                 alert("Sorry, " + sFileName.split('\\').pop() + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "))
                 return false
             } else {
-                let answer = await  sendFileTranslation(input.files[0], 'en', 'pl')
+                let answer = await sendFile(input.files[0], 'en', 'pl')
                 return answer
             }
         }

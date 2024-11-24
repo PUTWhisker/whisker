@@ -14,8 +14,8 @@ const { TextHistory,
         LoginResponse, 
         Empty } = require('./proto/authentication/authentication_pb.js')
 
-const soundClient = new SoundServiceClient('http://127.0.0.1:50051')
-const authenticationClient = new ClientServiceClient('http://127.0.0.1:50051')
+const soundClient = new SoundServiceClient('http://100.80.80.156:50051')
+const authenticationClient = new ClientServiceClient('http://100.80.80.156:50051')
 
 module.exports = { soundClient, 
                    SoundRequest, 
