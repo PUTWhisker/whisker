@@ -22,5 +22,5 @@ module.exports = {
             },
         ],
     },
-    mode: 'development', // Use 'production' for optimized builds
+    mode: 'development',
 };
