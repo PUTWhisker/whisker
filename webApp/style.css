@@ -1,5 +1,9 @@
-* {
-    background-color: darkgray;
+
+body{
+    background-image: linear-gradient(rgb(255,247,209), rgb(139,93,255));
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh;
 }
 
 #send_recording {
@@ -9,11 +13,15 @@
 
 #record {
     background-color: green;
-}
+} 
 
 #stop {
     background-color: red;
 }
+
+/* #submit_file{
+    background-position: center;
+} */
 
 .button {
     margin: 0px 10px 0px 10px;
@@ -25,6 +33,186 @@
     cursor: pointer;
 }
 
+fieldset {
+    /* background-color: whitesmoke; */
+    background-color: rgb(106, 66, 194, 0.4);
+    max-width: 900px;
+    min-height: 40vh;
+    margin: auto;
+    
+}
+
+#top_menu{
+    background-color:rgb(86, 58, 156);
+    overflow: hidden;
+}
+
+#top_menu a {
+    /* float: left; */
+    font-size: 20px;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    color: rgb(255,247,209);
+    background-color: rgb(86, 58, 156);
+    padding: 14px 16px;
+    margin: auto;
+    display: inline-block;
+    text-decoration: none;
+}
+
+#choose_file {
+    border-style: dotted;
+    border-width: 7px;
+    text-align: center;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    
+}
+
+#submit_file{
+    color: rgb(86, 58, 156);
+    background-color: rgb(255,247,209);
+    width: 200px;
+    height: 100px;
+    border-radius: 4px;
+    border: 2px solid rgba(27, 27, 27, 0.8);
+    font-size: 20px;
+    margin: 20px;
+    
+}
+
+#submit_container{
+    /* justify-content: center;
+    display: flex; */
+    margin: auto;
+    margin-right: 2%;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#main_buttons{
+    margin: auto;
+    /* margin: 3%; */
+    margin-left: 0%;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#main_field{
+    display: flex;
+    padding: 5% 5%;
+    /* margin: 5%; */
+    
+}
+
+#show_translation_tic, #choose_lang, #submit_file{
+    display: block;
+    
+    
+}
+
+#choose_lang{
+    appearance: none;
+    -webkit-appearance: none; 
+    -moz-appearance: none; 
+    background-color: rgb(255, 247, 209); 
+    color: rgb(86, 58, 156); 
+    width: 200px; 
+    height: 100px; 
+    border-radius: 4px; 
+    font-size: 20px; 
+    border: 2px solid rgb(27, 27, 27, 0.8); 
+    padding: 10px; 
+    cursor: pointer;
+    text-align: center;
+    margin: 20px;
+}
+
+#choose_trans_lang{
+    appearance: none;
+    -webkit-appearance: none; 
+    -moz-appearance: none; 
+    background-color: rgb(255, 247, 209); 
+    color: rgb(86, 58, 156); 
+    width: 200px; 
+    height: 100px; 
+    border-radius: 4px; 
+    font-size: 20px; 
+    border: 2px solid rgb(27, 27, 27, 0.8); 
+    padding: 10px; 
+    cursor: pointer;
+    text-align: center;
+    margin: 20px;
+}
+
+#show_translation_checkbox{
+    display: none;
+}
+
+.custom_check{
+    display: inline-block;
+    color: rgb(86, 58, 156); 
+    background-color: rgb(255, 247, 209); 
+    width: 200px;
+    height: 100px;
+    border-radius: 4px;
+    font-size: 20px;
+    line-height: 100px; 
+    text-align: center;
+    margin: 20px;
+    cursor: pointer;
+    border: 2px solid rgb(27, 27, 27, 0.8);
+}
+
+input[type="checkbox"]:checked + .custom_check {
+    background-color: rgb(22, 178, 105);
+    color: rgb(255, 247, 209);
+}
+
+#send_file {
+    display: flex;            
+    justify-content: center;   
+    align-items: center;
+    height: 50vh;
+}
+
+#upload_msg {
+    font-size: 40px;
+    color: white;
+    opacity: 0.8;
+    
+}
+
+#receive_transcript{
+    max-width:50%;
+    min-width:150px;
+    text-align: center;
+    padding: 5%;
+    margin: auto;
+}
+
+#copy_button{
+    float: right;
+}
+
+#show_transcript{
+    display: block;
+    text-align: center;
+    border-radius: 5px;
+}
+
+#translation_options{
+display: flex;
+}
+
+#show_translation{
+    display: none;
+    text-align: center;
+    border-radius: 5px;
+}
+
+#choose_trans_lang{
+    display: none;
+}
+
 audio {
     margin: 10px 0px 10px 0px;
 }
@@ -33,3 +221,8 @@ article {
     display: flex;
     flex-flow: column nowrap;
 }
+
+
+
+
+

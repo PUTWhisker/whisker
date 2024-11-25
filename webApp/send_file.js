@@ -13,26 +13,29 @@ const _validFileExtensions = [".mp3", ".wav"];
 export function setupConnection() {
     connectionTest()
 
-    // const form = document.getElementById('send_file')
-    // form.onsubmit = validateAndSend;
+    const send_button = document.getElementById('submit_file')
+    send_button.onclick = validateAndSend;
     //TODO: down from here are buttons from test.html
-    const register = document.getElementById('register')
-    register.onsubmit = button_register;
-    const login = document.getElementById('login')
-    login.onsubmit = button_login;
-    const getTransl = document.getElementById('getTranslation')
-    getTransl.onsubmit = button_getTranslation;
+//     const register = document.getElementById('register')
+//     register.onsubmit = button_register;
+//     const login = document.getElementById('login')
+//     login.onsubmit = button_login;
+//     const getTransl = document.getElementById('getTranslation')
+//     getTransl.onsubmit = button_getTranslation;
 }
 
 
 async function validateAndSend(e) {
     e.preventDefault()
     validate(e)
-    .then(result => {
-      if (result) {
-        showTranscriptedText(result); 
-      }
-    })
+    // .then(result => {
+    //   if (result) {
+    //     showTranscriptedText(result); 
+    //   }else {
+    //     // showTranscriptedText(result); 
+    //     // showTranslatededText(result); 
+    //   }
+    // })
     //TODO: uncomment upper code, I use this function for testing
     // SoundTranslationFunction
     //     validate(e)
@@ -43,10 +46,20 @@ async function validateAndSend(e) {
     // })
 }
 
-function showTranscriptedText(text) {
-    var transcripted = document.getElementById("transciptedText");
+async function showTranscriptedText(text) {
+    var transcripted = document.getElementById("transcriptedText");
     console.log(typeof(text))
-    transcripted.innerText = text;
+    console.log('szapka')
+    console.log(text)
+    transcripted.innerText = text
+}
+
+async function showTranslatedText(text) {
+    var translated = document.getElementById("translatedText");
+    console.log(typeof(text))
+    console.log('a')
+    console.log(text)
+    translated.innerText = text
 }
 
 function connectionTest() { // Verify whether we can connect with the Whisper server
@@ -85,12 +98,25 @@ async function validate(e) { // Validate input file format
                 alert("Sorry, " + sFileName.split('\\').pop() + " is invalid, allowed extensions are: " + _validFileExtensions.join(", "))
                 return false
             } else {
-                let answer = await sendFile(input.files[0], 'en', 'pl')
-                return answer
+                let answer = sendFileTranslation(input.files[0], 'en', 'pl')
+                let answer_flag = false;
+                for await (const res of answer) {
+                    console.log(res)
+                    if (!res) continue
+                    if(!answer_flag){
+                        showTranscriptedText(res);
+                        answer_flag = true;
+                    } else {
+                        showTranslatedText(res);
+                    } 
+                }
+                return "A"
             }
         }
     }
 }
+
+
 
 function sendFile(file) { // Send file to the server and return the answer
     let reader = new FileReader()
@@ -119,34 +145,57 @@ function sendFile(file) { // Send file to the server and return the answer
 }
 
 
-async function sendFileTranslation(file, fileLanguage, translationLanguage) {
-    let reader = new FileReader()
-    console.log('asd')
-    reader.readAsArrayBuffer(file)
-    reader.onload = function(e) {
-        console.log("A")
-        let buffer = e.target.result
-        let byteArray = new Uint8Array(buffer)
-        console.log(byteArray)
-        let metadata = {'language': fileLanguage, 'translation': translationLanguage}
-        let request = new SoundRequest()
-        request.setSoundData(byteArray)
-        let stream = soundClient.sendSoundFileTranslation(request, metadata)
+async function *sendFileTranslation(file, fileLanguage, translationLanguage) {
+    const reader = (file) =>
+        new Promise((resolve, reject) => {
+          const fr = new FileReader()
+          fr.onload = () => resolve(fr)
+          fr.onerror = (err) => reject(err)
+          fr.readAsArrayBuffer(file)
+        })
+    let e = await reader(file)
+    let buffer = e.result
+    let byteArray = new Uint8Array(buffer)
+    console.log(byteArray)
+    let metadata = {'language': fileLanguage, 'translation': translationLanguage}
+    let request = new SoundRequest()
+    request.setSoundData(byteArray)
+    const stream = soundClient.sendSoundFileTranslation(request, metadata)
 
-        // Handle responses
-        stream.on('data', (response) => {
-            console.log(`Received response: ${response.getText()}`);
-        });
+    const responseQueue = []
+    let resolveQueue = null
 
-        // Handle stream end
-        stream.on('end', () => {
-            console.log('Received everything, stream ended.');
-        });
+    stream.on('data', (response) => {
+        const text = response.getText()
+        console.log(`Received response: ${text}`)
+        responseQueue.push(text)
+        if (resolveQueue) {
+            resolveQueue()
+            resolveQueue = null
+        }
+    });
 
-        // Handle errors
-        stream.on('error', (err) => {
-            console.log(`There was an error: ${err.code}: ${err.message}`);
-        });
+    stream.on('end', () => {
+        console.log('Received everything, stream ended.')
+        if (resolveQueue) {
+            resolveQueue()
+            resolveQueue = null
+        }
+    });
+
+    stream.on('error', (err) => {
+        console.error(`There was an error: ${err.code}: ${err.message}`)
+        if (resolveQueue) {
+            resolveQueue()
+            resolveQueue = null
+        }
+    });
+
+    while (responseQueue.length > 0 || !stream.finished) {
+        if (responseQueue.length > 0) {
+            yield responseQueue.shift()
+        } else {
+            await new Promise((resolve) => (resolveQueue = resolve))
+        }
     }
-    return
 }
