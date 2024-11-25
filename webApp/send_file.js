@@ -160,42 +160,42 @@ async function *sendFileTranslation(file, fileLanguage, translationLanguage) {
     let metadata = {'language': fileLanguage, 'translation': translationLanguage}
     let request = new SoundRequest()
     request.setSoundData(byteArray)
-    const stream = soundClient.sendSoundFileTranslation(request, metadata);
+    const stream = soundClient.sendSoundFileTranslation(request, metadata)
 
-    const responseQueue = [];
-    let resolveQueue = null;
+    const responseQueue = []
+    let resolveQueue = null
 
     stream.on('data', (response) => {
-        const text = response.getText();
-        console.log(`Received response: ${text}`);
-        responseQueue.push(text);
+        const text = response.getText()
+        console.log(`Received response: ${text}`)
+        responseQueue.push(text)
         if (resolveQueue) {
-            resolveQueue();
-            resolveQueue = null;
+            resolveQueue()
+            resolveQueue = null
         }
     });
 
     stream.on('end', () => {
-        console.log('Received everything, stream ended.');
+        console.log('Received everything, stream ended.')
         if (resolveQueue) {
-            resolveQueue();
-            resolveQueue = null;
+            resolveQueue()
+            resolveQueue = null
         }
     });
 
     stream.on('error', (err) => {
-        console.error(`There was an error: ${err.code}: ${err.message}`);
+        console.error(`There was an error: ${err.code}: ${err.message}`)
         if (resolveQueue) {
-            resolveQueue();
-            resolveQueue = null;
+            resolveQueue()
+            resolveQueue = null
         }
     });
 
     while (responseQueue.length > 0 || !stream.finished) {
         if (responseQueue.length > 0) {
-            yield responseQueue.shift();
+            yield responseQueue.shift()
         } else {
-            await new Promise((resolve) => (resolveQueue = resolve));
+            await new Promise((resolve) => (resolveQueue = resolve))
         }
     }
 }
