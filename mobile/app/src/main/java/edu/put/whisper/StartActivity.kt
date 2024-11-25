@@ -13,6 +13,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,8 +29,8 @@ import java.io.File
 import java.io.FileOutputStream
 
 class StartActivity : AppCompatActivity() {
-    private lateinit var btnRecordActivity: Button
-    private lateinit var btnChooseFile: Button
+    private lateinit var btnRecordActivity: CardView
+    private lateinit var btnChooseFile: CardView
     private lateinit var tvSelectedFile: TextView
     private lateinit var tvTranscriptedFile: TextView
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
@@ -211,8 +212,8 @@ class StartActivity : AppCompatActivity() {
 
         btnLogout.setOnClickListener {
             utilities.setVisibility(View.VISIBLE, btnLogin, btnRegister, btnChooseFile, btnRecordActivity)
-            utilities.setVisibility(View.GONE, btnHistory, btnLogout, tvHello, rvTranscriptions)
-            rvTranscriptions.adapter = null
+            utilities.setVisibility(View.GONE, btnHistory, btnLogout, tvHello)
+            utilities.setVisibility(View.INVISIBLE, rvTranscriptions)
             tvHello.text = ""
             authClient.Logout()
             Toast.makeText(this, "Successfully logged out.", Toast.LENGTH_SHORT).show()
