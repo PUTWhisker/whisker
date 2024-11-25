@@ -47,7 +47,7 @@ async function validateAndSend(e) {
 }
 
 async function showTranscriptedText(text) {
-    var transcripted = document.getElementById("transciptedText");
+    var transcripted = document.getElementById("transcriptedText");
     console.log(typeof(text))
     console.log('szapka')
     console.log(text)
@@ -160,22 +160,42 @@ async function *sendFileTranslation(file, fileLanguage, translationLanguage) {
     let metadata = {'language': fileLanguage, 'translation': translationLanguage}
     let request = new SoundRequest()
     request.setSoundData(byteArray)
-    let stream = soundClient.sendSoundFileTranslation(request, metadata)
+    const stream = soundClient.sendSoundFileTranslation(request, metadata);
 
-    // Handle responses
-    yield stream.on('data', (response) => {
-        let text = response.getText()
-        console.log(`Received response: ${text}`)
-        return text
+    const responseQueue = [];
+    let resolveQueue = null;
+
+    stream.on('data', (response) => {
+        const text = response.getText();
+        console.log(`Received response: ${text}`);
+        responseQueue.push(text);
+        if (resolveQueue) {
+            resolveQueue();
+            resolveQueue = null;
+        }
     });
 
-    // Handle stream end
     stream.on('end', () => {
-        console.log('Received everything, stream ended.')
+        console.log('Received everything, stream ended.');
+        if (resolveQueue) {
+            resolveQueue();
+            resolveQueue = null;
+        }
     });
 
-    // Handle errors
     stream.on('error', (err) => {
-        console.log(`There was an error: ${err.code}: ${err.message}`)
+        console.error(`There was an error: ${err.code}: ${err.message}`);
+        if (resolveQueue) {
+            resolveQueue();
+            resolveQueue = null;
+        }
     });
+
+    while (responseQueue.length > 0 || !stream.finished) {
+        if (responseQueue.length > 0) {
+            yield responseQueue.shift();
+        } else {
+            await new Promise((resolve) => (resolveQueue = resolve));
+        }
+    }
 }

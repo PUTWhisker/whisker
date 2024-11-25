@@ -195,6 +195,7 @@ input[type="checkbox"]:checked + .custom_check {
 
 #show_transcript{
     display: block;
+    text-align: center;
     border-radius: 5px;
 }
 
@@ -204,6 +205,7 @@ display: flex;
 
 #show_translation{
     display: none;
+    text-align: center;
     border-radius: 5px;
 }
 
