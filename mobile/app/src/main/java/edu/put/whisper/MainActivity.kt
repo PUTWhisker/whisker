@@ -126,8 +126,8 @@ class MainActivity : AppCompatActivity() {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             bottomSheetBG.visibility = View.GONE
 
-            setVisibility(View.GONE, btnStop, btnResume, btnSave, btnDelete)
-            setVisibility(View.VISIBLE, btnRecord, btnList, btnBack)
+            utilities.setVisibility(View.GONE, btnStop, btnResume, btnSave, btnDelete)
+            utilities.setVisibility(View.VISIBLE, btnRecord, btnList, btnBack)
             tvTimer.text = "00:00:00"
             waveformView.clearAmplitudes()
 
@@ -145,7 +145,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnBack.setOnClickListener {
-            goBack()
+            utilities.goBack(this)
         }
     }
 
@@ -162,8 +162,8 @@ class MainActivity : AppCompatActivity() {
 //    /storage/emulated/0/Android/data/edu.put.whisper/files/Music/test.mp3
     fun btnRecordPressed(v: View) {
         tempFilePath = getTempRecordingFilePath()
-        setVisibility(View.GONE, btnList, btnRecord, btnBack)
-        setVisibility(View.VISIBLE, btnSave, btnStop, btnTranscript, btnDelete)
+        utilities.setVisibility(View.GONE, btnList, btnRecord, btnBack)
+        utilities.setVisibility(View.VISIBLE, btnSave, btnStop, btnTranscript, btnDelete)
         btnStop.setImageResource(R.drawable.ic_pause)
         try {
             mediaRecorder = MediaRecorder().apply {
@@ -203,8 +203,8 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        setVisibility(View.GONE, tvTimer, btnRecord, btnList, btnResume, btnStop, btnCancel, btnSave, btnDelete, waveformView, btnTranscript)
-        setVisibility(View.VISIBLE, tvTranscript, btnBack)
+        utilities.setVisibility(View.GONE, tvTimer, btnRecord, btnList, btnResume, btnStop, btnCancel, btnSave, btnDelete, waveformView, btnTranscript)
+        utilities.setVisibility(View.VISIBLE, tvTranscript, btnBack)
 
         lifecycleScope.launch {
             val filePath = tempFilePath ?: return@launch
@@ -225,7 +225,7 @@ class MainActivity : AppCompatActivity() {
             handler.removeCallbacks(amplitudeRunnable)
             elapsedTime += System.currentTimeMillis() - startTime
             btnStop.visibility = View.GONE
-            setVisibility(View.VISIBLE, btnResume, btnTranscript)
+            utilities.setVisibility(View.VISIBLE, btnResume, btnTranscript)
             btnResume.setImageResource(R.drawable.ic_restart)
             Toast.makeText(this, "Recording stopped. You can now transcript it.", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
@@ -272,8 +272,8 @@ class MainActivity : AppCompatActivity() {
 
 
     fun btnDeletePressed(v: View) {
-        setVisibility(View.GONE, btnDelete)
-        setVisibility(View.VISIBLE, btnBack)
+        utilities.setVisibility(View.GONE, btnDelete)
+        utilities.setVisibility(View.VISIBLE, btnBack)
         try {
             // Check if mediaRecorder is initialized and is recording
             if (mediaRecorder != null && !isRecordingStopped) {
@@ -298,8 +298,8 @@ class MainActivity : AppCompatActivity() {
             tvTimer.text = "00:00:00"
             waveformView.clearAmplitudes()
 
-            setVisibility(View.GONE, btnStop, btnResume, btnSave)
-            setVisibility(View.VISIBLE, btnRecord, btnList)
+            utilities.setVisibility(View.GONE, btnStop, btnResume, btnSave)
+            utilities.setVisibility(View.VISIBLE, btnRecord, btnList)
             btnTranscript.visibility = View.INVISIBLE
 
             Toast.makeText(this, "Recording deleted", Toast.LENGTH_LONG).show()
@@ -366,9 +366,6 @@ class MainActivity : AppCompatActivity() {
             tempFile.copyTo(finalFile, overwrite = true)
             tempFile.delete() // Remove the temporary file
 
-            // Wypisanie ścieżki do pliku i nazwy pliku w konsoli
-            println("Save Recording - Final File Path: $finalFilePath")
-            println("Save Recording - Current File Name: $currentFileName")
 
             mediaRecorder?.release()
             mediaRecorder = null
@@ -428,29 +425,18 @@ class MainActivity : AppCompatActivity() {
         return "recording_${dateFormat.format(date)}"
     }
 
-    private fun setVisibility(visibility: Int, vararg views: View) {
-        for (view in views) {
-            view.visibility = visibility
-        }
-    }
-
-    private fun goBack() {
-        finish()
-    }
-
     private suspend fun uploadRecording(filePath: String) {
         utilities.uploadRecording(filePath) { output ->
             runOnUiThread {
                 if (output != null) {
                     tvTranscript.text = output
-                    setVisibility(View.VISIBLE, btnCopy)
+                    utilities.setVisibility(View.VISIBLE, btnCopy)
                 } else {
                     tvTranscript.text = "Transkrypcja nie jest dostępna."
                 }
             }
         }
     }
-
 
     override fun onDestroy() {
         super.onDestroy()

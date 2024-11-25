@@ -8,6 +8,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -44,6 +45,9 @@ class StartActivity : AppCompatActivity() {
     private lateinit var tvHello: TextView
     private lateinit var btnLogout: Button
     private lateinit var btnHistory: TextView
+    private lateinit var btnCopy: ImageButton
+    private lateinit var btnBack: ImageButton
+    private lateinit var tvChoose: TextView
     private lateinit var rvTranscriptions: RecyclerView
     private lateinit var transcriptionAdapter: TranscriptionAdapter
     private lateinit var llFileRecord: LinearLayout
@@ -62,9 +66,11 @@ class StartActivity : AppCompatActivity() {
         utilities = Utilities(this)
 
         btnRecordActivity = findViewById(R.id.btnRecordActivity)
+        btnCopy = findViewById(R.id.btnCopy)
         btnChooseFile = findViewById(R.id.btnChooseFile)
         tvSelectedFile = findViewById(R.id.tvSelectedFile)
         tvTranscriptedFile = findViewById(R.id.tvTranscriptedFile)
+        tvChoose = findViewById(R.id.tvChoose)
         btnLogin = findViewById(R.id.btnLogin)
         loginInput = findViewById(R.id.loginInput)
         passwordInput = findViewById(R.id.passwordInput)
@@ -77,6 +83,7 @@ class StartActivity : AppCompatActivity() {
         tvHello = findViewById(R.id.tvHello)
         btnHistory = findViewById(R.id.btnHistory)
         btnLogout = findViewById(R.id.btnLogout)
+        btnBack = findViewById(R.id.btnBack)
         rvTranscriptions = findViewById(R.id.rvTranscriptions)
         llFileRecord = findViewById(R.id.llFileRecord)
         rvTranscriptions.layoutManager = LinearLayoutManager(this)
@@ -167,16 +174,9 @@ class StartActivity : AppCompatActivity() {
                             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
                             bottomSheetLogin.visibility = View.GONE
                             Toast.makeText(this@StartActivity, "Login successful!", Toast.LENGTH_SHORT).show()
-                            btnLogin.visibility = View.GONE
-                            btnRegister.visibility = View.GONE
-                            btnHistory.visibility = View.VISIBLE
-
+                            utilities.setVisibility(View.GONE, btnLogin, btnRegister)
                             tvHello.text = "Hello $username"
-                            tvHello.visibility = View.VISIBLE
-                            btnLogout.visibility = View.VISIBLE
-
-
-                            //showTranslationsHistory()
+                            utilities.setVisibility(View.VISIBLE, btnHistory, btnLogout, tvHello)
                         } else {
                             Toast.makeText(this@StartActivity, "Login failed. Try again.", Toast.LENGTH_SHORT).show()
                         }
@@ -189,8 +189,6 @@ class StartActivity : AppCompatActivity() {
             showTranslationHistory()
         }
 
-
-
         btnRecordActivity.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
@@ -202,6 +200,22 @@ class StartActivity : AppCompatActivity() {
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
             startActivityForResult(intent, PICK_FILE_REQUEST_CODE)
+        }
+
+        btnBack.setOnClickListener {
+            utilities.setVisibility(View.VISIBLE, btnRecordActivity, btnChooseFile, btnLogin, btnRegister, tvChoose)
+            utilities.setVisibility(View.GONE, btnCopy, btnBack)
+            tvTranscriptedFile.text = " "
+            tvSelectedFile.text = "No file selected"
+        }
+
+        btnLogout.setOnClickListener {
+            utilities.setVisibility(View.VISIBLE, btnLogin, btnRegister, btnChooseFile, btnRecordActivity)
+            utilities.setVisibility(View.GONE, btnHistory, btnLogout, tvHello, rvTranscriptions)
+            rvTranscriptions.adapter = null
+            tvHello.text = ""
+            authClient.Logout()
+            Toast.makeText(this, "Successfully logged out.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -218,6 +232,8 @@ class StartActivity : AppCompatActivity() {
                             utilities.uploadRecording(filePath) { transcription ->
                                 runOnUiThread {
                                     if (transcription != null) {
+                                        utilities.setVisibility(View.GONE, btnRecordActivity, btnChooseFile, btnLogin, btnRegister, tvChoose)
+                                        utilities.setVisibility(View.VISIBLE, btnCopy, btnBack)
                                         tvTranscriptedFile.text = transcription
                                     } else {
                                         Toast.makeText(this@StartActivity, "Transcription failed.", Toast.LENGTH_SHORT).show()
@@ -268,11 +284,10 @@ class StartActivity : AppCompatActivity() {
 
         GlobalScope.launch(Dispatchers.IO) {
             val history = authClient.GetTranslations()
-            val formattedHistory = history.map { "${it.text}, ${it.timestamp}" } // Format each element
+            val formattedHistory = history.map { "${it.text}, ${it.timestamp}" }
             withContext(Dispatchers.Main) {
                 transcriptionAdapter = TranscriptionAdapter(formattedHistory) { transcription ->
                     Toast.makeText(this@StartActivity, "Clicked: $transcription", Toast.LENGTH_SHORT).show()
-                    // Handle item click here
                 }
                 rvTranscriptions.adapter = transcriptionAdapter
             }

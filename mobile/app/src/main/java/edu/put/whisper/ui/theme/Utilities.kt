@@ -2,6 +2,8 @@ package edu.put.whisper.ui.theme
 
 import android.content.Context
 import android.net.Uri
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import edu.put.whisper.R
 import io.grpc.soundtransfer.SoundTransferGrpc
 import kotlinx.coroutines.Dispatchers
@@ -24,5 +26,15 @@ class Utilities(private val context: Context) {
                 callback(null)
             }
         }
+    }
+
+    fun setVisibility(visibility: Int, vararg views: View) {
+        for (view in views) {
+            view.visibility = visibility
+        }
+    }
+
+    fun goBack(activity: AppCompatActivity) {
+        activity.finish()
     }
 }

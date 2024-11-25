@@ -66,6 +66,11 @@ class AuthenticationClient(uri: Uri) : Closeable {
             TranscriptionElement(it.transcription, Instant.ofEpochSecond(it.createdAt.seconds, it.createdAt.nanos.toLong()))
         }.toList()
     }
+
+    fun Logout() {
+        Log.i("auth", "Logging out")
+        jWT = ""
+    }
 }
 
 
