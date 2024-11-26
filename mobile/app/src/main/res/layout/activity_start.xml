@@ -7,10 +7,13 @@
     android:layout_height="match_parent"
     tools:context=".StartActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:id="@+id/llLoginRegister"
@@ -19,10 +22,10 @@
             android:gravity="end"
             android:orientation="horizontal"
             android:padding="16dp"
-            app:layout_constraintBottom_toTopOf="@+id/llFileRecord"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/llFileRecord">
 
             <TextView
                 android:id="@+id/tvHello"
@@ -98,7 +101,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:visibility="invisible" />
+            android:visibility="gone" />
 
 
         <LinearLayout
@@ -114,7 +117,7 @@
                 android:id="@+id/tvChoose"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Choose or record a file to transcript"
+                android:text="What do you want to do?"
                 android:gravity="center"
                 android:layout_marginBottom="32dp"/>
 
@@ -230,6 +233,63 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 
+            <androidx.cardview.widget.CardView
+                android:id="@+id/btnTranscriptLive"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_margin="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:background="@color/primary">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp"
+                    android:layout_gravity="center">
+
+                    <ImageView
+                        android:id="@+id/icon3"
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:padding="20dp"
+                        android:src="@drawable/ic_live"
+                        android:background="@drawable/circle_icon_background"
+                        app:tint="@color/primaryLight"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Transcript live"
+                        android:textSize="18sp"
+                        android:textColor="@color/playerColor"
+                        app:layout_constraintStart_toEndOf="@id/icon3"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginStart="12dp" />
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow"
+                        app:tint="@color/primary"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginEnd="15dp" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+
+
             <TextView
                 android:id="@+id/tvSelectedFile"
                 android:layout_width="match_parent"
@@ -267,9 +327,7 @@
                 android:contentDescription="btn go back"/>
         </LinearLayout>
 
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
     <View
         android:id="@+id/bottomSheetLogin"
         android:visibility="gone"
