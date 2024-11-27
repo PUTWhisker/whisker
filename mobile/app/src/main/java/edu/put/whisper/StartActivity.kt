@@ -1,9 +1,14 @@
 package edu.put.whisper
 
 import android.content.Intent
+import android.media.AudioFormat
+import android.media.AudioRecord
+import android.media.MediaRecorder
+import android.net.Network
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -19,12 +24,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import edu.put.whisper.utilities.Utilities
 import io.grpc.authentication.AuthenticationClient
+import io.grpc.authentication.TextHistory
+import io.grpc.soundtransfer.SoundTransferGrpc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.lang.Thread.sleep
+import kotlin.concurrent.thread
 
 class StartActivity : AppCompatActivity() {
     private lateinit var btnRecordActivity: CardView
@@ -52,11 +62,15 @@ class StartActivity : AppCompatActivity() {
     private lateinit var transcriptionAdapter: TranscriptionAdapter
     private lateinit var llFileRecord: LinearLayout
     private lateinit var utilities: Utilities
+    private lateinit var btnTranscriptLive: CardView
     private var tempFilePath: String? = null
     private val PICK_FILE_REQUEST_CODE = 1
-
+    private val isRecording = false
+    private val audiStreamManager: AudioStreamManager = AudioStreamManager()
     private lateinit var authClient: AuthenticationClient
 
+
+    var is_recording = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
@@ -88,7 +102,7 @@ class StartActivity : AppCompatActivity() {
         rvTranscriptions = findViewById(R.id.rvTranscriptions)
         llFileRecord = findViewById(R.id.llFileRecord)
         rvTranscriptions.layoutManager = LinearLayoutManager(this)
-
+        btnTranscriptLive = findViewById(R.id.btnTranscriptLive)
 
         val bottomSheetL: LinearLayout = findViewById(R.id.bottomSheetL)
         bottomSheetLogin = findViewById(R.id.bottomSheetLogin)
@@ -203,6 +217,39 @@ class StartActivity : AppCompatActivity() {
             startActivityForResult(intent, PICK_FILE_REQUEST_CODE)
         }
 
+
+
+        btnTranscriptLive.setOnClickListener {
+            Log.i("bruh", is_recording.toString())
+            if (!is_recording){
+                audiStreamManager.initAudioRecorder()
+                audiStreamManager.record()
+
+            } else {
+                audiStreamManager.stop()
+            }
+            is_recording = !is_recording
+//            } else{
+//                audiStreamManager.stop()
+//            }
+//            audiStreamManager.isRecordingAudio = !(audiStreamManager.isRecordingAudio)
+
+//                sleep(500)
+//                audiStreamManager.stop()
+
+
+//            val soundTransferClient = SoundTransferGrpc(Uri.parse("http://10.0.2.2:7070/"))
+//            lifecycleScope.launch(Dispatchers.IO) {
+//                try {
+//                    soundTransferClient.streamSoundFile()
+//                }catch (e : Exception){
+//                    println(e.toString())
+//                }
+//
+//            }
+
+        }
+
         btnBack.setOnClickListener {
             utilities.setVisibility(View.VISIBLE, btnRecordActivity, btnChooseFile, btnLogin, btnRegister, tvChoose, btnTranscriptLive)
             utilities.setVisibility(View.GONE, btnCopy, btnBack)
@@ -218,6 +265,7 @@ class StartActivity : AppCompatActivity() {
             authClient.Logout()
             Toast.makeText(this, "Successfully logged out.", Toast.LENGTH_SHORT).show()
         }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -266,8 +314,6 @@ class StartActivity : AppCompatActivity() {
     }
 
 
-
-
     private fun getFileNameFromUri(uri: Uri): String? {
         var fileName: String? = null
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
@@ -294,5 +340,7 @@ class StartActivity : AppCompatActivity() {
             }
         }
     }
+
+
 
 }

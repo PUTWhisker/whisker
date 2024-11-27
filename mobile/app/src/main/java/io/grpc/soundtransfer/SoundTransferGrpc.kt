@@ -3,6 +3,7 @@ package io.grpc.soundtransfer
 import android.net.Uri
 import android.util.Log
 import com.google.protobuf.ByteString
+import com.google.protobuf.kotlin.DslList
 import com.google.protobuf.kotlin.toByteString
 import com.google.protobuf.kotlin.toByteStringUtf8
 import io.grpc.ManagedChannelBuilder
@@ -10,6 +11,9 @@ import io.grpc.Metadata
 import jWT
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import java.io.Closeable
 import java.io.File
@@ -32,7 +36,7 @@ class SoundTransferGrpc(uri: Uri) : Closeable {
         builder.executor(Dispatchers.IO.asExecutor()).build()
     }
     private  val transferer = SoundServiceGrpcKt.SoundServiceCoroutineStub(channel)
-
+    val stub = SoundServiceGrpcKt.SoundServiceCoroutineStub(channel)
 
     suspend fun sendSoundFile(filePath : String): String? {
         try {
@@ -49,6 +53,33 @@ class SoundTransferGrpc(uri: Uri) : Closeable {
             e.printStackTrace()
         }
         return null
+    }
+
+    suspend fun streamSoundFile() {
+        val requests = generateOutgoingNotes()
+        val metadata = Metadata()
+        val key = Metadata.Key.of("language", Metadata.ASCII_STRING_MARSHALLER)
+        metadata.put(key, "pl")
+        stub.streamSoundFile(requests, metadata).collect { note ->
+            Log.i("stream", "Got message: \"${note.text}\"")
+        }
+        Log.i("stream", "Finished RouteChat")
+    }
+
+    private fun generateOutgoingNotes(): Flow<SoundRequest> = flow {
+        val notes = listOf(
+            SoundRequest.newBuilder()
+                .setSoundData(ByteString.copyFrom(byteArrayOf(1, 2, 3)))  // Example of setting sound data (binary)
+                .build(),
+            SoundRequest.newBuilder()
+                .setSoundData(ByteString.copyFrom(byteArrayOf(1, 2, 3)))  // Example of setting sound data (binary)
+                .build()
+        )
+        for (request in notes) {
+            Log.i("stream","Sending message \"${request.toString()}\"")
+            emit(request)
+            delay(500)
+        }
     }
 
     override fun close() {
