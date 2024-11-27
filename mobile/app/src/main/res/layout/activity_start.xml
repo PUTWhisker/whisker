@@ -7,13 +7,17 @@
     android:layout_height="match_parent"
     tools:context=".StartActivity">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:padding="16dp">
 
         <LinearLayout
             android:id="@+id/llLoginRegister"
@@ -21,32 +25,22 @@
             android:layout_height="wrap_content"
             android:gravity="end"
             android:orientation="horizontal"
-            android:padding="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/llFileRecord">
+            android:padding="16dp">
 
             <TextView
                 android:id="@+id/tvHello"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
-                android:ellipsize="end"
-                android:maxLines="1"
                 android:text="Hello"
-                android:textSize="15sp"
                 android:visibility="gone"
-                app:autoSizeMaxTextSize="25sp"
-                app:autoSizeMinTextSize="12sp"
-                app:autoSizeStepGranularity="1sp"
                 app:autoSizeTextType="uniform"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLogin"
                 android:layout_width="100dp"
                 android:layout_height="48dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="8dp"
                 android:backgroundTint="@color/gray"
                 android:text="Log In"
                 android:textColor="@color/grayDark"
@@ -66,7 +60,7 @@
                 app:rippleColor="@color/grayDark" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnHistory"
+                android:id="@+id/btnHistoryMock"
                 android:layout_width="100dp"
                 android:layout_height="48dp"
                 android:layout_marginEnd="16dp"
@@ -93,14 +87,11 @@
 
         <ImageView
             android:id="@+id/logoWhisper"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:src="@drawable/logo_whisper"
             android:layout_marginTop="24dp"
-            android:layout_marginBottom="24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            android:layout_marginBottom="24dp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTranscriptions"
@@ -118,9 +109,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/llLoginRegister">
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tvChoose"
@@ -128,15 +117,15 @@
                 android:layout_height="wrap_content"
                 android:text="What do you want to do?"
                 android:gravity="center"
-                android:layout_marginBottom="32dp"/>
+                android:layout_marginBottom="16dp"/>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/btnRecordActivity"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
-                android:layout_margin="16dp"
+                android:layout_marginBottom="16dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="8dp"
+                app:cardElevation="6dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
@@ -191,9 +180,9 @@
                 android:id="@+id/btnChooseFile"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
-                android:layout_margin="16dp"
+                android:layout_marginBottom="16dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="8dp"
+                app:cardElevation="6dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
@@ -246,9 +235,9 @@
                 android:id="@+id/btnTranscriptLive"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
-                android:layout_margin="16dp"
+                android:layout_marginBottom="16dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="8dp"
+                app:cardElevation="6dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
@@ -297,13 +286,69 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 
+            <androidx.cardview.widget.CardView
+                android:id="@+id/btnHistory"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:background="@color/primary">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp"
+                    android:layout_gravity="center">
+
+                    <ImageView
+                        android:id="@+id/icon4"
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:padding="20dp"
+                        android:src="@drawable/ic_history"
+                        android:background="@drawable/circle_icon_background"
+                        app:tint="@color/primaryLight"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="History"
+                        android:textSize="18sp"
+                        android:textColor="@color/playerColor"
+                        app:layout_constraintStart_toEndOf="@id/icon4"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginStart="12dp" />
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow"
+                        app:tint="@color/primary"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginEnd="15dp" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
             <TextView
                 android:id="@+id/tvSelectedFile"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="7dp"
                 android:layout_marginTop="24dp"
+                android:gravity="center"
                 android:text="No file selected"
-                android:gravity="center"/>
+                android:visibility="gone"/>
             <TextView
                 android:id="@+id/tvTranscriptedFile"
                 android:layout_width="match_parent"
@@ -337,6 +382,7 @@
 
 
     </LinearLayout>
+    </ScrollView>
     <View
         android:id="@+id/bottomSheetLogin"
         android:visibility="gone"

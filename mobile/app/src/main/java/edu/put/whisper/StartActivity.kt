@@ -44,7 +44,7 @@ class StartActivity : AppCompatActivity() {
     private lateinit var loginInput: EditText
     private lateinit var tvHello: TextView
     private lateinit var btnLogout: Button
-    private lateinit var btnHistory: TextView
+    private lateinit var btnHistory: CardView
     private lateinit var btnCopy: ImageButton
     private lateinit var btnBack: ImageButton
     private lateinit var tvChoose: TextView
