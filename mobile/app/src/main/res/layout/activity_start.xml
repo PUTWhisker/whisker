@@ -91,6 +91,16 @@
                 app:rippleColor="@color/grayDark" />
         </LinearLayout>
 
+        <ImageView
+            android:id="@+id/logoWhisper"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@drawable/logo_whisper"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTranscriptions"
@@ -102,7 +112,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:visibility="gone" />
-
 
         <LinearLayout
             android:id="@+id/llFileRecord"
@@ -288,8 +297,6 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 
-
-
             <TextView
                 android:id="@+id/tvSelectedFile"
                 android:layout_width="match_parent"
@@ -326,6 +333,8 @@
                 android:visibility="invisible"
                 android:contentDescription="btn go back"/>
         </LinearLayout>
+
+
 
     </LinearLayout>
     <View

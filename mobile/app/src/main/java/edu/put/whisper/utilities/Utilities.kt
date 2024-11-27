@@ -1,4 +1,4 @@
-package edu.put.whisper.ui.theme
+package edu.put.whisper.utilities
 
 import android.content.Context
 import android.net.Uri

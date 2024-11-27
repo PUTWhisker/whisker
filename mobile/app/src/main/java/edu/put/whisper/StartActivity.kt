@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -18,9 +17,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import edu.put.whisper.ui.theme.Utilities
+import edu.put.whisper.utilities.Utilities
 import io.grpc.authentication.AuthenticationClient
-import io.grpc.authentication.TextHistory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -31,6 +29,7 @@ import java.io.FileOutputStream
 class StartActivity : AppCompatActivity() {
     private lateinit var btnRecordActivity: CardView
     private lateinit var btnChooseFile: CardView
+    private lateinit var btnTranscriptLive: CardView
     private lateinit var tvSelectedFile: TextView
     private lateinit var tvTranscriptedFile: TextView
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
@@ -67,6 +66,7 @@ class StartActivity : AppCompatActivity() {
         utilities = Utilities(this)
 
         btnRecordActivity = findViewById(R.id.btnRecordActivity)
+        btnTranscriptLive = findViewById(R.id.btnTranscriptLive)
         btnCopy = findViewById(R.id.btnCopy)
         btnChooseFile = findViewById(R.id.btnChooseFile)
         tvSelectedFile = findViewById(R.id.tvSelectedFile)
@@ -204,7 +204,7 @@ class StartActivity : AppCompatActivity() {
         }
 
         btnBack.setOnClickListener {
-            utilities.setVisibility(View.VISIBLE, btnRecordActivity, btnChooseFile, btnLogin, btnRegister, tvChoose)
+            utilities.setVisibility(View.VISIBLE, btnRecordActivity, btnChooseFile, btnLogin, btnRegister, tvChoose, btnTranscriptLive)
             utilities.setVisibility(View.GONE, btnCopy, btnBack)
             tvTranscriptedFile.text = " "
             tvSelectedFile.text = "No file selected"
@@ -233,7 +233,7 @@ class StartActivity : AppCompatActivity() {
                             utilities.uploadRecording(filePath) { transcription ->
                                 runOnUiThread {
                                     if (transcription != null) {
-                                        utilities.setVisibility(View.GONE, btnRecordActivity, btnChooseFile, btnLogin, btnRegister, tvChoose)
+                                        utilities.setVisibility(View.GONE, btnRecordActivity, btnChooseFile, btnLogin, btnRegister, tvChoose, btnTranscriptLive)
                                         utilities.setVisibility(View.VISIBLE, btnCopy, btnBack)
                                         tvTranscriptedFile.text = transcription
                                     } else {
