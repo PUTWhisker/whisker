@@ -41,7 +41,6 @@ class AudioRecorder():
                 data = stream.read(self.chunk)
                 self.frames.append(data)
                 await asyncio.sleep(0) # Check if while in record is ready to execute (probeTime has passed)
-
         except KeyboardInterrupt:
             # logging.info("Detected interruption, ending recording.") TODO: Figure out how to print it nicely
             # print()

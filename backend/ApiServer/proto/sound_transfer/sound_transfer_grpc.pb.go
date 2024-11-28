@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v5.26.0
-// source: backend/src/proto/sound_transfer/sound_transfer.proto
+// source: backend/ApiServer/proto/sound_transfer/sound_transfer.proto
 
 package sound_transfer
 
@@ -23,10 +23,10 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SoundServiceClient interface {
 	TestConnection(ctx context.Context, in *TextMessage, opts ...grpc.CallOption) (*TextMessage, error)
-	SendSoundFile(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (*SoundResponse, error)
-	StreamSoundFile(ctx context.Context, opts ...grpc.CallOption) (SoundService_StreamSoundFileClient, error)
-	SendSoundFileTranslation(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (SoundService_SendSoundFileTranslationClient, error)
-	DiarizateSpeakers(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (*SpeakerAndLine, error)
+	TranscribeFile(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SoundResponse, error)
+	TranscribeLive(ctx context.Context, opts ...grpc.CallOption) (SoundService_TranscribeLiveClient, error)
+	TranslateFile(ctx context.Context, in *TranslationRequest, opts ...grpc.CallOption) (SoundService_TranslateFileClient, error)
+	DiarizateFile(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SpeakerAndLineResponse, error)
 }
 
 type soundServiceClient struct {
@@ -46,39 +46,39 @@ func (c *soundServiceClient) TestConnection(ctx context.Context, in *TextMessage
 	return out, nil
 }
 
-func (c *soundServiceClient) SendSoundFile(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (*SoundResponse, error) {
+func (c *soundServiceClient) TranscribeFile(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SoundResponse, error) {
 	out := new(SoundResponse)
-	err := c.cc.Invoke(ctx, "/SoundService/SendSoundFile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/SoundService/TranscribeFile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *soundServiceClient) StreamSoundFile(ctx context.Context, opts ...grpc.CallOption) (SoundService_StreamSoundFileClient, error) {
-	stream, err := c.cc.NewStream(ctx, &SoundService_ServiceDesc.Streams[0], "/SoundService/StreamSoundFile", opts...)
+func (c *soundServiceClient) TranscribeLive(ctx context.Context, opts ...grpc.CallOption) (SoundService_TranscribeLiveClient, error) {
+	stream, err := c.cc.NewStream(ctx, &SoundService_ServiceDesc.Streams[0], "/SoundService/TranscribeLive", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &soundServiceStreamSoundFileClient{stream}
+	x := &soundServiceTranscribeLiveClient{stream}
 	return x, nil
 }
 
-type SoundService_StreamSoundFileClient interface {
-	Send(*SoundRequest) error
+type SoundService_TranscribeLiveClient interface {
+	Send(*TranscriptionRequest) error
 	Recv() (*SoundStreamResponse, error)
 	grpc.ClientStream
 }
 
-type soundServiceStreamSoundFileClient struct {
+type soundServiceTranscribeLiveClient struct {
 	grpc.ClientStream
 }
 
-func (x *soundServiceStreamSoundFileClient) Send(m *SoundRequest) error {
+func (x *soundServiceTranscribeLiveClient) Send(m *TranscriptionRequest) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *soundServiceStreamSoundFileClient) Recv() (*SoundStreamResponse, error) {
+func (x *soundServiceTranscribeLiveClient) Recv() (*SoundStreamResponse, error) {
 	m := new(SoundStreamResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -86,12 +86,12 @@ func (x *soundServiceStreamSoundFileClient) Recv() (*SoundStreamResponse, error)
 	return m, nil
 }
 
-func (c *soundServiceClient) SendSoundFileTranslation(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (SoundService_SendSoundFileTranslationClient, error) {
-	stream, err := c.cc.NewStream(ctx, &SoundService_ServiceDesc.Streams[1], "/SoundService/SendSoundFileTranslation", opts...)
+func (c *soundServiceClient) TranslateFile(ctx context.Context, in *TranslationRequest, opts ...grpc.CallOption) (SoundService_TranslateFileClient, error) {
+	stream, err := c.cc.NewStream(ctx, &SoundService_ServiceDesc.Streams[1], "/SoundService/TranslateFile", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &soundServiceSendSoundFileTranslationClient{stream}
+	x := &soundServiceTranslateFileClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -101,16 +101,16 @@ func (c *soundServiceClient) SendSoundFileTranslation(ctx context.Context, in *S
 	return x, nil
 }
 
-type SoundService_SendSoundFileTranslationClient interface {
+type SoundService_TranslateFileClient interface {
 	Recv() (*SoundStreamResponse, error)
 	grpc.ClientStream
 }
 
-type soundServiceSendSoundFileTranslationClient struct {
+type soundServiceTranslateFileClient struct {
 	grpc.ClientStream
 }
 
-func (x *soundServiceSendSoundFileTranslationClient) Recv() (*SoundStreamResponse, error) {
+func (x *soundServiceTranslateFileClient) Recv() (*SoundStreamResponse, error) {
 	m := new(SoundStreamResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -118,9 +118,9 @@ func (x *soundServiceSendSoundFileTranslationClient) Recv() (*SoundStreamRespons
 	return m, nil
 }
 
-func (c *soundServiceClient) DiarizateSpeakers(ctx context.Context, in *SoundRequest, opts ...grpc.CallOption) (*SpeakerAndLine, error) {
-	out := new(SpeakerAndLine)
-	err := c.cc.Invoke(ctx, "/SoundService/DiarizateSpeakers", in, out, opts...)
+func (c *soundServiceClient) DiarizateFile(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SpeakerAndLineResponse, error) {
+	out := new(SpeakerAndLineResponse)
+	err := c.cc.Invoke(ctx, "/SoundService/DiarizateFile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -132,10 +132,10 @@ func (c *soundServiceClient) DiarizateSpeakers(ctx context.Context, in *SoundReq
 // for forward compatibility
 type SoundServiceServer interface {
 	TestConnection(context.Context, *TextMessage) (*TextMessage, error)
-	SendSoundFile(context.Context, *SoundRequest) (*SoundResponse, error)
-	StreamSoundFile(SoundService_StreamSoundFileServer) error
-	SendSoundFileTranslation(*SoundRequest, SoundService_SendSoundFileTranslationServer) error
-	DiarizateSpeakers(context.Context, *SoundRequest) (*SpeakerAndLine, error)
+	TranscribeFile(context.Context, *TranscriptionRequest) (*SoundResponse, error)
+	TranscribeLive(SoundService_TranscribeLiveServer) error
+	TranslateFile(*TranslationRequest, SoundService_TranslateFileServer) error
+	DiarizateFile(context.Context, *TranscriptionRequest) (*SpeakerAndLineResponse, error)
 	mustEmbedUnimplementedSoundServiceServer()
 }
 
@@ -146,17 +146,17 @@ type UnimplementedSoundServiceServer struct {
 func (UnimplementedSoundServiceServer) TestConnection(context.Context, *TextMessage) (*TextMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TestConnection not implemented")
 }
-func (UnimplementedSoundServiceServer) SendSoundFile(context.Context, *SoundRequest) (*SoundResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendSoundFile not implemented")
+func (UnimplementedSoundServiceServer) TranscribeFile(context.Context, *TranscriptionRequest) (*SoundResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TranscribeFile not implemented")
 }
-func (UnimplementedSoundServiceServer) StreamSoundFile(SoundService_StreamSoundFileServer) error {
-	return status.Errorf(codes.Unimplemented, "method StreamSoundFile not implemented")
+func (UnimplementedSoundServiceServer) TranscribeLive(SoundService_TranscribeLiveServer) error {
+	return status.Errorf(codes.Unimplemented, "method TranscribeLive not implemented")
 }
-func (UnimplementedSoundServiceServer) SendSoundFileTranslation(*SoundRequest, SoundService_SendSoundFileTranslationServer) error {
-	return status.Errorf(codes.Unimplemented, "method SendSoundFileTranslation not implemented")
+func (UnimplementedSoundServiceServer) TranslateFile(*TranslationRequest, SoundService_TranslateFileServer) error {
+	return status.Errorf(codes.Unimplemented, "method TranslateFile not implemented")
 }
-func (UnimplementedSoundServiceServer) DiarizateSpeakers(context.Context, *SoundRequest) (*SpeakerAndLine, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DiarizateSpeakers not implemented")
+func (UnimplementedSoundServiceServer) DiarizateFile(context.Context, *TranscriptionRequest) (*SpeakerAndLineResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DiarizateFile not implemented")
 }
 func (UnimplementedSoundServiceServer) mustEmbedUnimplementedSoundServiceServer() {}
 
@@ -189,85 +189,85 @@ func _SoundService_TestConnection_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SoundService_SendSoundFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SoundRequest)
+func _SoundService_TranscribeFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TranscriptionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SoundServiceServer).SendSoundFile(ctx, in)
+		return srv.(SoundServiceServer).TranscribeFile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/SoundService/SendSoundFile",
+		FullMethod: "/SoundService/TranscribeFile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SoundServiceServer).SendSoundFile(ctx, req.(*SoundRequest))
+		return srv.(SoundServiceServer).TranscribeFile(ctx, req.(*TranscriptionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SoundService_StreamSoundFile_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(SoundServiceServer).StreamSoundFile(&soundServiceStreamSoundFileServer{stream})
+func _SoundService_TranscribeLive_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(SoundServiceServer).TranscribeLive(&soundServiceTranscribeLiveServer{stream})
 }
 
-type SoundService_StreamSoundFileServer interface {
+type SoundService_TranscribeLiveServer interface {
 	Send(*SoundStreamResponse) error
-	Recv() (*SoundRequest, error)
+	Recv() (*TranscriptionRequest, error)
 	grpc.ServerStream
 }
 
-type soundServiceStreamSoundFileServer struct {
+type soundServiceTranscribeLiveServer struct {
 	grpc.ServerStream
 }
 
-func (x *soundServiceStreamSoundFileServer) Send(m *SoundStreamResponse) error {
+func (x *soundServiceTranscribeLiveServer) Send(m *SoundStreamResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *soundServiceStreamSoundFileServer) Recv() (*SoundRequest, error) {
-	m := new(SoundRequest)
+func (x *soundServiceTranscribeLiveServer) Recv() (*TranscriptionRequest, error) {
+	m := new(TranscriptionRequest)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-func _SoundService_SendSoundFileTranslation_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(SoundRequest)
+func _SoundService_TranslateFile_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(TranslationRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(SoundServiceServer).SendSoundFileTranslation(m, &soundServiceSendSoundFileTranslationServer{stream})
+	return srv.(SoundServiceServer).TranslateFile(m, &soundServiceTranslateFileServer{stream})
 }
 
-type SoundService_SendSoundFileTranslationServer interface {
+type SoundService_TranslateFileServer interface {
 	Send(*SoundStreamResponse) error
 	grpc.ServerStream
 }
 
-type soundServiceSendSoundFileTranslationServer struct {
+type soundServiceTranslateFileServer struct {
 	grpc.ServerStream
 }
 
-func (x *soundServiceSendSoundFileTranslationServer) Send(m *SoundStreamResponse) error {
+func (x *soundServiceTranslateFileServer) Send(m *SoundStreamResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _SoundService_DiarizateSpeakers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SoundRequest)
+func _SoundService_DiarizateFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TranscriptionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SoundServiceServer).DiarizateSpeakers(ctx, in)
+		return srv.(SoundServiceServer).DiarizateFile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/SoundService/DiarizateSpeakers",
+		FullMethod: "/SoundService/DiarizateFile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SoundServiceServer).DiarizateSpeakers(ctx, req.(*SoundRequest))
+		return srv.(SoundServiceServer).DiarizateFile(ctx, req.(*TranscriptionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -284,26 +284,26 @@ var SoundService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _SoundService_TestConnection_Handler,
 		},
 		{
-			MethodName: "SendSoundFile",
-			Handler:    _SoundService_SendSoundFile_Handler,
+			MethodName: "TranscribeFile",
+			Handler:    _SoundService_TranscribeFile_Handler,
 		},
 		{
-			MethodName: "DiarizateSpeakers",
-			Handler:    _SoundService_DiarizateSpeakers_Handler,
+			MethodName: "DiarizateFile",
+			Handler:    _SoundService_DiarizateFile_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "StreamSoundFile",
-			Handler:       _SoundService_StreamSoundFile_Handler,
+			StreamName:    "TranscribeLive",
+			Handler:       _SoundService_TranscribeLive_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},
 		{
-			StreamName:    "SendSoundFileTranslation",
-			Handler:       _SoundService_SendSoundFileTranslation_Handler,
+			StreamName:    "TranslateFile",
+			Handler:       _SoundService_TranslateFile_Handler,
 			ServerStreams: true,
 		},
 	},
-	Metadata: "backend/src/proto/sound_transfer/sound_transfer.proto",
+	Metadata: "backend/ApiServer/proto/sound_transfer/sound_transfer.proto",
 }

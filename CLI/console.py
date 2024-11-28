@@ -9,6 +9,7 @@ import grpc
 import time
 import logging
 import os
+import math
 
 class LoginFailure(Exception):
     pass
@@ -25,6 +26,7 @@ class ConsolePrinter:
     ):
         self.grpcClient = GrpcClient(host, port, language, model, save, translation)
 
+
     def _errorHandler(func):
         async def wrapper(*args, **kwargs):
             start = time.time()
@@ -34,8 +36,6 @@ class ConsolePrinter:
                 print(f"Grpc connection failure: {grpcError.details()}") # <- custom message sent by server
                 print(f"{grpcError.code()}") # <- one of the 17 rpcError status codes
                 print(f"{grpcError.debug_error_string()}") # <- Error message string, Usefull might be IP address and created_time
-                print(f"{grpcError.initial_metadata()}") # <- No idea the difference, but metadata sent with the error message
-                print(f"{grpcError.trailing_metadata()}") # <- No idea the difference, but metadata sent with the error message
                 return
             except Exception as e:
                 print(f"This is an unhandled exception: {e}")
@@ -45,6 +45,7 @@ class ConsolePrinter:
                 print(f"Execution time: {end - start}")
 
         return wrapper
+
 
     @_errorHandler
     async def startApp(self):
@@ -62,10 +63,10 @@ class ConsolePrinter:
         if connected.text != seed:  # Unsuccessful if server returned different number
             print("Problem connecting to the server")
             return False
-
         print("Connected to the server!")
         return True
     
+
     @_errorHandler
     async def diarizateSpeakers(self, audio: bytes):
         sendTask = asyncio.create_task(
@@ -76,11 +77,12 @@ class ConsolePrinter:
             dot = self._waitingAnimation(dot)
             await asyncio.sleep(0.1)
         self._waitingAnimation(3)
-        script = sendTask.result()  # Received transcribed text
-        speaker = list(script.speakerName)
-        text = list(script.text)
-        for i in range(0, len(speaker)):
-            print(f"{speaker[i]}: {text[i]}")
+        scripts = sendTask.result()  # Received transcribed text
+        speakers = list(scripts.speakerName)
+        speakerColors = self._generateRandomUniqueColors(speakers)
+        text = list(scripts.text)
+        for i in range(0, len(speakers)):
+            print(f"\033[38;{speakerColors[i][0]};{speakerColors[i][1]};{speakerColors[i][2]};12m{speakers[i]}\033[0m: {text[i]}")
 
 
     @_errorHandler
@@ -100,8 +102,6 @@ class ConsolePrinter:
     @_errorHandler
     async def sendFileTranslation(self, audio: bytes):
         responseIter = self.grpcClient.SendSoundFileTranslation(audio)
-        dot = 0
-        
         async for response in responseIter:
             if "transcription" in response.flags:
                 print(f'\033[1mAudio transcription: \033[0m{response.text}')
@@ -180,3 +180,21 @@ class ConsolePrinter:
             print(end=".", flush=True)
             dot += 1
         return dot
+
+    def _generateRandomColorsWithDistanceCalculation(self, speakers: str) -> dict:
+        uniqueSpeakers = set(speakers)
+        speakers = list(uniqueSpeakers)
+        colors = dict()
+        for speaker in speakers:
+            while True:
+                isSimilar = False
+                newColor = list(random.sample(range(256), 3))
+                newColor.append(sum(newColor))
+                for _, value in colors.items():
+                    if abs(value[3] - newColor[3]) < math.floor((3 * 256) / len(uniqueSpeakers) * 0.7):
+                        isSimilar = True
+                        break
+                if not isSimilar:
+                    colors[speaker] = newColor
+                    break
+        return colors

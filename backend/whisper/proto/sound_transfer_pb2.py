@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14sound_transfer.proto\"1\n\x0cSoundRequest\x12\x12\n\nsound_data\x18\x01 \x01(\x0c\x12\r\n\x05\x66lags\x18\x02 \x03(\t\"\x1d\n\rSoundResponse\x12\x0c\n\x04text\x18\x03 \x01(\t\"\x1b\n\x0bTextMessage\x12\x0c\n\x04text\x18\x04 \x01(\t\"2\n\x13SoundStreamResponse\x12\x0c\n\x04text\x18\x05 \x01(\t\x12\r\n\x05\x66lags\x18\x06 \x03(\t\"3\n\x0eSpeakerAndLine\x12\x0c\n\x04text\x18\x07 \x03(\t\x12\x13\n\x0bspeakerName\x18\x08 \x03(\t2\xa4\x02\n\x0cSoundService\x12.\n\x0eTestConnection\x12\x0c.TextMessage\x1a\x0c.TextMessage\"\x00\x12\x30\n\rSendSoundFile\x12\r.SoundRequest\x1a\x0e.SoundResponse\"\x00\x12:\n\x0fStreamSoundFile\x12\r.SoundRequest\x1a\x14.SoundStreamResponse(\x01\x30\x01\x12\x41\n\x18SendSoundFileTranslation\x12\r.SoundRequest\x1a\x14.SoundStreamResponse0\x01\x12\x33\n\x11\x44iarizateSpeakers\x12\r.SoundRequest\x1a\x0f.SpeakerAndLineBH\n\x15io.grpc.soundtransferB\x12SoundTransferProtoP\x01Z\x19inzynierka/sound_transferb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14sound_transfer.proto\"\x1b\n\x0bTextMessage\x12\x0c\n\x04text\x18\x01 \x01(\t\"C\n\x14TranscriptionRequest\x12\x12\n\nsound_data\x18\x01 \x01(\x0c\x12\x17\n\x0fsource_language\x18\x02 \x01(\t\"_\n\x12TranslationRequest\x12\x12\n\nsound_data\x18\x01 \x01(\x0c\x12\x17\n\x0fsource_language\x18\x02 \x01(\t\x12\x1c\n\x14translation_language\x18\x03 \x01(\t\"8\n\rSoundResponse\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x19\n\x11\x64\x65tected_language\x18\x02 \x01(\t\"6\n\x13SoundStreamResponse\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x11\n\tnew_chunk\x18\x02 \x01(\x08\"V\n\x16SpeakerAndLineResponse\x12\x0c\n\x04text\x18\x01 \x03(\t\x12\x13\n\x0bspeakerName\x18\x02 \x03(\t\x12\x19\n\x11\x64\x65tected_language\x18\x03 \x01(\t2\xbb\x02\n\x0cSoundService\x12.\n\x0eTestConnection\x12\x0c.TextMessage\x1a\x0c.TextMessage\"\x00\x12\x39\n\x0eTranscribeFile\x12\x15.TranscriptionRequest\x1a\x0e.SoundResponse\"\x00\x12\x41\n\x0eTranscribeLive\x12\x15.TranscriptionRequest\x1a\x14.SoundStreamResponse(\x01\x30\x01\x12<\n\rTranslateFile\x12\x13.TranslationRequest\x1a\x14.SoundStreamResponse0\x01\x12?\n\rDiarizateFile\x12\x15.TranscriptionRequest\x1a\x17.SpeakerAndLineResponseBH\n\x15io.grpc.soundtransferB\x12SoundTransferProtoP\x01Z\x19inzynierka/sound_transferb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -32,16 +32,18 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'sound_transfer_pb2', _globa
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'\n\025io.grpc.soundtransferB\022SoundTransferProtoP\001Z\031inzynierka/sound_transfer'
-  _globals['_SOUNDREQUEST']._serialized_start=24
-  _globals['_SOUNDREQUEST']._serialized_end=73
-  _globals['_SOUNDRESPONSE']._serialized_start=75
-  _globals['_SOUNDRESPONSE']._serialized_end=104
-  _globals['_TEXTMESSAGE']._serialized_start=106
-  _globals['_TEXTMESSAGE']._serialized_end=133
-  _globals['_SOUNDSTREAMRESPONSE']._serialized_start=135
-  _globals['_SOUNDSTREAMRESPONSE']._serialized_end=185
-  _globals['_SPEAKERANDLINE']._serialized_start=187
-  _globals['_SPEAKERANDLINE']._serialized_end=238
-  _globals['_SOUNDSERVICE']._serialized_start=241
-  _globals['_SOUNDSERVICE']._serialized_end=533
+  _globals['_TEXTMESSAGE']._serialized_start=24
+  _globals['_TEXTMESSAGE']._serialized_end=51
+  _globals['_TRANSCRIPTIONREQUEST']._serialized_start=53
+  _globals['_TRANSCRIPTIONREQUEST']._serialized_end=120
+  _globals['_TRANSLATIONREQUEST']._serialized_start=122
+  _globals['_TRANSLATIONREQUEST']._serialized_end=217
+  _globals['_SOUNDRESPONSE']._serialized_start=219
+  _globals['_SOUNDRESPONSE']._serialized_end=275
+  _globals['_SOUNDSTREAMRESPONSE']._serialized_start=277
+  _globals['_SOUNDSTREAMRESPONSE']._serialized_end=331
+  _globals['_SPEAKERANDLINERESPONSE']._serialized_start=333
+  _globals['_SPEAKERANDLINERESPONSE']._serialized_end=419
+  _globals['_SOUNDSERVICE']._serialized_start=422
+  _globals['_SOUNDSERVICE']._serialized_end=737
 # @@protoc_insertion_point(module_scope)

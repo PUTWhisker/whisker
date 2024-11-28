@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v5.26.0
-// source: backend/src/proto/authentication/authentication.proto
+// source: backend/ApiServer/proto/authentication/authentication.proto
 
 package authentication
 
@@ -201,5 +201,5 @@ var ClientService_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "backend/src/proto/authentication/authentication.proto",
+	Metadata: "backend/ApiServer/proto/authentication/authentication.proto",
 }

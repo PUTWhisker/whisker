@@ -2,13 +2,14 @@
 // versions:
 // 	protoc-gen-go v1.33.0
 // 	protoc        v5.26.0
-// source: backend/src/proto/authentication/authentication.proto
+// source: backend/ApiServer/proto/authentication/authentication.proto
 
 package authentication
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -25,13 +26,14 @@ type TextHistory struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Transcription string `protobuf:"bytes,1,opt,name=transcription,proto3" json:"transcription,omitempty"`
+	Transcription string                 `protobuf:"bytes,1,opt,name=transcription,proto3" json:"transcription,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 }
 
 func (x *TextHistory) Reset() {
 	*x = TextHistory{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_backend_src_proto_authentication_authentication_proto_msgTypes[0]
+		mi := &file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -44,7 +46,7 @@ func (x *TextHistory) String() string {
 func (*TextHistory) ProtoMessage() {}
 
 func (x *TextHistory) ProtoReflect() protoreflect.Message {
-	mi := &file_backend_src_proto_authentication_authentication_proto_msgTypes[0]
+	mi := &file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -57,7 +59,7 @@ func (x *TextHistory) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TextHistory.ProtoReflect.Descriptor instead.
 func (*TextHistory) Descriptor() ([]byte, []int) {
-	return file_backend_src_proto_authentication_authentication_proto_rawDescGZIP(), []int{0}
+	return file_backend_ApiServer_proto_authentication_authentication_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *TextHistory) GetTranscription() string {
@@ -67,19 +69,26 @@ func (x *TextHistory) GetTranscription() string {
 	return ""
 }
 
+func (x *TextHistory) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
 type UserCredits struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Username string `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
-	Password string `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 }
 
 func (x *UserCredits) Reset() {
 	*x = UserCredits{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_backend_src_proto_authentication_authentication_proto_msgTypes[1]
+		mi := &file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -92,7 +101,7 @@ func (x *UserCredits) String() string {
 func (*UserCredits) ProtoMessage() {}
 
 func (x *UserCredits) ProtoReflect() protoreflect.Message {
-	mi := &file_backend_src_proto_authentication_authentication_proto_msgTypes[1]
+	mi := &file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -105,7 +114,7 @@ func (x *UserCredits) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserCredits.ProtoReflect.Descriptor instead.
 func (*UserCredits) Descriptor() ([]byte, []int) {
-	return file_backend_src_proto_authentication_authentication_proto_rawDescGZIP(), []int{1}
+	return file_backend_ApiServer_proto_authentication_authentication_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UserCredits) GetUsername() string {
@@ -127,14 +136,14 @@ type StatusResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Error      string `protobuf:"bytes,4,opt,name=error,proto3" json:"error,omitempty"`
-	Successful bool   `protobuf:"varint,5,opt,name=successful,proto3" json:"successful,omitempty"`
+	Error      string `protobuf:"bytes,1,opt,name=error,proto3" json:"error,omitempty"`
+	Successful bool   `protobuf:"varint,2,opt,name=successful,proto3" json:"successful,omitempty"`
 }
 
 func (x *StatusResponse) Reset() {
 	*x = StatusResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_backend_src_proto_authentication_authentication_proto_msgTypes[2]
+		mi := &file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -147,7 +156,7 @@ func (x *StatusResponse) String() string {
 func (*StatusResponse) ProtoMessage() {}
 
 func (x *StatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_backend_src_proto_authentication_authentication_proto_msgTypes[2]
+	mi := &file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -160,7 +169,7 @@ func (x *StatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StatusResponse.ProtoReflect.Descriptor instead.
 func (*StatusResponse) Descriptor() ([]byte, []int) {
-	return file_backend_src_proto_authentication_authentication_proto_rawDescGZIP(), []int{2}
+	return file_backend_ApiServer_proto_authentication_authentication_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *StatusResponse) GetError() string {
@@ -182,14 +191,14 @@ type LoginResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	JWT        string `protobuf:"bytes,6,opt,name=JWT,proto3" json:"JWT,omitempty"`
-	Successful bool   `protobuf:"varint,7,opt,name=successful,proto3" json:"successful,omitempty"`
+	JWT        string `protobuf:"bytes,1,opt,name=JWT,proto3" json:"JWT,omitempty"`
+	Successful bool   `protobuf:"varint,2,opt,name=successful,proto3" json:"successful,omitempty"`
 }
 
 func (x *LoginResponse) Reset() {
 	*x = LoginResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_backend_src_proto_authentication_authentication_proto_msgTypes[3]
+		mi := &file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -202,7 +211,7 @@ func (x *LoginResponse) String() string {
 func (*LoginResponse) ProtoMessage() {}
 
 func (x *LoginResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_backend_src_proto_authentication_authentication_proto_msgTypes[3]
+	mi := &file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -215,7 +224,7 @@ func (x *LoginResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LoginResponse.ProtoReflect.Descriptor instead.
 func (*LoginResponse) Descriptor() ([]byte, []int) {
-	return file_backend_src_proto_authentication_authentication_proto_rawDescGZIP(), []int{3}
+	return file_backend_ApiServer_proto_authentication_authentication_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *LoginResponse) GetJWT() string {
@@ -241,7 +250,7 @@ type Empty struct {
 func (x *Empty) Reset() {
 	*x = Empty{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_backend_src_proto_authentication_authentication_proto_msgTypes[4]
+		mi := &file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -254,7 +263,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_backend_src_proto_authentication_authentication_proto_msgTypes[4]
+	mi := &file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -267,90 +276,99 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_backend_src_proto_authentication_authentication_proto_rawDescGZIP(), []int{4}
+	return file_backend_ApiServer_proto_authentication_authentication_proto_rawDescGZIP(), []int{4}
 }
 
-var File_backend_src_proto_authentication_authentication_proto protoreflect.FileDescriptor
+var File_backend_ApiServer_proto_authentication_authentication_proto protoreflect.FileDescriptor
 
-var file_backend_src_proto_authentication_authentication_proto_rawDesc = []byte{
-	0x0a, 0x35, 0x62, 0x61, 0x63, 0x6b, 0x65, 0x6e, 0x64, 0x2f, 0x73, 0x72, 0x63, 0x2f, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x2f, 0x61, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x2f, 0x61, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f,
-	0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x33, 0x0a, 0x0b, 0x54, 0x65, 0x78, 0x74, 0x48,
-	0x69, 0x73, 0x74, 0x6f, 0x72, 0x79, 0x12, 0x24, 0x0a, 0x0d, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x63,
-	0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x74,
-	0x72, 0x61, 0x6e, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x45, 0x0a, 0x0b,
-	0x55, 0x73, 0x65, 0x72, 0x43, 0x72, 0x65, 0x64, 0x69, 0x74, 0x73, 0x12, 0x1a, 0x0a, 0x08, 0x75,
-	0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75,
-	0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77,
-	0x6f, 0x72, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77,
-	0x6f, 0x72, 0x64, 0x22, 0x46, 0x0a, 0x0e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x04,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x12, 0x1e, 0x0a, 0x0a, 0x73,
-	0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x66, 0x75, 0x6c, 0x18, 0x05, 0x20, 0x01, 0x28, 0x08, 0x52,
-	0x0a, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x66, 0x75, 0x6c, 0x22, 0x41, 0x0a, 0x0d, 0x4c,
-	0x6f, 0x67, 0x69, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x10, 0x0a, 0x03,
-	0x4a, 0x57, 0x54, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x4a, 0x57, 0x54, 0x12, 0x1e,
-	0x0a, 0x0a, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x66, 0x75, 0x6c, 0x18, 0x07, 0x20, 0x01,
-	0x28, 0x08, 0x52, 0x0a, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x66, 0x75, 0x6c, 0x22, 0x07,
-	0x0a, 0x05, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x32, 0x91, 0x01, 0x0a, 0x0d, 0x43, 0x6c, 0x69, 0x65,
-	0x6e, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x27, 0x0a, 0x05, 0x4c, 0x6f, 0x67,
-	0x69, 0x6e, 0x12, 0x0c, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x43, 0x72, 0x65, 0x64, 0x69, 0x74, 0x73,
-	0x1a, 0x0e, 0x2e, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x22, 0x00, 0x12, 0x2a, 0x0a, 0x0e, 0x47, 0x65, 0x74, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x6c, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x12, 0x06, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x0c, 0x2e, 0x54,
-	0x65, 0x78, 0x74, 0x48, 0x69, 0x73, 0x74, 0x6f, 0x72, 0x79, 0x22, 0x00, 0x30, 0x01, 0x12, 0x2b,
-	0x0a, 0x08, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x12, 0x0c, 0x2e, 0x55, 0x73, 0x65,
-	0x72, 0x43, 0x72, 0x65, 0x64, 0x69, 0x74, 0x73, 0x1a, 0x0f, 0x2e, 0x53, 0x74, 0x61, 0x74, 0x75,
-	0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x4a, 0x0a, 0x16, 0x69,
-	0x6f, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74, 0x69, 0x63,
-	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x13, 0x41, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74, 0x69, 0x63,
-	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x19, 0x69, 0x6e,
-	0x7a, 0x79, 0x6e, 0x69, 0x65, 0x72, 0x6b, 0x61, 0x2f, 0x61, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74,
-	0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+var file_backend_ApiServer_proto_authentication_authentication_proto_rawDesc = []byte{
+	0x0a, 0x3b, 0x62, 0x61, 0x63, 0x6b, 0x65, 0x6e, 0x64, 0x2f, 0x41, 0x70, 0x69, 0x53, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x61, 0x75, 0x74, 0x68, 0x65, 0x6e,
+	0x74, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x61, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74,
+	0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x1f, 0x67,
+	0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x74,
+	0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x6e,
+	0x0a, 0x0b, 0x54, 0x65, 0x78, 0x74, 0x48, 0x69, 0x73, 0x74, 0x6f, 0x72, 0x79, 0x12, 0x24, 0x0a,
+	0x0d, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74,
+	0x69, 0x6f, 0x6e, 0x12, 0x39, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61,
+	0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74,
+	0x61, 0x6d, 0x70, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x22, 0x45,
+	0x0a, 0x0b, 0x55, 0x73, 0x65, 0x72, 0x43, 0x72, 0x65, 0x64, 0x69, 0x74, 0x73, 0x12, 0x1a, 0x0a,
+	0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x61, 0x73,
+	0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x61, 0x73,
+	0x73, 0x77, 0x6f, 0x72, 0x64, 0x22, 0x46, 0x0a, 0x0e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x12, 0x1e, 0x0a,
+	0x0a, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x66, 0x75, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x08, 0x52, 0x0a, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x66, 0x75, 0x6c, 0x22, 0x41, 0x0a,
+	0x0d, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x10,
+	0x0a, 0x03, 0x4a, 0x57, 0x54, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x4a, 0x57, 0x54,
+	0x12, 0x1e, 0x0a, 0x0a, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x66, 0x75, 0x6c, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x08, 0x52, 0x0a, 0x73, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x66, 0x75, 0x6c,
+	0x22, 0x07, 0x0a, 0x05, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x32, 0x91, 0x01, 0x0a, 0x0d, 0x43, 0x6c,
+	0x69, 0x65, 0x6e, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x27, 0x0a, 0x05, 0x4c,
+	0x6f, 0x67, 0x69, 0x6e, 0x12, 0x0c, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x43, 0x72, 0x65, 0x64, 0x69,
+	0x74, 0x73, 0x1a, 0x0e, 0x2e, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x22, 0x00, 0x12, 0x2a, 0x0a, 0x0e, 0x47, 0x65, 0x74, 0x54, 0x72, 0x61, 0x6e, 0x73,
+	0x6c, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x06, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x0c,
+	0x2e, 0x54, 0x65, 0x78, 0x74, 0x48, 0x69, 0x73, 0x74, 0x6f, 0x72, 0x79, 0x22, 0x00, 0x30, 0x01,
+	0x12, 0x2b, 0x0a, 0x08, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x12, 0x0c, 0x2e, 0x55,
+	0x73, 0x65, 0x72, 0x43, 0x72, 0x65, 0x64, 0x69, 0x74, 0x73, 0x1a, 0x0f, 0x2e, 0x53, 0x74, 0x61,
+	0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x4a, 0x0a,
+	0x16, 0x69, 0x6f, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74,
+	0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x13, 0x41, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74,
+	0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x19,
+	0x69, 0x6e, 0x7a, 0x79, 0x6e, 0x69, 0x65, 0x72, 0x6b, 0x61, 0x2f, 0x61, 0x75, 0x74, 0x68, 0x65,
+	0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x33,
 }
 
 var (
-	file_backend_src_proto_authentication_authentication_proto_rawDescOnce sync.Once
-	file_backend_src_proto_authentication_authentication_proto_rawDescData = file_backend_src_proto_authentication_authentication_proto_rawDesc
+	file_backend_ApiServer_proto_authentication_authentication_proto_rawDescOnce sync.Once
+	file_backend_ApiServer_proto_authentication_authentication_proto_rawDescData = file_backend_ApiServer_proto_authentication_authentication_proto_rawDesc
 )
 
-func file_backend_src_proto_authentication_authentication_proto_rawDescGZIP() []byte {
-	file_backend_src_proto_authentication_authentication_proto_rawDescOnce.Do(func() {
-		file_backend_src_proto_authentication_authentication_proto_rawDescData = protoimpl.X.CompressGZIP(file_backend_src_proto_authentication_authentication_proto_rawDescData)
+func file_backend_ApiServer_proto_authentication_authentication_proto_rawDescGZIP() []byte {
+	file_backend_ApiServer_proto_authentication_authentication_proto_rawDescOnce.Do(func() {
+		file_backend_ApiServer_proto_authentication_authentication_proto_rawDescData = protoimpl.X.CompressGZIP(file_backend_ApiServer_proto_authentication_authentication_proto_rawDescData)
 	})
-	return file_backend_src_proto_authentication_authentication_proto_rawDescData
+	return file_backend_ApiServer_proto_authentication_authentication_proto_rawDescData
 }
 
-var file_backend_src_proto_authentication_authentication_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
-var file_backend_src_proto_authentication_authentication_proto_goTypes = []interface{}{
-	(*TextHistory)(nil),    // 0: TextHistory
-	(*UserCredits)(nil),    // 1: UserCredits
-	(*StatusResponse)(nil), // 2: StatusResponse
-	(*LoginResponse)(nil),  // 3: LoginResponse
-	(*Empty)(nil),          // 4: Empty
+var file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_backend_ApiServer_proto_authentication_authentication_proto_goTypes = []interface{}{
+	(*TextHistory)(nil),           // 0: TextHistory
+	(*UserCredits)(nil),           // 1: UserCredits
+	(*StatusResponse)(nil),        // 2: StatusResponse
+	(*LoginResponse)(nil),         // 3: LoginResponse
+	(*Empty)(nil),                 // 4: Empty
+	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
 }
-var file_backend_src_proto_authentication_authentication_proto_depIdxs = []int32{
-	1, // 0: ClientService.Login:input_type -> UserCredits
-	4, // 1: ClientService.GetTranslation:input_type -> Empty
-	1, // 2: ClientService.Register:input_type -> UserCredits
-	3, // 3: ClientService.Login:output_type -> LoginResponse
-	0, // 4: ClientService.GetTranslation:output_type -> TextHistory
-	2, // 5: ClientService.Register:output_type -> StatusResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+var file_backend_ApiServer_proto_authentication_authentication_proto_depIdxs = []int32{
+	5, // 0: TextHistory.created_at:type_name -> google.protobuf.Timestamp
+	1, // 1: ClientService.Login:input_type -> UserCredits
+	4, // 2: ClientService.GetTranslation:input_type -> Empty
+	1, // 3: ClientService.Register:input_type -> UserCredits
+	3, // 4: ClientService.Login:output_type -> LoginResponse
+	0, // 5: ClientService.GetTranslation:output_type -> TextHistory
+	2, // 6: ClientService.Register:output_type -> StatusResponse
+	4, // [4:7] is the sub-list for method output_type
+	1, // [1:4] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
-func init() { file_backend_src_proto_authentication_authentication_proto_init() }
-func file_backend_src_proto_authentication_authentication_proto_init() {
-	if File_backend_src_proto_authentication_authentication_proto != nil {
+func init() { file_backend_ApiServer_proto_authentication_authentication_proto_init() }
+func file_backend_ApiServer_proto_authentication_authentication_proto_init() {
+	if File_backend_ApiServer_proto_authentication_authentication_proto != nil {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_backend_src_proto_authentication_authentication_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*TextHistory); i {
 			case 0:
 				return &v.state
@@ -362,7 +380,7 @@ func file_backend_src_proto_authentication_authentication_proto_init() {
 				return nil
 			}
 		}
-		file_backend_src_proto_authentication_authentication_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UserCredits); i {
 			case 0:
 				return &v.state
@@ -374,7 +392,7 @@ func file_backend_src_proto_authentication_authentication_proto_init() {
 				return nil
 			}
 		}
-		file_backend_src_proto_authentication_authentication_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*StatusResponse); i {
 			case 0:
 				return &v.state
@@ -386,7 +404,7 @@ func file_backend_src_proto_authentication_authentication_proto_init() {
 				return nil
 			}
 		}
-		file_backend_src_proto_authentication_authentication_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*LoginResponse); i {
 			case 0:
 				return &v.state
@@ -398,7 +416,7 @@ func file_backend_src_proto_authentication_authentication_proto_init() {
 				return nil
 			}
 		}
-		file_backend_src_proto_authentication_authentication_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Empty); i {
 			case 0:
 				return &v.state
@@ -415,18 +433,18 @@ func file_backend_src_proto_authentication_authentication_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_backend_src_proto_authentication_authentication_proto_rawDesc,
+			RawDescriptor: file_backend_ApiServer_proto_authentication_authentication_proto_rawDesc,
 			NumEnums:      0,
 			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_backend_src_proto_authentication_authentication_proto_goTypes,
-		DependencyIndexes: file_backend_src_proto_authentication_authentication_proto_depIdxs,
-		MessageInfos:      file_backend_src_proto_authentication_authentication_proto_msgTypes,
+		GoTypes:           file_backend_ApiServer_proto_authentication_authentication_proto_goTypes,
+		DependencyIndexes: file_backend_ApiServer_proto_authentication_authentication_proto_depIdxs,
+		MessageInfos:      file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes,
 	}.Build()
-	File_backend_src_proto_authentication_authentication_proto = out.File
-	file_backend_src_proto_authentication_authentication_proto_rawDesc = nil
-	file_backend_src_proto_authentication_authentication_proto_goTypes = nil
-	file_backend_src_proto_authentication_authentication_proto_depIdxs = nil
+	File_backend_ApiServer_proto_authentication_authentication_proto = out.File
+	file_backend_ApiServer_proto_authentication_authentication_proto_rawDesc = nil
+	file_backend_ApiServer_proto_authentication_authentication_proto_goTypes = nil
+	file_backend_ApiServer_proto_authentication_authentication_proto_depIdxs = nil
 }

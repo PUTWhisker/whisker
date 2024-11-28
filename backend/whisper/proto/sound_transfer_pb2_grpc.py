@@ -39,25 +39,25 @@ class SoundServiceStub(object):
                 request_serializer=sound__transfer__pb2.TextMessage.SerializeToString,
                 response_deserializer=sound__transfer__pb2.TextMessage.FromString,
                 _registered_method=True)
-        self.SendSoundFile = channel.unary_unary(
-                '/SoundService/SendSoundFile',
-                request_serializer=sound__transfer__pb2.SoundRequest.SerializeToString,
+        self.TranscribeFile = channel.unary_unary(
+                '/SoundService/TranscribeFile',
+                request_serializer=sound__transfer__pb2.TranscriptionRequest.SerializeToString,
                 response_deserializer=sound__transfer__pb2.SoundResponse.FromString,
                 _registered_method=True)
-        self.StreamSoundFile = channel.stream_stream(
-                '/SoundService/StreamSoundFile',
-                request_serializer=sound__transfer__pb2.SoundRequest.SerializeToString,
+        self.TranscribeLive = channel.stream_stream(
+                '/SoundService/TranscribeLive',
+                request_serializer=sound__transfer__pb2.TranscriptionRequest.SerializeToString,
                 response_deserializer=sound__transfer__pb2.SoundStreamResponse.FromString,
                 _registered_method=True)
-        self.SendSoundFileTranslation = channel.unary_stream(
-                '/SoundService/SendSoundFileTranslation',
-                request_serializer=sound__transfer__pb2.SoundRequest.SerializeToString,
+        self.TranslateFile = channel.unary_stream(
+                '/SoundService/TranslateFile',
+                request_serializer=sound__transfer__pb2.TranslationRequest.SerializeToString,
                 response_deserializer=sound__transfer__pb2.SoundStreamResponse.FromString,
                 _registered_method=True)
-        self.DiarizateSpeakers = channel.unary_unary(
-                '/SoundService/DiarizateSpeakers',
-                request_serializer=sound__transfer__pb2.SoundRequest.SerializeToString,
-                response_deserializer=sound__transfer__pb2.SpeakerAndLine.FromString,
+        self.DiarizateFile = channel.unary_unary(
+                '/SoundService/DiarizateFile',
+                request_serializer=sound__transfer__pb2.TranscriptionRequest.SerializeToString,
+                response_deserializer=sound__transfer__pb2.SpeakerAndLineResponse.FromString,
                 _registered_method=True)
 
 
@@ -70,25 +70,25 @@ class SoundServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SendSoundFile(self, request, context):
+    def TranscribeFile(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def StreamSoundFile(self, request_iterator, context):
+    def TranscribeLive(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SendSoundFileTranslation(self, request, context):
+    def TranslateFile(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def DiarizateSpeakers(self, request, context):
+    def DiarizateFile(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -102,25 +102,25 @@ def add_SoundServiceServicer_to_server(servicer, server):
                     request_deserializer=sound__transfer__pb2.TextMessage.FromString,
                     response_serializer=sound__transfer__pb2.TextMessage.SerializeToString,
             ),
-            'SendSoundFile': grpc.unary_unary_rpc_method_handler(
-                    servicer.SendSoundFile,
-                    request_deserializer=sound__transfer__pb2.SoundRequest.FromString,
+            'TranscribeFile': grpc.unary_unary_rpc_method_handler(
+                    servicer.TranscribeFile,
+                    request_deserializer=sound__transfer__pb2.TranscriptionRequest.FromString,
                     response_serializer=sound__transfer__pb2.SoundResponse.SerializeToString,
             ),
-            'StreamSoundFile': grpc.stream_stream_rpc_method_handler(
-                    servicer.StreamSoundFile,
-                    request_deserializer=sound__transfer__pb2.SoundRequest.FromString,
+            'TranscribeLive': grpc.stream_stream_rpc_method_handler(
+                    servicer.TranscribeLive,
+                    request_deserializer=sound__transfer__pb2.TranscriptionRequest.FromString,
                     response_serializer=sound__transfer__pb2.SoundStreamResponse.SerializeToString,
             ),
-            'SendSoundFileTranslation': grpc.unary_stream_rpc_method_handler(
-                    servicer.SendSoundFileTranslation,
-                    request_deserializer=sound__transfer__pb2.SoundRequest.FromString,
+            'TranslateFile': grpc.unary_stream_rpc_method_handler(
+                    servicer.TranslateFile,
+                    request_deserializer=sound__transfer__pb2.TranslationRequest.FromString,
                     response_serializer=sound__transfer__pb2.SoundStreamResponse.SerializeToString,
             ),
-            'DiarizateSpeakers': grpc.unary_unary_rpc_method_handler(
-                    servicer.DiarizateSpeakers,
-                    request_deserializer=sound__transfer__pb2.SoundRequest.FromString,
-                    response_serializer=sound__transfer__pb2.SpeakerAndLine.SerializeToString,
+            'DiarizateFile': grpc.unary_unary_rpc_method_handler(
+                    servicer.DiarizateFile,
+                    request_deserializer=sound__transfer__pb2.TranscriptionRequest.FromString,
+                    response_serializer=sound__transfer__pb2.SpeakerAndLineResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -161,7 +161,7 @@ class SoundService(object):
             _registered_method=True)
 
     @staticmethod
-    def SendSoundFile(request,
+    def TranscribeFile(request,
             target,
             options=(),
             channel_credentials=None,
@@ -174,8 +174,8 @@ class SoundService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/SoundService/SendSoundFile',
-            sound__transfer__pb2.SoundRequest.SerializeToString,
+            '/SoundService/TranscribeFile',
+            sound__transfer__pb2.TranscriptionRequest.SerializeToString,
             sound__transfer__pb2.SoundResponse.FromString,
             options,
             channel_credentials,
@@ -188,7 +188,7 @@ class SoundService(object):
             _registered_method=True)
 
     @staticmethod
-    def StreamSoundFile(request_iterator,
+    def TranscribeLive(request_iterator,
             target,
             options=(),
             channel_credentials=None,
@@ -201,8 +201,8 @@ class SoundService(object):
         return grpc.experimental.stream_stream(
             request_iterator,
             target,
-            '/SoundService/StreamSoundFile',
-            sound__transfer__pb2.SoundRequest.SerializeToString,
+            '/SoundService/TranscribeLive',
+            sound__transfer__pb2.TranscriptionRequest.SerializeToString,
             sound__transfer__pb2.SoundStreamResponse.FromString,
             options,
             channel_credentials,
@@ -215,7 +215,7 @@ class SoundService(object):
             _registered_method=True)
 
     @staticmethod
-    def SendSoundFileTranslation(request,
+    def TranslateFile(request,
             target,
             options=(),
             channel_credentials=None,
@@ -228,8 +228,8 @@ class SoundService(object):
         return grpc.experimental.unary_stream(
             request,
             target,
-            '/SoundService/SendSoundFileTranslation',
-            sound__transfer__pb2.SoundRequest.SerializeToString,
+            '/SoundService/TranslateFile',
+            sound__transfer__pb2.TranslationRequest.SerializeToString,
             sound__transfer__pb2.SoundStreamResponse.FromString,
             options,
             channel_credentials,
@@ -242,7 +242,7 @@ class SoundService(object):
             _registered_method=True)
 
     @staticmethod
-    def DiarizateSpeakers(request,
+    def DiarizateFile(request,
             target,
             options=(),
             channel_credentials=None,
@@ -255,9 +255,9 @@ class SoundService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/SoundService/DiarizateSpeakers',
-            sound__transfer__pb2.SoundRequest.SerializeToString,
-            sound__transfer__pb2.SpeakerAndLine.FromString,
+            '/SoundService/DiarizateFile',
+            sound__transfer__pb2.TranscriptionRequest.SerializeToString,
+            sound__transfer__pb2.SpeakerAndLineResponse.FromString,
             options,
             channel_credentials,
             insecure,
