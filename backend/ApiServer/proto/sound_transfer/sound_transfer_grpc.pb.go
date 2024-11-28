@@ -102,7 +102,7 @@ func (c *soundServiceClient) TranslateFile(ctx context.Context, in *TranslationR
 }
 
 type SoundService_TranslateFileClient interface {
-	Recv() (*SoundStreamResponse, error)
+	Recv() (*SoundResponse, error)
 	grpc.ClientStream
 }
 
@@ -110,8 +110,8 @@ type soundServiceTranslateFileClient struct {
 	grpc.ClientStream
 }
 
-func (x *soundServiceTranslateFileClient) Recv() (*SoundStreamResponse, error) {
-	m := new(SoundStreamResponse)
+func (x *soundServiceTranslateFileClient) Recv() (*SoundResponse, error) {
+	m := new(SoundResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -242,7 +242,7 @@ func _SoundService_TranslateFile_Handler(srv interface{}, stream grpc.ServerStre
 }
 
 type SoundService_TranslateFileServer interface {
-	Send(*SoundStreamResponse) error
+	Send(*SoundResponse) error
 	grpc.ServerStream
 }
 
@@ -250,7 +250,7 @@ type soundServiceTranslateFileServer struct {
 	grpc.ServerStream
 }
 
-func (x *soundServiceTranslateFileServer) Send(m *SoundStreamResponse) error {
+func (x *soundServiceTranslateFileServer) Send(m *SoundResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 

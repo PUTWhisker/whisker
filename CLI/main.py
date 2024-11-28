@@ -1,4 +1,5 @@
 from console import ConsolePrinter, LoginFailure
+from dotenv import load_dotenv, set_key
 
 import dicts
 import argparse
@@ -6,15 +7,6 @@ import sys
 import asyncio
 import os.path
 import logging
-
-curDir = os.path.dirname(__file__)
-protoDir = os.path.join(curDir, "proto/sound_transfer")
-sys.path.insert(0, protoDir)
-
-from proto.sound_transfer import sound_transfer_pb2_grpc
-from proto.sound_transfer import sound_transfer_pb2
-
-sys.path.insert(0, curDir)
 
 _cleanup_coroutines = []  # Needed for asyncio graceful shutdown
 
@@ -41,14 +33,6 @@ def parse() -> argparse.ArgumentParser:
         default=None,
         choices=sorted(list(dicts.LANGUAGES)) + sorted(list(dicts.LANGUAGES.values())),
         help="Set it to the audio language",
-    )
-
-    parser.add_argument(
-        "--model",
-        type=str,
-        default="small",
-        choices=dicts.MODELS,
-        help="Set it to the desired Whisper model",
     )
 
     parser.add_argument(
@@ -145,19 +129,25 @@ async def main(parser: argparse.ArgumentParser):
                 logging.error("Incorrect file name.")
                 return
 
+        env = ".env"
+        load_dotenv(env)
+        token = os.getenv("JWT_TOKEN")
         # Innitiate connection with the server
         console = ConsolePrinter(
-            host, port, args.language, args.model, args.save, args.trans
+            host, port, args.language, args.save, args.trans, token
         )
         if not await console.startApp():
             return
-
         if args.register:
             await console.register()
         elif args.retrieve:
-            await console.getTranslation()
+            if token != "":
+                await console.getTranslation()
+            else:
+                print("Login into your account first!")
         elif args.username is not None:
-            await console.retreiveToken(args.username)
+            token = await console.retreiveToken(args.username)
+            set_key(env, "JWT_TOKEN", token)
         elif (
             args.fileName is not None
         ):  # If there is a valid audio file as an argument, initiate SendSoundFile method

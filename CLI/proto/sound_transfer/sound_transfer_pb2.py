@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14sound_transfer.proto\"\x1b\n\x0bTextMessage\x12\x0c\n\x04text\x18\x01 \x01(\t\"C\n\x14TranscriptionRequest\x12\x12\n\nsound_data\x18\x01 \x01(\x0c\x12\x17\n\x0fsource_language\x18\x02 \x01(\t\"_\n\x12TranslationRequest\x12\x12\n\nsound_data\x18\x01 \x01(\x0c\x12\x17\n\x0fsource_language\x18\x02 \x01(\t\x12\x1c\n\x14translation_language\x18\x03 \x01(\t\"8\n\rSoundResponse\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x19\n\x11\x64\x65tected_language\x18\x02 \x01(\t\"6\n\x13SoundStreamResponse\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x11\n\tnew_chunk\x18\x02 \x01(\x08\"V\n\x16SpeakerAndLineResponse\x12\x0c\n\x04text\x18\x01 \x03(\t\x12\x13\n\x0bspeakerName\x18\x02 \x03(\t\x12\x19\n\x11\x64\x65tected_language\x18\x03 \x01(\t2\xbb\x02\n\x0cSoundService\x12.\n\x0eTestConnection\x12\x0c.TextMessage\x1a\x0c.TextMessage\"\x00\x12\x39\n\x0eTranscribeFile\x12\x15.TranscriptionRequest\x1a\x0e.SoundResponse\"\x00\x12\x41\n\x0eTranscribeLive\x12\x15.TranscriptionRequest\x1a\x14.SoundStreamResponse(\x01\x30\x01\x12<\n\rTranslateFile\x12\x13.TranslationRequest\x1a\x14.SoundStreamResponse0\x01\x12?\n\rDiarizateFile\x12\x15.TranscriptionRequest\x1a\x17.SpeakerAndLineResponseBH\n\x15io.grpc.soundtransferB\x12SoundTransferProtoP\x01Z\x19inzynierka/sound_transferb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14sound_transfer.proto\"\x1b\n\x0bTextMessage\x12\x0c\n\x04text\x18\x01 \x01(\t\"C\n\x14TranscriptionRequest\x12\x12\n\nsound_data\x18\x01 \x01(\x0c\x12\x17\n\x0fsource_language\x18\x02 \x01(\t\"_\n\x12TranslationRequest\x12\x12\n\nsound_data\x18\x01 \x01(\x0c\x12\x17\n\x0fsource_language\x18\x02 \x01(\t\x12\x1c\n\x14translation_language\x18\x03 \x01(\t\"8\n\rSoundResponse\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x19\n\x11\x64\x65tected_language\x18\x02 \x01(\t\"6\n\x13SoundStreamResponse\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x11\n\tnew_chunk\x18\x02 \x01(\x08\"V\n\x16SpeakerAndLineResponse\x12\x0c\n\x04text\x18\x01 \x03(\t\x12\x13\n\x0bspeakerName\x18\x02 \x03(\t\x12\x19\n\x11\x64\x65tected_language\x18\x03 \x01(\t2\xb5\x02\n\x0cSoundService\x12.\n\x0eTestConnection\x12\x0c.TextMessage\x1a\x0c.TextMessage\"\x00\x12\x39\n\x0eTranscribeFile\x12\x15.TranscriptionRequest\x1a\x0e.SoundResponse\"\x00\x12\x41\n\x0eTranscribeLive\x12\x15.TranscriptionRequest\x1a\x14.SoundStreamResponse(\x01\x30\x01\x12\x36\n\rTranslateFile\x12\x13.TranslationRequest\x1a\x0e.SoundResponse0\x01\x12?\n\rDiarizateFile\x12\x15.TranscriptionRequest\x1a\x17.SpeakerAndLineResponseBH\n\x15io.grpc.soundtransferB\x12SoundTransferProtoP\x01Z\x19inzynierka/sound_transferb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -45,5 +45,5 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_SPEAKERANDLINERESPONSE']._serialized_start=333
   _globals['_SPEAKERANDLINERESPONSE']._serialized_end=419
   _globals['_SOUNDSERVICE']._serialized_start=422
-  _globals['_SOUNDSERVICE']._serialized_end=737
+  _globals['_SOUNDSERVICE']._serialized_end=731
 # @@protoc_insertion_point(module_scope)

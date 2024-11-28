@@ -60,14 +60,14 @@ class AudioRecorder():
         output.close()
 
 
-    async def record(self):
+    async def record(self, language:str):
         try:
             recordTask = asyncio.create_task(self._startRecording()) # Initiate recording async
             while not recordTask.done():
                 await asyncio.sleep(self.probeTime) # Await for set in constructor time
-                yield Variables.SoundRequest( # After probeTime seconds send 
+                yield Variables.TranscriptionRequest( # After probeTime seconds send 
                     sound_data=b''.join(self.frames),
-                    flags=["a","b"] # TODO: resolve flags problem
+                    source_language=language
                 )
                 if self.save is not None: # Saving bytes if --save flag is raised
                     self.data += self.frames
@@ -79,9 +79,9 @@ class AudioRecorder():
         except Exception as e:
             logging.error(f'Problem occured while recording audio: {e}')
         finally:
-            yield Variables.SoundRequest( # Send recorded data after keyboard interruption
+            yield Variables.TranscriptionRequest( # Send recorded data after keyboard interruption
                     sound_data=b''.join(self.frames),
-                    flags=["a","b"]
+                    source_language=language
                 ) 
 
 

@@ -40,7 +40,6 @@ class TranscriptionData():
         if self.curSeconds < 10:
             self.audio = self.previousAudio + receivedAudio
         self.previousAudio = self.audio
-        # self.filePath = Path(f'./tempFiles/{uuid.uuid4()}.wav')
 
     def _saveAudioFile(self, fileName: Path, data: bytes):
         p = pyaudio.PyAudio()
@@ -73,25 +72,8 @@ class TranscriptionData():
             if stop - start > silenceLength:
                 logging.info("Silence Detected!!!")
                 return True
-                # TODO: check only the last one
         return False
 
-    def processMetadata(self, context: grpc.ServicerContext):
-        for key, value in context.invocation_metadata():
-            if key == "translation":
-                for languageKey, languageValue in languages.LANGUAGES.items():
-                    if languageKey == value or languageValue == value:
-                        self.translate = value
-                logging.info(f"{self.translate}: {value}")
-                if (
-                    self.translate is None and value != ""
-                ):  # Raise error if chosen language is not in M2M100 available language list
-                    raise WrongLanguage(
-                        "Given language is not supported for translation."
-                    )
-                self.translate = value
-            elif key == "language":
-                self.language = value
 
     def incrementData(self):
         self.curSeconds += 2

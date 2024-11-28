@@ -1,7 +1,6 @@
 #TODO: waiting animation for SendFileTranslation and diarization doesn't work for reasons
 from grpcClient import GrpcClient
 from getpass import getpass
-from dotenv import load_dotenv, set_key
 
 import random
 import asyncio
@@ -20,11 +19,13 @@ class ConsolePrinter:
         host: str = None,
         port: str = None,
         language: str = None,
-        model: str = "small",
         save: str = None,
         translation: str = None,
+        token:str = ""
     ):
-        self.grpcClient = GrpcClient(host, port, language, model, save, translation)
+        self.grpcClient = GrpcClient(host, port, language, save, translation, token)
+        self.token = token
+        self.language = language
 
 
     def _errorHandler(func):
@@ -51,7 +52,7 @@ class ConsolePrinter:
     async def startApp(self):
         seed = str(random.randint(0, 10000))
         conTask = asyncio.create_task(
-            self.grpcClient.initiateConnection(seed)
+            self.grpcClient.testConnection(seed)
         )  # Initiate connection attempt async
         dot = 0
         while not conTask.done():  # Dot animation until connection task is finished
@@ -70,7 +71,7 @@ class ConsolePrinter:
     @_errorHandler
     async def diarizateSpeakers(self, audio: bytes):
         sendTask = asyncio.create_task(
-            self.grpcClient.diarizateSpeakers(audio)
+            self.grpcClient.diarizateFile(audio)
         )  # Initiate sending file async
         dot = 0
         while not sendTask.done():  # Dot animation until connection task is finished
@@ -80,32 +81,40 @@ class ConsolePrinter:
         scripts = sendTask.result()  # Received transcribed text
         speakers = list(scripts.speakerName)
         speakerColors = self._generateRandomUniqueColors(speakers)
-        text = list(scripts.text)
-        for i in range(0, len(speakers)):
-            print(f"\033[38;{speakerColors[i][0]};{speakerColors[i][1]};{speakerColors[i][2]};12m{speakers[i]}\033[0m: {text[i]}")
+        texts = list(scripts.text)
+        if self.language is None:
+            print(f"Detected transcription language: {scripts.detected_language}")
+        for speaker, text in zip(speakers, texts):
+            print(f"\033[1m\033[38;2;{speakerColors[speaker][0]};{speakerColors[speaker][1]};{speakerColors[speaker][2]}m{speaker}\033[0m: {text}")
 
 
     @_errorHandler
     async def sendFile(self, audio: bytes):
         sendTask = asyncio.create_task(
-            self.grpcClient.sendSoundFile(audio)
+            self.grpcClient.transcribeFile(audio)
         )  # Initiate sending file async
         dot = 0
         while not sendTask.done():  # Dot animation until connection task is finished
             dot = self._waitingAnimation(dot)
             await asyncio.sleep(0.1)
         self._waitingAnimation(3)
-        script = sendTask.result()  # Received transcribed text
-        print(script)
+        response = sendTask.result()  # Received transcribed text
+        if self.language is None:
+            print(f"Detected transcription language: {response.detected_language}")
+        print(f"{response.text}")
 
 
     @_errorHandler
     async def sendFileTranslation(self, audio: bytes):
-        responseIter = self.grpcClient.SendSoundFileTranslation(audio)
+        responseIter = self.grpcClient.translateFile(audio)
+        awaitingTranscription = True
         async for response in responseIter:
-            if "transcription" in response.flags:
+            if awaitingTranscription:
+                awaitingTranscription = False
+                if self.language is None:
+                    print(f"Detected transcription language: {response.detected_language}")
                 print(f'\033[1mAudio transcription: \033[0m{response.text}')
-            elif "translation" in response.flags:
+            else:
                 print(f'\033[1mAudio translation: \033[0m{response.text}')
 
 
@@ -129,42 +138,30 @@ class ConsolePrinter:
     async def retreiveToken(self, username:str):
         if os.getenv("JWT_TOKEN") == "":
             password = getpass(f"{username}'s password: ")
-            env = ".env"
-            load_dotenv(env)
             newTokenJWT = await self.grpcClient.retreiveJWT(username, password)
-            print(newTokenJWT.JWT)
             print(newTokenJWT.successful)
             if not newTokenJWT.successful:
                 raise LoginFailure
             print("Successfully logged into your account!")
-            print(newTokenJWT.JWT)
-            set_key(env, "JWT_TOKEN", newTokenJWT.JWT)
+            return newTokenJWT.JWT
         else:
             print("You already have retreived a token. Clear env file if you want to retreive a different one.")
 
 
     async def getTranslation(self):
-        env = ".env"
-        load_dotenv(env)
-        token = os.getenv("JWT_TOKEN")
-        if token != "":
-            transcriptions = await self.grpcClient.getTranslation(token)
-        else:
-            print("Login into your account first!")
+        transcriptions = await self.grpcClient.getTranslation(self.token)
         print(transcriptions)
-        return
-
 
     @_errorHandler
     async def record(self):
         transcription, iter = [""], 0
-        responseIter = self.grpcClient.streamSoundFile()  # Initiate streaming file async
+        responseIter = self.grpcClient.transcribeLive()  # Initiate streaming file async
         async for response in responseIter:
             transcription[iter] = response.text
             terminalWidth, _ = os.get_terminal_size()
             print(" " * terminalWidth, end="\r", flush=True)
             print(transcription[iter], end="\r", flush=True)  # Delete?
-            if response.flags[0] == "True":
+            if response.new_chunk == "True":
                 iter += 1
                 transcription.append("")
                 print()
@@ -181,7 +178,7 @@ class ConsolePrinter:
             dot += 1
         return dot
 
-    def _generateRandomColorsWithDistanceCalculation(self, speakers: str) -> dict:
+    def _generateRandomUniqueColors(self, speakers: str) -> dict:
         uniqueSpeakers = set(speakers)
         speakers = list(uniqueSpeakers)
         colors = dict()

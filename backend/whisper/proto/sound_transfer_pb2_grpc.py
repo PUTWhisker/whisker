@@ -52,7 +52,7 @@ class SoundServiceStub(object):
         self.TranslateFile = channel.unary_stream(
                 '/SoundService/TranslateFile',
                 request_serializer=sound__transfer__pb2.TranslationRequest.SerializeToString,
-                response_deserializer=sound__transfer__pb2.SoundStreamResponse.FromString,
+                response_deserializer=sound__transfer__pb2.SoundResponse.FromString,
                 _registered_method=True)
         self.DiarizateFile = channel.unary_unary(
                 '/SoundService/DiarizateFile',
@@ -115,7 +115,7 @@ def add_SoundServiceServicer_to_server(servicer, server):
             'TranslateFile': grpc.unary_stream_rpc_method_handler(
                     servicer.TranslateFile,
                     request_deserializer=sound__transfer__pb2.TranslationRequest.FromString,
-                    response_serializer=sound__transfer__pb2.SoundStreamResponse.SerializeToString,
+                    response_serializer=sound__transfer__pb2.SoundResponse.SerializeToString,
             ),
             'DiarizateFile': grpc.unary_unary_rpc_method_handler(
                     servicer.DiarizateFile,
@@ -230,7 +230,7 @@ class SoundService(object):
             target,
             '/SoundService/TranslateFile',
             sound__transfer__pb2.TranslationRequest.SerializeToString,
-            sound__transfer__pb2.SoundStreamResponse.FromString,
+            sound__transfer__pb2.SoundResponse.FromString,
             options,
             channel_credentials,
             insecure,

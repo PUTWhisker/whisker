@@ -13,24 +13,24 @@ class TestConsoleSoundTransfer(unittest.IsolatedAsyncioTestCase):
 
     async def test_startApp(self):
         seed = str(random.randint(0, 10000))
-        res = await self.grpcClient.initiateConnection(seed)
+        res = await self.grpcClient.testConnection(seed)
         self.assertEqual(res.text, seed)
 
 
     async def test_sendFile(self):
-        res = await self.grpcClient.sendSoundFile(self.audio)
+        res = await self.grpcClient.transcribeFile(self.audio)
         self.assertIsInstance(res.text, str)
 
 
     async def test_sendFileTranslation(self):
-        res = await self.grpcClient.SendSoundFileTranslation(self.audio)
+        res = await self.grpcClient.translateFile(self.audio)
         self.assertEqual(len(res), 2)
         self.assertIsInstance(res[0].text, str)
         self.assertIsInstance(res[1].text, str)
 
 
     async def test_diarizateSpeakers(self):
-        res = await self.grpcClient.diarizateSpeakers(self.audio)
+        res = await self.grpcClient.diarizateFile(self.audio)
         self.assertEqual(len(res), 1)
         self.assertIsInstance(res[0].text, str)
 
