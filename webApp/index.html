@@ -2,6 +2,8 @@
 <html lang="en">
 
 <head>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   <meta charset="UTF-8">
   <title>DEMO PAGE</title>
   <script src="./dist/main.js"></script>
@@ -19,7 +21,7 @@
         translationfield.classList.remove('hidden');
       } else {
         langlist.classList.add('hidden');
-        translationfield.add('hidden');
+        translationfield.classList.add('hidden');
       }
     }
     function handleUpload(file) {
@@ -129,17 +131,28 @@
       </div>
     </div>
     <div id="results_fields">
-      <fieldset id="show_transcript">
+      <!-- <fieldset id="show_transcript">
         <legend>Transcript</legend>
         <form id="receive_transcript">
           <p id="transcriptedText"></p>
         </form>
+      </fieldset> -->
+      <fieldset id="show_transcript" class="result_windows">
+        <legend>Transcript</legend>
+        <button onclick="copyToClipboard(document.getElementById('transcription_result').innerText)">
+          <span class="material-symbols-outlined">content_copy</span>
+        </button>
+        <span id="transcription_result" class="result_span">&nbsp; en en en en en en en en en en en en en en en en en en
+          en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en
+          en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en
+          en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en </span>
       </fieldset>
-      <fieldset id="show_translation" class="hidden">
+      <fieldset id="show_translation" class="result_windows hidden">
         <legend>Translation</legend>
-        <form id="receive_translation">
-          <p id="translatedText"></p>
-        </form>
+        <button onclick="copyToClipboard(document.getElementById('translation_result').innerText)">
+          <span class="material-symbols-outlined">content_copy</span>
+        </button>
+        <span id="translation_result" class="result_span">&nbsp;</span>
       </fieldset>
     </div>
   </main>
@@ -180,6 +193,26 @@
         fourthTile.classList.remove("locked");
       }
     });
+
+    function copyToClipboard(text) {
+      if (location.protocol === 'https:') {
+        navigator.clipboard.writeText(text)
+          .then(() => { })
+          .catch((err) => console.error('Unable to copy to clipboard', err));
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+        } catch (err) {
+          console.error('Unable to copy to clipboard', err);
+        }
+        document.body.removeChild(textArea);
+      }
+    }
   </script>
 </body>
 

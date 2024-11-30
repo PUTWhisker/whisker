@@ -280,7 +280,7 @@ input[type='checkbox'] {
 
 }
 
-#receive_transcript {
+/* #transcription_result {
     max-width: 50%;
     min-width: 150px;
     text-align: center;
@@ -289,13 +289,13 @@ input[type='checkbox'] {
 }
 
 
-#receive_translation {
+#translation_result {
     max-width: 50%;
     min-width: 150px;
     text-align: center;
     padding: 5%;
     margin: auto;
-}
+} */
 
 #copy_button {
     float: right;
@@ -305,16 +305,28 @@ input[type='checkbox'] {
     border: none;
 }
 
-#show_transcript {
-    display: block;
+.result_windows {
     border-radius: 5px;
     width: 100%;
+    position: relative;
+
+}
+
+.result_windows>button {
+    margin-left: auto;
+    position: absolute;
+    right: 0.5em;
+    border: none;
+    background: none;
+}
+
+.result_span {
+    margin: 1.5vw;
+    display: inline-block;
 }
 
 #show_translation {
-    /* display: none; */
-    border-radius: 5px;
-    width: 100%;
+    margin-left: 2vw;
 }
 
 audio {
