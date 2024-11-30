@@ -225,7 +225,8 @@ body::-webkit-scrollbar {
 @media(max-aspect-ratio:1/1) {
 
     #input_file,
-    #choose_lang {
+    #choose_lang,
+    #start {
         font-size: 4vw;
     }
 }
@@ -296,6 +297,11 @@ input[type='checkbox'] {
     padding: 5%;
     margin: auto;
 } */
+
+.icon_button .material-symbols-outlined {
+    font-size: inherit;
+    transform: translateY(15%);
+}
 
 #copy_button {
     float: right;
