@@ -82,10 +82,3 @@ LANGUAGES = {
     "ba": "Bashkir",
     "su": "Sundanese",
 }
-
-MODELS = {
-    "tiny",
-    "small",
-    "medium",
-    "large" 
-}

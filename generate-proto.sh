@@ -24,15 +24,15 @@ python -m grpc_tools.protoc -I ./proto --python_out=./CLI/proto/authentication -
 python -m grpc_tools.protoc -I ./proto --python_out=./backend/whisper/proto --pyi_out=./backend/whisper/proto --grpc_python_out=./backend/whisper/proto ./proto/sound_transfer.proto
 
 # ServerAPI
-cp ./proto/sound_transfer.proto ./backend/src/proto/sound_transfer
-cp ./proto/authentication.proto ./backend/src/proto/authentication
-protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative ./backend/src/proto/sound_transfer/sound_transfer.proto
-protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative ./backend/src/proto/authentication/authentication.proto
+cp ./proto/sound_transfer.proto ./backend/ApiServer/proto/sound_transfer
+cp ./proto/authentication.proto ./backend/ApiServer/proto/authentication
+protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative ./backend/ApiServer/proto/sound_transfer/sound_transfer.proto
+protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative ./backend/ApiServer/proto/authentication/authentication.proto
 
 # Web
 protoc sound_transfer.proto --js_out=import_style=commonjs:webApp/proto/sound_transfer --grpc-web_out=import_style=commonjs,mode=grpcwebtext:webApp/proto/sound_transfer --proto_path=./proto
 protoc authentication.proto --js_out=import_style=commonjs:webApp/proto/authentication --grpc-web_out=import_style=commonjs,mode=grpcwebtext:webApp/proto/authentication --proto_path=./proto
 
-#TODO: Add Mobile's protoc (And maybe protoc installing if possible)
+#TODO: Add Mobile's protoc (And maybe protoc installing if possible) and fix js protoc
 
 rm -r venv
