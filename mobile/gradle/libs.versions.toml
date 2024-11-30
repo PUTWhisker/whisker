@@ -13,6 +13,8 @@ materal = "1.9.0"
 activity = "1.8.0"
 constraintlayout = "2.1.4"
 securityCryptoKtx = "1.1.0-alpha06"
+navigationFragmentKtx = "2.6.0"
+navigationUiKtx = "2.6.0"
 
 
 [libraries]
@@ -60,6 +62,8 @@ android-material = {group = "com.google.android.material", name="material", vers
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-security-crypto-ktx = { group = "androidx.security", name = "security-crypto-ktx", version.ref = "securityCryptoKtx" }
+androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version = "8.3.0" }

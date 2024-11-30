@@ -189,7 +189,7 @@ class StartActivity : AppCompatActivity() {
         }
 
         btnHistory.setOnClickListener{
-            showTranslationHistory()
+            startActivity(Intent(this, GalleryActivity::class.java))
         }
 
         btnRecordActivity.setOnClickListener {
