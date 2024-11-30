@@ -182,8 +182,8 @@ class SoundService(Services.SoundServiceServicer):
     async def TranscribeLive(self, requestIter, context):
         logging.info("Received record streaming.")
         transcriptionData = TranscriptionData()
+        transcriptionData.processMetadata(context)
         async for request in requestIter:
-            transcriptionData.language = request.source_language
             transcriptionData.isSilence = False
             if transcriptionData.curSeconds >= 10:
                 transcriptionData.curSegment += 1

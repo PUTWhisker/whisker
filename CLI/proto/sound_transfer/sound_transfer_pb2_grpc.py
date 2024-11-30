@@ -46,7 +46,7 @@ class SoundServiceStub(object):
                 _registered_method=True)
         self.TranscribeLive = channel.stream_stream(
                 '/SoundService/TranscribeLive',
-                request_serializer=sound__transfer__pb2.TranscriptionRequest.SerializeToString,
+                request_serializer=sound__transfer__pb2.TranscirptionLiveRequest.SerializeToString,
                 response_deserializer=sound__transfer__pb2.SoundStreamResponse.FromString,
                 _registered_method=True)
         self.TranslateFile = channel.unary_stream(
@@ -109,7 +109,7 @@ def add_SoundServiceServicer_to_server(servicer, server):
             ),
             'TranscribeLive': grpc.stream_stream_rpc_method_handler(
                     servicer.TranscribeLive,
-                    request_deserializer=sound__transfer__pb2.TranscriptionRequest.FromString,
+                    request_deserializer=sound__transfer__pb2.TranscirptionLiveRequest.FromString,
                     response_serializer=sound__transfer__pb2.SoundStreamResponse.SerializeToString,
             ),
             'TranslateFile': grpc.unary_stream_rpc_method_handler(
@@ -202,7 +202,7 @@ class SoundService(object):
             request_iterator,
             target,
             '/SoundService/TranscribeLive',
-            sound__transfer__pb2.TranscriptionRequest.SerializeToString,
+            sound__transfer__pb2.TranscirptionLiveRequest.SerializeToString,
             sound__transfer__pb2.SoundStreamResponse.FromString,
             options,
             channel_credentials,

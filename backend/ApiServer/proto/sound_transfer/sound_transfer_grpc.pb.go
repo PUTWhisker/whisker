@@ -65,7 +65,7 @@ func (c *soundServiceClient) TranscribeLive(ctx context.Context, opts ...grpc.Ca
 }
 
 type SoundService_TranscribeLiveClient interface {
-	Send(*TranscriptionRequest) error
+	Send(*TranscirptionLiveRequest) error
 	Recv() (*SoundStreamResponse, error)
 	grpc.ClientStream
 }
@@ -74,7 +74,7 @@ type soundServiceTranscribeLiveClient struct {
 	grpc.ClientStream
 }
 
-func (x *soundServiceTranscribeLiveClient) Send(m *TranscriptionRequest) error {
+func (x *soundServiceTranscribeLiveClient) Send(m *TranscirptionLiveRequest) error {
 	return x.ClientStream.SendMsg(m)
 }
 
@@ -213,7 +213,7 @@ func _SoundService_TranscribeLive_Handler(srv interface{}, stream grpc.ServerStr
 
 type SoundService_TranscribeLiveServer interface {
 	Send(*SoundStreamResponse) error
-	Recv() (*TranscriptionRequest, error)
+	Recv() (*TranscirptionLiveRequest, error)
 	grpc.ServerStream
 }
 
@@ -225,8 +225,8 @@ func (x *soundServiceTranscribeLiveServer) Send(m *SoundStreamResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *soundServiceTranscribeLiveServer) Recv() (*TranscriptionRequest, error) {
-	m := new(TranscriptionRequest)
+func (x *soundServiceTranscribeLiveServer) Recv() (*TranscirptionLiveRequest, error) {
+	m := new(TranscirptionLiveRequest)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}

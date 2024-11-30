@@ -112,6 +112,7 @@ class GrpcClient:
             recording = audio.AudioRecorder(self.save)  # Initiate recording class
             metadata = (
                 ("jwt", self.token),
+                ("source_language", self.language),
             )
             responseIter = self.stub.TranscribeLive(
                 recording.record(self.language), metadata=metadata

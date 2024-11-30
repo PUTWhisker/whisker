@@ -75,6 +75,20 @@ class TranscriptionData():
         return False
 
 
+    def processMetadata(self, context: grpc.ServicerContext):
+        for key, value in context.invocation_metadata():
+            if key == 'source_language':
+                for languageKey, languageValue in languages.LANGUAGES.items():
+                    if languageKey == value or languageValue == value:
+                        self.language = value
+                if (
+                    self.language is None and value != ""
+                ):  # Raise error if chosen language is not in M2M100 available language list
+                    raise WrongLanguage(
+                        "Given language is not supported for translation."
+                    )
+    
+
     def incrementData(self):
         self.curSeconds += 2
         if self.isSilence or self.curSeconds >= 10:

@@ -7,7 +7,7 @@ option java_outer_classname = "SoundTransferProto";
 service SoundService {
     rpc TestConnection(TextMessage) returns (TextMessage) {};
     rpc TranscribeFile(TranscriptionRequest) returns (SoundResponse) {};
-    rpc TranscribeLive(stream TranscriptionRequest) returns (stream SoundStreamResponse);
+    rpc TranscribeLive(stream TranscirptionLiveRequest) returns (stream SoundStreamResponse);
     rpc TranslateFile(TranslationRequest) returns (stream SoundResponse);
     rpc DiarizateFile(TranscriptionRequest) returns (SpeakerAndLineResponse);
 }
@@ -25,6 +25,10 @@ message TranslationRequest {
     bytes sound_data = 1;
     string source_language = 2;
     string translation_language = 3;  
+}
+
+message TranscirptionLiveRequest {
+    bytes sound_data = 1;
 }
 
 message SoundResponse {

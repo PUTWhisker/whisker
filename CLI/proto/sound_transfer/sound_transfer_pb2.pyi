@@ -29,6 +29,12 @@ class TranslationRequest(_message.Message):
     translation_language: str
     def __init__(self, sound_data: _Optional[bytes] = ..., source_language: _Optional[str] = ..., translation_language: _Optional[str] = ...) -> None: ...
 
+class TranscirptionLiveRequest(_message.Message):
+    __slots__ = ("sound_data",)
+    SOUND_DATA_FIELD_NUMBER: _ClassVar[int]
+    sound_data: bytes
+    def __init__(self, sound_data: _Optional[bytes] = ...) -> None: ...
+
 class SoundResponse(_message.Message):
     __slots__ = ("text", "detected_language")
     TEXT_FIELD_NUMBER: _ClassVar[int]
