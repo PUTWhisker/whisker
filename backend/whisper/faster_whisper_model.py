@@ -40,7 +40,6 @@ class FasterWhisperHandler:
         transcriptionData: TranscriptionData,
         context: grpc.ServicerContext,
     ) -> Path:
-        transcriptionData.processMetadata(context)
         transcriptionData.audio = data
         return transcriptionData.saveFile()
     
