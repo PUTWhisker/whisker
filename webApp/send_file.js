@@ -13,8 +13,8 @@ const _validFileExtensions = [".mp3", ".wav"];
 export function setupConnection() {
     connectionTest()
 
-    const send_button = document.getElementById('submit_file')
-    send_button.onclick = validateAndSend;
+    const form = document.getElementById('send_file')
+    form.onsubmit = validateAndSend;
     //TODO: down from here are buttons from test.html
 //     const register = document.getElementById('register')
 //     register.onsubmit = button_register;
@@ -28,14 +28,14 @@ export function setupConnection() {
 async function validateAndSend(e) {
     e.preventDefault()
     validate(e)
-    // .then(result => {
-    //   if (result) {
-    //     showTranscriptedText(result); 
-    //   }else {
-    //     // showTranscriptedText(result); 
-    //     // showTranslatededText(result); 
-    //   }
-    // })
+    .then(result => {
+      if (result) {
+        showTranscriptedText(result); 
+      }else {
+        showTranscriptedText(result); 
+        showTranslatededText(result); 
+      }
+    })
     //TODO: uncomment upper code, I use this function for testing
     // SoundTranslationFunction
     //     validate(e)
@@ -46,20 +46,16 @@ async function validateAndSend(e) {
     // })
 }
 
-async function showTranscriptedText(text) {
+function showTranscriptedText(text) {
     var transcripted = document.getElementById("transciptedText");
     console.log(typeof(text))
-    console.log('szapka')
-    console.log(text)
-    transcripted.innerText = text
+    transcripted.innerText = text;
 }
 
-async function showTranslatedText(text) {
+function showTranslatedText(text) {
     var translated = document.getElementById("translatedText");
     console.log(typeof(text))
-    console.log('a')
-    console.log(text)
-    translated.innerText = text
+    translated.innerText = text;
 }
 
 function connectionTest() { // Verify whether we can connect with the Whisper server
@@ -102,13 +98,11 @@ async function validate(e) { // Validate input file format
                 let answer_flag = false;
                 for await (const res of answer) {
                     console.log(res)
-                    if (!res) continue
                     if(!answer_flag){
-                        showTranscriptedText(res);
-                        answer_flag = true;
-                    } else {
-                        showTranslatedText(res);
-                    } 
+                        
+                    }
+                    
+                    
                 }
                 return "A"
             }
@@ -148,11 +142,11 @@ function sendFile(file) { // Send file to the server and return the answer
 async function *sendFileTranslation(file, fileLanguage, translationLanguage) {
     const reader = (file) =>
         new Promise((resolve, reject) => {
-          const fr = new FileReader()
-          fr.onload = () => resolve(fr)
-          fr.onerror = (err) => reject(err)
-          fr.readAsArrayBuffer(file)
-        })
+          const fr = new FileReader();
+          fr.onload = () => resolve(fr);
+          fr.onerror = (err) => reject(err);
+          fr.readAsArrayBuffer(file);
+        });
     let e = await reader(file)
     let buffer = e.result
     let byteArray = new Uint8Array(buffer)
@@ -164,18 +158,17 @@ async function *sendFileTranslation(file, fileLanguage, translationLanguage) {
 
     // Handle responses
     yield stream.on('data', (response) => {
-        let text = response.getText()
-        console.log(`Received response: ${text}`)
-        return text
+        console.log(`Received response: ${response.getText()}`);
+        return response.getText()
     });
 
     // Handle stream end
     stream.on('end', () => {
-        console.log('Received everything, stream ended.')
+        console.log('Received everything, stream ended.');
     });
 
     // Handle errors
     stream.on('error', (err) => {
-        console.log(`There was an error: ${err.code}: ${err.message}`)
+        console.log(`There was an error: ${err.code}: ${err.message}`);
     });
 }

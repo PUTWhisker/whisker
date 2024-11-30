@@ -1,9 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
 
-body{
-    background-image: linear-gradient(rgb(255,247,209), rgb(139,93,255));
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: white;
     background-size: cover;
     background-position: center;
     min-height: 100vh;
+    font-family: Lato, sans-serif;
+    /* position: relative;
+    overflow: hidden; */
+}
+
+body::-webkit-scrollbar {
+    display: none;
+}
+
+.hidden {
+    display: none !important;
 }
 
 #send_recording {
@@ -13,15 +31,11 @@ body{
 
 #record {
     background-color: green;
-} 
+}
 
 #stop {
     background-color: red;
 }
-
-/* #submit_file{
-    background-position: center;
-} */
 
 .button {
     margin: 0px 10px 0px 10px;
@@ -33,25 +47,16 @@ body{
     cursor: pointer;
 }
 
-fieldset {
-    /* background-color: whitesmoke; */
-    background-color: rgb(106, 66, 194, 0.4);
-    max-width: 900px;
-    min-height: 40vh;
-    margin: auto;
-    
-}
-
-#top_menu{
-    background-color:rgb(86, 58, 156);
+#top_menu {
+    background-color: rgb(86, 58, 156);
     overflow: hidden;
+    display: flex;
 }
 
 #top_menu a {
     /* float: left; */
     font-size: 20px;
-    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    color: rgb(255,247,209);
+    color: white;
     background-color: rgb(86, 58, 156);
     padding: 14px 16px;
     margin: auto;
@@ -59,40 +64,40 @@ fieldset {
     text-decoration: none;
 }
 
-#top_menu a:hover{
-    background-color: rgb(139,93,255);
+#top_menu a:hover {
+    background-color: rgb(139, 93, 255);
 }
 
-#choose_file {
+#blank_space {
+    flex: 1;
+}
+
+#choose_file_field {
     border-style: dotted;
-    border-width: 7px;
+    border-color: black;
+    border-width: 2px;
+    background-color: rgb(226, 226, 226);
     text-align: center;
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    
+    height: 90%;
 }
 
-#submit_file{
-    color: rgb(86, 58, 156);
-    background-color: rgb(255,247,209);
-    width: 200px;
-    height: 100px;
+#submit_file {
+    color: black;
+    background-color: white;
+    max-width: 200px;
+    max-height: 100px;
     border-radius: 4px;
     border: 2px solid rgba(27, 27, 27, 0.8);
     font-size: 20px;
     margin: 20px;
-    
 }
 
-#submit_container{
-    /* justify-content: center;
-    display: flex; */
-    margin: auto;
-    margin-right: 2%;
-    display: inline-block;
-    vertical-align: middle;
+#submit_file_container {
+    border-style: dashed;
+    border-width: 3px;
 }
 
-#main_buttons{
+#main_buttons {
     margin: auto;
     /* margin: 3%; */
     margin-left: 0%;
@@ -100,119 +105,216 @@ fieldset {
     vertical-align: middle;
 }
 
-#main_field{
+#settings_fields {
     display: flex;
-    padding: 5% 5%;
+    width: auto;
+    /* margin-left: 5vw;
+    margin-right: 5%; */
+    margin: calc(2vw + 4.5vh) 5vw 3vw;
+    /* padding-top: 3%; */
+    height: 30vh;
+    align-content: space-between;
+    /* overflow: auto; */
     /* margin: 5%; */
-    
+    justify-content: space-between;
+    flex-wrap: wrap;
+
 }
 
-#show_translation_tic, #choose_lang, #submit_file{
+.options_div {
+    /* max-width: 25%; */
+    /* min-width: 25%; */
+    /* padding: 0 2vw; */
+    flex: 1;
+    background-color: blue;
+    /* width: 15vw; */
+    max-width: 18vw;
+    /* min-width: 13vw; */
+    height: 100%;
+    /* margin: 0 2vw 3vh; */
+    position: relative;
+    border-radius: 3%;
+
+}
+
+.options_div.locked {
+    opacity: 0.5;
+}
+
+.steps {
+    position: absolute;
+    top: -4.5vh;
+    left: -4.5vh;
+    background-color: yellow;
+    border-radius: 4.5vh;
+    height: 9vh;
+    width: 9vh;
+    font-size: 5vh;
+
+
+}
+
+.steps>div {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+}
+
+.field_container {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    text-align: center;
+}
+
+.field_container>* {
+    flex: 1;
+}
+
+.fields_in_options {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+@media(max-aspect-ratio:1/1) {
+    .options_div {
+        min-width: 39vw;
+        height: 45%;
+    }
+
+    #settings_fields {
+        height: 50vh;
+    }
+}
+
+#results_fields {
+    display: flex;
+    width: auto;
+    margin-left: 5%;
+    margin-right: 5%;
+    height: 60%;
+}
+
+/* #show_translation_tic,
+#choose_lang,
+#submit_file {
     display: block;
-    
-    
-}
+} */
 
-#choose_lang{
-    appearance: none;
-    -webkit-appearance: none; 
-    -moz-appearance: none; 
-    background-color: rgb(255, 247, 209); 
-    color: rgb(86, 58, 156); 
-    width: 200px; 
-    height: 100px; 
-    border-radius: 4px; 
-    font-size: 20px; 
-    border: 2px solid rgb(27, 27, 27, 0.8); 
-    padding: 10px; 
+#choose_lang,
+#input_file,
+#choose_trans_lang,
+#start {
+    background-color: white;
+    color: black;
+    /* height: 40%; */
+    border-radius: 4px;
+    font-size: 1.4vw;
+    border: 2px solid rgb(27, 27, 27, 0.8);
     cursor: pointer;
     text-align: center;
-    margin: 20px;
+    position: relative;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -25%);
+    padding: 1.5vw;
 }
 
-#choose_trans_lang{
-    appearance: none;
-    -webkit-appearance: none; 
-    -moz-appearance: none; 
-    background-color: rgb(255, 247, 209); 
-    color: rgb(86, 58, 156); 
-    width: 200px; 
-    height: 100px; 
-    border-radius: 4px; 
-    font-size: 20px; 
-    border: 2px solid rgb(27, 27, 27, 0.8); 
-    padding: 10px; 
-    cursor: pointer;
-    text-align: center;
-    margin: 20px;
+@media(max-aspect-ratio:1/1) {
+
+    #input_file,
+    #choose_lang {
+        font-size: 4vw;
+    }
 }
 
-#show_translation_checkbox{
+#show_translation_checkbox {
     display: none;
 }
 
-.custom_check{
-    display: inline-block;
-    color: rgb(86, 58, 156); 
-    background-color: rgb(255, 247, 209); 
-    width: 200px;
-    height: 100px;
-    border-radius: 4px;
-    font-size: 20px;
-    line-height: 100px; 
-    text-align: center;
-    margin: 20px;
-    cursor: pointer;
-    border: 2px solid rgb(27, 27, 27, 0.8);
-}
-
-input[type="checkbox"]:checked + .custom_check {
+input[type="checkbox"]:checked+.custom_check {
     background-color: rgb(22, 178, 105);
-    color: rgb(255, 247, 209);
+    color: white;
 }
 
 #send_file {
-    display: flex;            
-    justify-content: center;   
+    display: flex;
+    justify-content: center;
     align-items: center;
     height: 50vh;
 }
 
-#upload_msg {
-    font-size: 40px;
-    color: white;
-    opacity: 0.8;
-    
+.step_label {
+    font-size: 1.5vw;
+    color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    padding: 0 15%;
 }
 
-#receive_transcript{
-    max-width:50%;
-    min-width:150px;
+#file_name {
+    font-size: 1vw;
+}
+
+input[type='checkbox'] {
+    transform: scale(1.5);
+    filter: hue-rotate(280deg);
+    cursor: pointer;
+}
+
+.checkbox_label {
+    display: inline-block;
+    transform: translate(0.35em, -0.05em);
+    color: white;
+    font-size: 1.5vw;
+}
+
+@media(max-aspect-ratio:1/1) {
+
+    #upload_msg,
+    #choose_lang_msg,
+    .checkbox_label {
+        font-size: 3.2vw;
+    }
+
+}
+
+#receive_transcript {
+    max-width: 50%;
+    min-width: 150px;
     text-align: center;
     padding: 5%;
     margin: auto;
 }
 
-#copy_button{
+
+#receive_translation {
+    max-width: 50%;
+    min-width: 150px;
+    text-align: center;
+    padding: 5%;
+    margin: auto;
+}
+
+#copy_button {
     float: right;
 }
 
-#show_transcript{
+#transcribe {
+    border: none;
+}
+
+#show_transcript {
     display: block;
     border-radius: 5px;
+    width: 100%;
 }
 
-#translation_options{
-display: flex;
-}
-
-#show_translation{
-    display: none;
+#show_translation {
+    /* display: none; */
     border-radius: 5px;
-}
-
-#choose_trans_lang{
-    display: none;
+    width: 100%;
 }
 
 audio {
@@ -223,8 +325,3 @@ article {
     display: flex;
     flex-flow: column nowrap;
 }
-
-
-
-
-

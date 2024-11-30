@@ -1,87 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>DEMO PAGE</title>
-    <script src="./dist/main.js"></script>
-    <script> 
-      function showTransBox(){
-        document.getElementById("show_transcript").style.display = 'block';
-      }
 
-      function showTranslateBox(){
-        var box = document.getElementById("show_translation_checkbox");
-        var div_style = "none";
-          if(box.checked){
-            div_style = "block";
-        }
-        document.getElementById("show_translation").style.display = div_style;
-        document.getElementById("choose_trans_lang").style.display = div_style;
+<head>
+  <meta charset="UTF-8">
+  <title>DEMO PAGE</title>
+  <script src="./dist/main.js"></script>
+  <script>
+    function showTransBox() {
+      document.getElementById("show_transcript").style.display = 'block';
+    }
+
+    function showTransOptions() {
+      const checkbox = document.getElementById("translate");
+      const langlist = document.getElementById("trans_lang_list");
+      const translationfield = document.getElementById("show_translation");
+      if (checkbox.checked) {
+        langlist.classList.remove('hidden');
+        translationfield.classList.remove('hidden');
+      } else {
+        langlist.classList.add('hidden');
+        translationfield.add('hidden');
       }
-    </script>
-    <link rel="stylesheet" href="style.css">
-    <link rel="shortcut icon" href="#">
-  </head>
-  <body>
-    <main>
-      <div id="top_menu">
-        <a href="http://127.0.0.1:5500/webApp/record.html">Switch to dictate</a>
-        <a href="http://127.0.0.1:5500/webApp/login.html">Log in</a>
-        <a href="http://127.0.0.1:5500/webApp/signup.html">Sign up</a>
-      </div>
-        <div id = "main_field">
-          <div id = "submit_container">
-              <fieldset id = "choose_file">
-                <form id="send_file">
-                  <div>
-                    <label id = "upload_msg" for="input_file">Drag and drop an audio file or</label>
-                    <br />
-                    <input type="file" name="input_file" id="input_file"><br /><br />
-                  </div>
-                </form>
-              </fieldset>
+    }
+    function handleUpload(file) {
+      const fileNameLabel = document.getElementById("file_name");
+      const sourceLangTile = document.getElementById("source_language_container");
+      const languageChooser = document.getElementById("choose_lang");
+      console.log(`File ${file.name} hast became the chosen one`);
+      sourceLangTile.classList.remove("locked");
+      languageChooser.disabled = false;
+      fileNameLabel.classList.remove("hidden");
+      var visibleName = file.name;
+      if (visibleName.length > 20)
+        visibleName = `${visibleName.substring(0, 9)}...${visibleName.substring(visibleName.length - 8)}`
+      fileNameLabel.innerHTML = `Selected file:<br>${visibleName}`;
+    }
+    function dropHandle(event) {
+      event.preventDefault();
+      if (event.dataTransfer.items.length == 1) {
+        const file = event.dataTransfer.items[0];
+        if (file.kind == "file") {
+          const actuallyFile = file.getAsFile();
+          handleUpload(actuallyFile);
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="shortcut icon" href="#">
+</head>
+
+<body>
+  <main>
+    <div id="top_menu">
+      <a href="http://127.0.0.1:5500/webApp/record.html">Switch to dictate</a>
+      <div id="blank_space"></div>
+      <a href="http://127.0.0.1:5500/webApp/login.html">Log in</a>
+      <a href="http://127.0.0.1:5500/webApp/signup.html">Sign up</a>
+    </div>
+    <div id="settings_fields">
+      <div id="submit_file_container" class="options_div">
+        <div class="fields_in_options">
+          <div class="field_container">
+            <p id="upload_msg" class="step_label">Drag and drop an audio file or</p>
           </div>
-          <div id="main_buttons">
-            <select id="choose_lang"> 
+          <div class="field_container">
+            <input type="file" id="upload" hidden />
+            <label for="upload" id="input_file">Browse</label>
+          </div>
+          <div id="file_name" class="step_label hidden"></div>
+        </div>
+        <div class="steps">
+          <div>1</div>
+        </div>
+      </div>
+      <div id="source_language_container" class="options_div locked">
+        <div class="fields_in_options">
+          <div class="field_container">
+            <p id="choose_lang_msg" class="step_label">Choose the source language of your file</p>
+          </div>
+          <div class="field_container">
+            <select id="choose_lang" disabled>
               <option disabled selected>Choose language</option>
               <option>Polish</option>
               <option>English</option>
               <option>German</option>
             </select>
-            <div id="translation_options">
-              <label>
-                <input type="checkbox" id="show_translation_checkbox" onclick="showTranslateBox()"/>
-                <span class="custom_check">Show translation</span>
-              </label>
-              <select id="choose_trans_lang"> 
-                <option disabled selected>Translate to:</option>
-                <option>Polish</option>
-                <option>English</option>
-                <option>German</option>
-              </select>
-            </div>
-            <button type="submit" value="Submit file" id="submit_file">Transcribe!</button>
           </div>
         </div>
-        <div>
-          <fieldset id = "show_transcript">
-            <legend>Transcript</legend>
-            <form id="receive_transcript">
-              <!-- <button id="copy_button">Copy</button> -->
-              <p id="transcriptedText"></p>
-            </form>
-          </fieldset>
+        <div class="steps">
+          <div>2</div>
         </div>
-        <br />
-        <div>
-          <fieldset id = "show_translation">
-            <legend>Translation</legend>
-            <form id="receive_translation">
-              <!-- <button id="copy_button">Copy</button> -->
-              <p id="translatedText"></p>
-            </form>
-          </fieldset>
+      </div>
+      <div id="translation_options_container" class="options_div locked">
+        <div class="fields_in_options">
+          <div class="field_container">
+            <!-- <p id="choose_lang_msg">Choose the source language of your file</p> -->
+            <label id="translate_checkbox">
+              <input type="checkbox" id="translate" onclick="showTransOptions()" disabled>
+              <span class="checkbox_label">Translate</span></input>
+            </label>
+          </div>
+          <div class="field_container hidden" id="trans_lang_list">
+            <select id="choose_trans_lang" disabled>
+              <option disabled selected>Choose language</option>
+              <option>Polish</option>
+              <option>English</option>
+              <option>German</option>
+            </select>
+          </div>
         </div>
-    </main>
-  </body>
+        <div class="steps">
+          <div>3</div>
+        </div>
+      </div>
+      <div id="fourth_tile" class="options_div locked">
+        <div class="fields_in_options">
+          <div class="field_container">
+            <p id="ready_msg" class="step_label"></p>
+          </div>
+          <div class="field_container">
+            <button id="start">START</button>
+          </div>
+        </div>
+        <div class="steps">
+          <div>4</div>
+        </div>
+      </div>
+    </div>
+    <div id="results_fields">
+      <fieldset id="show_transcript">
+        <legend>Transcript</legend>
+        <form id="receive_transcript">
+          <p id="transcriptedText"></p>
+        </form>
+      </fieldset>
+      <fieldset id="show_translation" class="hidden">
+        <legend>Translation</legend>
+        <form id="receive_translation">
+          <p id="translatedText"></p>
+        </form>
+      </fieldset>
+    </div>
+  </main>
+  <script>
+    const uploadButton = document.getElementById("upload");
+    const languageChooser = document.getElementById("choose_lang");
+    const optionsTile = document.getElementById("translation_options_container");
+    const translationCheckbox = document.getElementById("translate");
+    const translationList = document.getElementById("choose_trans_lang");
+    const fourthTile = document.getElementById("fourth_tile");
+    document.body.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropHandle(e);
+    });
+    document.body.addEventListener("dragdrop", (e) => {
+      e.preventDefault();
+      dropHandle(e);
+    });
+    document.body.addEventListener("dragenter", (e) => {
+      e.preventDefault();
+    });
+    document.body.addEventListener("dragleave", (e) => {
+      e.preventDefault();
+    });
+    document.body.addEventListener("dragover", (e) => {
+      e.preventDefault();
+    });
+    uploadButton.addEventListener("change", (e) => {
+      if (e.target.files.length == 1) {
+        handleUpload(e.target.files[0]);
+      }
+    });
+    languageChooser.addEventListener("change", () => {
+      if (languageChooser.selectedIndex != 0) {
+        optionsTile.classList.remove("locked");
+        translationCheckbox.disabled = false;
+        translationList.disabled = false;
+        fourthTile.classList.remove("locked");
+      }
+    });
+  </script>
+</body>
+
 </html>
