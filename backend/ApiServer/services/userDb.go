@@ -71,7 +71,7 @@ func (db UserDb) addUserToDatabase(email string, password string) error {
 }
 
 func (db UserDb) getUserTranscriptionHistory(email string) (pgx.Rows, error) {
-	rows, err := db.pool.Query(context.Background(), "SELECT content FROM transcription WHERE app_user_id=(select id from app_user where email=$1 LIMIT 1);", email)
+	rows, err := db.pool.Query(context.Background(), "SELECT content, created_at FROM transcription WHERE app_user_id=(select id from app_user where email=$1 LIMIT 1);", email)
 	if err != nil {
 		log.Printf("Database error %v", err)
 		return nil, err

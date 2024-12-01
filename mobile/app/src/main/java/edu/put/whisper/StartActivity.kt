@@ -67,7 +67,7 @@ class StartActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
 
-        val serverUri = Uri.parse("http://100.80.80.156:50051/")
+        val serverUri = Uri.parse(getString(R.string.server_url))
         authClient = AuthenticationClient(serverUri)
         utilities = Utilities(this)
 
@@ -213,15 +213,6 @@ class StartActivity : AppCompatActivity() {
 
 
         btnTranscriptLive.setOnClickListener {
-//            if (!is_recording){
-//                soundTransferClient = SoundTransferClient(Uri.parse("http://10.0.2.2:7070/"))
-//                soundTransferClient!!.streamSoundFile()
-//
-//            } else {
-//                soundTransferClient!!.stopStream()
-//                soundTransferClient = null
-//            }
-//            is_recording = !is_recording
             val intent = Intent(this, LiveTranscriptionActivity::class.java)
             startActivity(intent)
 
@@ -255,7 +246,7 @@ class StartActivity : AppCompatActivity() {
                     lifecycleScope.launch {
                         val filePath = getFilePathFromUri(uri)
                         if (filePath != null) {
-                            utilities.uploadRecording(filePath) { transcription ->
+                            utilities.uploadRecording(filePath, "pl") { transcription ->
                                 runOnUiThread {
                                     if (transcription != null) {
                                         utilities.setVisibility(View.GONE, btnRecordActivity, btnChooseFile, btnLogin, btnRegister, tvChoose, btnTranscriptLive, logoWhisper)

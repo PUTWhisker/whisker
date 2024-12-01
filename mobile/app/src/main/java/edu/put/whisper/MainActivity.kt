@@ -202,7 +202,7 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             val filePath = tempFilePath ?: return@launch
-            uploadRecording(filePath)
+            uploadRecording(filePath, "pl")
         }
 
 
@@ -419,8 +419,8 @@ class MainActivity : AppCompatActivity() {
         return "recording_${dateFormat.format(date)}"
     }
 
-    private suspend fun uploadRecording(filePath: String) {
-        utilities.uploadRecording(filePath) { output ->
+    private suspend fun uploadRecording(filePath: String, language: String) {
+        utilities.uploadRecording(filePath, language) { output ->
             runOnUiThread {
                 if (output != null) {
                     tvTranscript.text = output

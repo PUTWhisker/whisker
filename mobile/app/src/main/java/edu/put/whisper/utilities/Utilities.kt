@@ -12,11 +12,11 @@ import java.lang.Exception
 
 class Utilities(private val context: Context) {
 
-    suspend fun uploadRecording(filePath: String, callback: (String?) -> Unit) {
+    suspend fun uploadRecording(filePath: String, language: String, callback: (String?) -> Unit) {
         try {
             val serverUri = Uri.parse(context.resources.getString(R.string.server_url))
             val transfer = SoundTransferClient(serverUri)
-            val output: String? = transfer.sendSoundFile(filePath)
+            val output: String? = transfer.transcribeFile(filePath, language)
 
             withContext(Dispatchers.Main) {
                 callback(output)

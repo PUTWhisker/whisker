@@ -41,47 +41,105 @@ func ConnectToWhisperServer() error {
 }
 
 func (s *SoundServer) TestConnection(ctx context.Context, in *pb.TextMessage) (*pb.TextMessage, error) {
-	log.Printf("Received: %v", in.GetText())
+	log.Printf("Received new connection")
 	return &pb.TextMessage{Text: in.GetText()}, nil
 }
 
-func (s *SoundServer) SendSoundFile(ctx context.Context, in *pb.SoundRequest) (*pb.SoundResponse, error) {
-	log.Printf("Received: sound file")
+func (s *SoundServer) TranscribeFile(ctx context.Context, in *pb.TranscriptionRequest) (*pb.SoundResponse, error) {
+	log.Printf("Received: sound file transcription")
 
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.Errorf(codes.DataLoss, "Failed to get metadata")
 	}
-	newCtx := metadata.NewOutgoingContext(context.Background(), md)
-	res, err := WhisperServer.SendSoundFile(newCtx, in)
+	log.Print(md) // JWT token for saving
+	newCtx := metadata.NewOutgoingContext(context.Background(), nil)
+	res, err := WhisperServer.TranscribeFile(newCtx, in)
 	if err != nil {
 		return res, err
 	}
-	username, err := GetUserNameFromMetadata(md)
 
-	if err != nil {
-		return nil, err
-	}
+	//Commented this code, as server tries to save to database even when env variable USE_DATABASE=False
 
-	if username != "" && s.Db != nil {
-		s.Db.saveTranscription(res.Text, username)
-	}
+	// username, err := GetUserNameFromMetadata(md)
+
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// if username != "" && s.Db != nil {
+	// 	s.Db.saveTranscription(res.Text, username)
+	// }
 
 	return res, nil
 }
 
-func (s *SoundServer) StreamSoundFile(stream pb.SoundService_StreamSoundFileServer) error {
+func (s *SoundServer) DiarizateFile(ctx context.Context, in *pb.TranscriptionRequest) (*pb.SpeakerAndLineResponse, error) {
+	log.Printf("Received: sound file diarization")
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Errorf(codes.DataLoss, "Failed to get metadata")
+	}
+	log.Print(md) // JWT token for saving
+	newCtx := metadata.NewOutgoingContext(context.Background(), nil)
+	res, err := WhisperServer.DiarizateFile(newCtx, in)
+	if err != nil {
+		return res, err
+	}
+	// username, err := GetUserNameFromMetadata(md)
+
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//TODO: Save to database result, needs to refractor database and save function for that
+	// if username != "" {
+	// 	SaveTextToHistory(res.Text, username, s.DbPool)
+	// }
+
+	return res, nil
+}
+
+func (s *SoundServer) TranslateFile(in *pb.TranslationRequest, stream pb.SoundService_TranslateFileServer) error {
+	log.Printf("Received: sound file translation")
 	md, ok := metadata.FromIncomingContext(stream.Context())
-	fmt.Println(md)
 	if !ok {
 		return status.Errorf(codes.DataLoss, "Failed to get metadata")
 	}
-	newCtx := metadata.NewOutgoingContext(context.Background(), md)
-	fmt.Println(newCtx)
-	whisperStream, _ := WhisperServer.StreamSoundFile(newCtx)
+	log.Print(md) // JWT token for saving
+	newCtx := metadata.NewOutgoingContext(context.Background(), nil)
+	whisperStream, _ := WhisperServer.TranslateFile(newCtx, in)
+	transcription, err := whisperStream.Recv()
+	if err != nil {
+		return err
+	}
+	stream.Send(transcription)
+	translation, err := whisperStream.Recv()
+	if err != nil {
+		return err
+	}
+	stream.Send(translation)
+	return nil
+}
+
+func (s *SoundServer) TranscribeLive(stream pb.SoundService_TranscribeLiveServer) error {
+	md, ok := metadata.FromIncomingContext(stream.Context())
+	if !ok {
+		return status.Errorf(codes.DataLoss, "Failed to get metadata")
+	}
+	language := md["source_language"]
+
+	whisperMd := metadata.New(map[string]string{})
+	if language != nil {
+		whisperMd = metadata.New(map[string]string{
+			"source_language": language[0],
+		})
+	}
+
+	newCtx := metadata.NewOutgoingContext(context.Background(), whisperMd)
+	whisperStream, _ := WhisperServer.TranscribeLive(newCtx)
 	errChannel := make(chan error)
 
-	go func(whisperStream pb.SoundService_StreamSoundFileClient, errChannel chan error) {
+	go func(whisperStream pb.SoundService_TranscribeLiveClient, errChannel chan error) {
 		for {
 			whisperTranscription, err := whisperStream.Recv()
 			if err == io.EOF {
