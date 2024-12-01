@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.media.MediaRecorder
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
@@ -16,10 +15,10 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import io.grpc.soundtransfer.SoundTransferGrpc
-import kotlinx.coroutines.Dispatchers
+import edu.put.whisper.utilities.Utilities
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
@@ -42,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnCopy: ImageButton
     private lateinit var btnBack: ImageButton
     private lateinit var tvTranscript: TextView
+    private lateinit var utilities: Utilities
     private var isRecordingStopped: Boolean = false
     private var currentFileName: String? = null
     private var tempFilePath: String? = null
@@ -62,13 +62,10 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var db : AppDatabase
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-
-
+        utilities = Utilities(this)
         tvTimer = findViewById(R.id.tvTimer)
         waveformView = findViewById(R.id.waveformView)
 
@@ -123,15 +120,14 @@ class MainActivity : AppCompatActivity() {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             bottomSheetBG.visibility = View.GONE
 
-            setVisibility(View.GONE, btnStop, btnResume, btnSave)
-            setVisibility(View.VISIBLE, btnRecord, btnList)
+            utilities.setVisibility(View.GONE, btnStop, btnResume, btnSave, btnDelete)
+            utilities.setVisibility(View.VISIBLE, btnRecord, btnList, btnBack)
             tvTimer.text = "00:00:00"
             waveformView.clearAmplitudes()
 
             // Hide the keyboard
             val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(filenameInput.windowToken, 0)
-//            uploadRecording()
         }
 
         filenameInput.setOnClickListener {
@@ -143,11 +139,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnBack.setOnClickListener {
-            goBack()
+            utilities.goBack(this)
         }
-
-
-
     }
 
     private val amplitudeRunnable: Runnable = object : Runnable {
@@ -163,8 +156,8 @@ class MainActivity : AppCompatActivity() {
 //    /storage/emulated/0/Android/data/edu.put.whisper/files/Music/test.mp3
     fun btnRecordPressed(v: View) {
         tempFilePath = getTempRecordingFilePath()
-        setVisibility(View.GONE, btnList, btnRecord, btnBack)
-        setVisibility(View.VISIBLE, btnSave, btnStop, btnTranscript, btnDelete)
+        utilities.setVisibility(View.GONE, btnList, btnRecord, btnBack)
+        utilities.setVisibility(View.VISIBLE, btnSave, btnStop, btnTranscript, btnDelete)
         btnStop.setImageResource(R.drawable.ic_pause)
         try {
             mediaRecorder = MediaRecorder().apply {
@@ -204,12 +197,16 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        setVisibility(View.GONE, tvTimer, btnRecord, btnList, btnResume, btnStop, btnCancel, btnSave, btnDelete, waveformView, btnTranscript)
-        setVisibility(View.VISIBLE, tvTranscript, btnBack)
-        val filePath = getRecordingFilePath("test123")
-        GlobalScope.launch(Dispatchers.IO) {
-            uploadRecording(filePath)
+        utilities.setVisibility(View.GONE, tvTimer, btnRecord, btnList, btnResume, btnStop, btnCancel, btnSave, btnDelete, waveformView, btnTranscript)
+        utilities.setVisibility(View.VISIBLE, tvTranscript, btnBack)
+
+        lifecycleScope.launch {
+            val filePath = tempFilePath ?: return@launch
+            uploadRecording(filePath, "pl")
         }
+
+
+
     }
 
     fun btnStopPressed(v: View) {
@@ -222,7 +219,7 @@ class MainActivity : AppCompatActivity() {
             handler.removeCallbacks(amplitudeRunnable)
             elapsedTime += System.currentTimeMillis() - startTime
             btnStop.visibility = View.GONE
-            setVisibility(View.VISIBLE, btnResume, btnTranscript)
+            utilities.setVisibility(View.VISIBLE, btnResume, btnTranscript)
             btnResume.setImageResource(R.drawable.ic_restart)
             Toast.makeText(this, "Recording stopped. You can now transcript it.", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
@@ -269,8 +266,8 @@ class MainActivity : AppCompatActivity() {
 
 
     fun btnDeletePressed(v: View) {
-        setVisibility(View.GONE, btnDelete)
-        setVisibility(View.VISIBLE, btnBack)
+        utilities.setVisibility(View.GONE, btnDelete)
+        utilities.setVisibility(View.VISIBLE, btnBack)
         try {
             // Check if mediaRecorder is initialized and is recording
             if (mediaRecorder != null && !isRecordingStopped) {
@@ -295,8 +292,8 @@ class MainActivity : AppCompatActivity() {
             tvTimer.text = "00:00:00"
             waveformView.clearAmplitudes()
 
-            setVisibility(View.GONE, btnStop, btnResume, btnSave)
-            setVisibility(View.VISIBLE, btnRecord, btnList)
+            utilities.setVisibility(View.GONE, btnStop, btnResume, btnSave)
+            utilities.setVisibility(View.VISIBLE, btnRecord, btnList)
             btnTranscript.visibility = View.INVISIBLE
 
             Toast.makeText(this, "Recording deleted", Toast.LENGTH_LONG).show()
@@ -338,8 +335,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getRecordingFilePath(fileName: String): String {
-        val contextWrapper = ContextWrapper(applicationContext)
-        val musicDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+        val musicDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC)
+        if (!musicDirectory.exists()) {
+            musicDirectory.mkdirs() // Utwórz katalog, jeśli nie istnieje
+        }
         val file = File(musicDirectory, "$fileName.mp3")
         return file.path
     }
@@ -361,9 +360,6 @@ class MainActivity : AppCompatActivity() {
             tempFile.copyTo(finalFile, overwrite = true)
             tempFile.delete() // Remove the temporary file
 
-            // Wypisanie ścieżki do pliku i nazwy pliku w konsoli
-            println("Save Recording - Final File Path: $finalFilePath")
-            println("Save Recording - Current File Name: $currentFileName")
 
             mediaRecorder?.release()
             mediaRecorder = null
@@ -423,37 +419,18 @@ class MainActivity : AppCompatActivity() {
         return "recording_${dateFormat.format(date)}"
     }
 
-    private fun setVisibility(visibility: Int, vararg views: View) {
-        for (view in views) {
-            view.visibility = visibility
-        }
-    }
-
-    private fun goBack() {
-        finish()
-    }
-
-    private suspend fun uploadRecording(filePath: String) {
-        try {
-            val transfer = SoundTransferGrpc(Uri.parse(resources.getString(R.string.server_url)))
-            val output: String? = transfer.sendSoundFile(filePath)
-
+    private suspend fun uploadRecording(filePath: String, language: String) {
+        utilities.uploadRecording(filePath, language) { output ->
             runOnUiThread {
                 if (output != null) {
                     tvTranscript.text = output
-                    setVisibility( View.VISIBLE, btnCopy)
+                    utilities.setVisibility(View.VISIBLE, btnCopy)
                 } else {
                     tvTranscript.text = "Transkrypcja nie jest dostępna."
                 }
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            runOnUiThread {
-                tvTranscript.text = "Błąd podczas transkrypcji: ${e.message}"
-            }
         }
     }
-
 
     override fun onDestroy() {
         super.onDestroy()
