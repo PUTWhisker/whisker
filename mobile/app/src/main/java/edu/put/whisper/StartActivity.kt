@@ -208,15 +208,9 @@ class StartActivity : AppCompatActivity() {
 
 
         btnTranscriptLive.setOnClickListener {
-            if (!is_recording){
-                soundTransferClient = SoundTransferClient(Uri.parse(getResources().getString(R.string.server_url)))
-                soundTransferClient!!.transcribeLive()
+            val intent = Intent(this, LiveTranscriptionActivity::class.java)
+            startActivity(intent)
 
-            } else {
-                soundTransferClient!!.stopStream()
-                soundTransferClient = null
-            }
-            is_recording = !is_recording
         }
 
         btnBack.setOnClickListener {
