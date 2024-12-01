@@ -46,9 +46,16 @@
             android:name=".MainActivity"
             android:exported="false" />
         <activity
+            android:name=".TranscriptionDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Voicememos" />
+        <activity
             android:name=".SplashActivity"
             android:exported="false"
-            android:theme="@style/Theme.Design.NoActionBar"></activity>
+            android:theme="@style/Theme.Design.NoActionBar">
+
+        </activity>
     </application>
+
 
 </manifest>
