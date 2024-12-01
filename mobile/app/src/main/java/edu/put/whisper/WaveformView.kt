@@ -25,7 +25,7 @@ class WaveformView(context: Context?, attrs: AttributeSet?): View(context, attrs
 
 
     init {
-        paint.color = Color.rgb( 244,  81,  30)
+        paint.color = Color.parseColor("#6A42C2")
 
         sw = resources.displayMetrics.widthPixels.toFloat()
 
