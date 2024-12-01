@@ -16,6 +16,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type AuthenticationServer struct {
@@ -209,12 +210,13 @@ func (s *AuthenticationServer) GetTranslation(_ *pb.Empty, stream pb.ClientServi
 	defer rows.Close()
 	for rows.Next() {
 		var transcirptionText string
-		err = rows.Scan(&transcirptionText)
+		var time_added time.Time
+		err = rows.Scan(&transcirptionText, &time_added)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err := stream.Send(&pb.TextHistory{Transcription: transcirptionText})
+		err := stream.Send(&pb.TextHistory{Transcription: transcirptionText, CreatedAt: timestamppb.New(time_added)})
 		if err != nil {
 			return err
 		}

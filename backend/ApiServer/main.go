@@ -73,7 +73,7 @@ func main() {
 			connected = true
 		}
 	}
-	fmt.Printf("🟢 Connected to whisper server, retrying in 10 s")
+	fmt.Printf("🟢 Connected to whisper server")
 	if dbPool != nil {
 		defer dbPool.Close()
 	}

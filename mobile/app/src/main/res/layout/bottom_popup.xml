@@ -40,7 +40,7 @@
                 android:backgroundTint="@color/gray"
                 android:textColor="@color/grayDark"
                 app:cornerRadius="26dp"
-                app:rippleColor="@color/grayDark"/>
+                app:rippleColor="@color/primaryDark"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnOk"
@@ -48,10 +48,10 @@
                 android:layout_height="60dp"
                 android:text="Ok"
                 android:layout_marginStart="20dp"
-                android:backgroundTint="@color/strokeColor"
+                android:backgroundTint="@color/playerColor"
                 android:textColor="@color/white"
                 app:cornerRadius="26dp"
-                app:rippleColor="@color/grayDark"/>
+                app:rippleColor="@color/primaryDark"/>
         </LinearLayout>
 
     </com.google.android.material.textfield.TextInputLayout>

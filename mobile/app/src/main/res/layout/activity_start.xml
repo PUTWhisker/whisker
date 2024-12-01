@@ -6,58 +6,390 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".StartActivity">
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <LinearLayout
+            android:id="@+id/llLoginRegister"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvHello"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:text="Hello"
+                android:visibility="gone"
+                app:autoSizeTextType="uniform"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLogin"
+                android:layout_width="100dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/gray"
+                android:text="Log In"
+                android:textColor="@color/grayDark"
+                android:textSize="12sp"
+                app:cornerRadius="26dp"
+                app:rippleColor="@color/grayDark" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRegister"
+                android:layout_width="100dp"
+                android:layout_height="48dp"
+                android:backgroundTint="@color/gray"
+                android:text="Register"
+                android:textColor="@color/grayDark"
+                android:textSize="12sp"
+                app:cornerRadius="26dp"
+                app:rippleColor="@color/grayDark" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnHistoryMock"
+                android:layout_width="100dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="16dp"
+                android:backgroundTint="@color/gray"
+                android:text="History"
+                android:textColor="@color/grayDark"
+                android:textSize="12sp"
+                android:visibility="gone"
+                app:cornerRadius="26dp"
+                app:rippleColor="@color/grayDark" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLogout"
+                android:layout_width="100dp"
+                android:layout_height="48dp"
+                android:backgroundTint="@color/gray"
+                android:text="Log out"
+                android:textColor="@color/grayDark"
+                android:textSize="12sp"
+                android:visibility="gone"
+                app:cornerRadius="26dp"
+                app:rippleColor="@color/grayDark" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/logoWhisper"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/logo_whisper"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvTranscriptions"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:padding="16dp"
+            app:layout_constraintTop_toBottomOf="@+id/llLoginRegister"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/llFileRecord"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:orientation="vertical">
 
             <TextView
+                android:id="@+id/tvChoose"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Choose or record a file to transcript"
+                android:text="What do you want to do?"
                 android:gravity="center"
-                android:layout_marginBottom="32dp"/>
+                android:layout_marginBottom="16dp"/>
 
-            <com.google.android.material.button.MaterialButton
+            <androidx.cardview.widget.CardView
                 android:id="@+id/btnRecordActivity"
-                android:layout_width="140dp"
-                android:layout_height="60dp"
-                android:backgroundTint="@color/gray"
-                android:text="Record"
-                android:textColor="@color/grayDark"
-                app:cornerRadius="26dp"
-                app:rippleColor="@color/grayDark" />
-            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:background="@color/primary">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp"
+                    android:layout_gravity="center">
+
+                    <ImageView
+                        android:id="@+id/icon"
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:padding="20dp"
+                        android:src="@drawable/ic_mic"
+                        android:background="@drawable/circle_icon_background"
+                        app:tint="@color/primaryLight"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <TextView
+                        android:id="@+id/text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Record a file to transcript"
+                        android:textSize="18sp"
+                        android:textColor="@color/playerColor"
+                        app:layout_constraintStart_toEndOf="@id/icon"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginStart="12dp" />
+
+                    <ImageView
+                        android:id="@+id/arrow"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow"
+                        app:tint="@color/primary"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginEnd="15dp" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
                 android:id="@+id/btnChooseFile"
-                android:layout_width="140dp"
-                android:layout_height="60dp"
-                android:backgroundTint="@color/gray"
-                android:text="Choose File"
-                android:layout_marginTop="12dp"
-                android:textColor="@color/grayDark"
-                app:cornerRadius="26dp"
-                app:rippleColor="@color/grayDark" />
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:background="@color/primary">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp"
+                    android:layout_gravity="center">
+
+                    <ImageView
+                        android:id="@+id/icon2"
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:padding="20dp"
+                        android:src="@drawable/ic_file"
+                        android:background="@drawable/circle_icon_background"
+                        app:tint="@color/primaryLight"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Choose a file to transcript"
+                        android:textSize="18sp"
+                        android:textColor="@color/playerColor"
+                        app:layout_constraintStart_toEndOf="@id/icon2"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginStart="12dp" />
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow"
+                        app:tint="@color/primary"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginEnd="15dp" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/btnTranscriptLive"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:background="@color/primary">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp"
+                    android:layout_gravity="center">
+
+                    <ImageView
+                        android:id="@+id/icon3"
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:padding="20dp"
+                        android:src="@drawable/ic_live"
+                        android:background="@drawable/circle_icon_background"
+                        app:tint="@color/primaryLight"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Transcript live"
+                        android:textSize="18sp"
+                        android:textColor="@color/playerColor"
+                        app:layout_constraintStart_toEndOf="@id/icon3"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginStart="12dp" />
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow"
+                        app:tint="@color/primary"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginEnd="15dp" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/btnHistory"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:background="@color/primary">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp"
+                    android:layout_gravity="center">
+
+                    <ImageView
+                        android:id="@+id/icon4"
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:padding="20dp"
+                        android:src="@drawable/ic_history"
+                        android:background="@drawable/circle_icon_background"
+                        app:tint="@color/primaryLight"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="History"
+                        android:textSize="18sp"
+                        android:textColor="@color/playerColor"
+                        app:layout_constraintStart_toEndOf="@id/icon4"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginStart="12dp" />
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow"
+                        app:tint="@color/primary"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginEnd="15dp" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
 
             <TextView
                 android:id="@+id/tvSelectedFile"
                 android:layout_width="match_parent"
+                android:layout_height="7dp"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:text="No file selected"
+                android:visibility="gone"/>
+            <TextView
+                android:id="@+id/tvTranscriptedFile"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="No file selected"
+                android:text=""
                 android:gravity="center"/>
+
+            <ImageButton
+                android:id="@+id/btnCopy"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_copy"
+                android:layout_marginEnd="42dp"
+                android:layout_marginTop="24dp"
+                android:visibility="invisible"
+                android:onClick="btnCopyPressed"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvTranscriptedFile" />
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="@dimen/btn_size"
+                android:layout_height="@dimen/btn_size"
+                android:src="@drawable/ic_back"
+                android:background="@drawable/ic_ripple"
+                android:visibility="invisible"
+                android:contentDescription="btn go back"/>
         </LinearLayout>
 
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+    </ScrollView>
+    <View
+        android:id="@+id/bottomSheetLogin"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/opaqueBG"/>
 
+    <include layout="@layout/bottom_popup_login"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

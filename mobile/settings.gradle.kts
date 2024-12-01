@@ -21,4 +21,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "whisperDemo"
 include(":app", ":protos", "stub-android")
- 

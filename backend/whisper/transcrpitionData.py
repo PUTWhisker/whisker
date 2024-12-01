@@ -21,10 +21,11 @@ class TranscriptionData():
                  curSegment:int=0,
                  curSeconds:int=0,
                  silenceAudio:bool=False,
-                 language:str=None,
-                 translate:str=None,
+                 language:str="",
+                 translate:str="",
                  diarizate:bool=False
                  ):
+        # TODO: validate source and translate language
         self.transcription = transcription
         self.audio = audio
         self.previousAudio = previousAudio
@@ -32,9 +33,18 @@ class TranscriptionData():
         self.curSeconds = curSeconds
         self.silenceAudio = silenceAudio
         self.filePath = Path(f"./tempFiles/{uuid.uuid4()}")
-        self.translate = translate
-        self.language = language
+        self.language = self.validateLanguage(language)
+        if self.language is None:
+            raise WrongLanguage(
+                    "Given language is not supported for translation."
+                )
+        self.translate = self.validateLanguage(translate)
+        if self.translate is None:
+            raise WrongLanguage(
+                    "Given language is not supported for translation."
+                )
         self.diarizate = diarizate
+        self.sessionId = None
 
     def appendData(self, receivedAudio: bytes):
         if self.curSeconds < 10:
@@ -78,16 +88,26 @@ class TranscriptionData():
     def processMetadata(self, context: grpc.ServicerContext):
         for key, value in context.invocation_metadata():
             if key == 'source_language':
-                for languageKey, languageValue in languages.LANGUAGES.items():
-                    if languageKey == value or languageValue == value:
-                        self.language = value
-                if (
-                    self.language is None and value != ""
-                ):  # Raise error if chosen language is not in M2M100 available language list
+                language = self.validateLanguage(value)
+                if language is None:
                     raise WrongLanguage(
                         "Given language is not supported for translation."
                     )
+                break
+            elif key == 'session_id':
+                self.sessionId = value
     
+
+    def validateLanguage(self, language: str) -> bool:
+        for languageKey, languageValue in languages.LANGUAGES.items():
+            if languageKey == language or languageValue == language:
+                return languageValue
+        if (
+            language != ""
+        ):  # Raise error if chosen language is not in M2M100 available language list
+            return None
+        return ""
+
 
     def incrementData(self):
         self.curSeconds += 2

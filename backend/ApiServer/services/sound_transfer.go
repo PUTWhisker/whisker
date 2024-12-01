@@ -121,15 +121,35 @@ func (s *SoundServer) TranslateFile(in *pb.TranslationRequest, stream pb.SoundSe
 	return nil
 }
 
+func (s *SoundServer) TranscribeLiveWeb(ctx context.Context, in *pb.TranscriptionRequest) (*pb.SoundStreamResponse, error) {
+	log.Printf("Received: sound file translation from webClient")
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Errorf(codes.DataLoss, "Failed to get metadata")
+	}
+	log.Print(md) // JWT token for saving
+	newCtx := metadata.NewOutgoingContext(context.Background(), nil)
+	res, err := WhisperServer.TranscribeLiveWeb(newCtx, in)
+	if err != nil {
+		return res, err
+	}
+	return res, nil
+}
+
 func (s *SoundServer) TranscribeLive(stream pb.SoundService_TranscribeLiveServer) error {
 	md, ok := metadata.FromIncomingContext(stream.Context())
 	if !ok {
 		return status.Errorf(codes.DataLoss, "Failed to get metadata")
 	}
 	language := md["source_language"]
-	whisperMd := metadata.New(map[string]string{
-		"source_language": language[0],
-	})
+
+	whisperMd := metadata.New(map[string]string{})
+	if language != nil {
+		whisperMd = metadata.New(map[string]string{
+			"source_language": language[0],
+		})
+	}
+
 	newCtx := metadata.NewOutgoingContext(context.Background(), whisperMd)
 	whisperStream, _ := WhisperServer.TranscribeLive(newCtx)
 	errChannel := make(chan error)
