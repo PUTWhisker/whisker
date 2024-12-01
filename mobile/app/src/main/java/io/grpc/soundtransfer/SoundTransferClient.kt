@@ -9,9 +9,15 @@ import jWT
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import org.intellij.lang.annotations.Language
 import java.io.Closeable
 import java.io.File
+
+
+class SpeakerAndLine(speaker : String, line: String){}
+
 
 class SoundTransferClient(uri: Uri) : Closeable {
     private val audiStreamManager: AudioStreamManager = AudioStreamManager()
@@ -27,7 +33,6 @@ class SoundTransferClient(uri: Uri) : Closeable {
 
         builder.executor(Dispatchers.IO.asExecutor()).build()
     }
-    private val transferer = SoundServiceGrpcKt.SoundServiceCoroutineStub(channel)
     private val stub = SoundServiceGrpcKt.SoundServiceCoroutineStub(channel)
 
     suspend fun transcribeFile(filePath: String, language : String): String? {
@@ -39,7 +44,7 @@ class SoundTransferClient(uri: Uri) : Closeable {
             }
             val bytes = File(filePath).readBytes().toByteString()
             val request = transcriptionRequest { this.soundData = bytes; this.sourceLanguage = language}
-            val response = transferer.transcribeFile(request, metadata)
+            val response = stub.transcribeFile(request, metadata)
             return response.text
         } catch (e: Exception) {
             e.printStackTrace()
@@ -59,6 +64,31 @@ class SoundTransferClient(uri: Uri) : Closeable {
                 Log.i("stream", "Got message: \"${response.text}\"")
             }
         }
+    }
+
+    fun translate(filePath: String, sourceLanguage : String, translationLanguage: String): Flow<SoundResponse> {
+        val bytes = File(filePath).readBytes().toByteString()
+        val request = translationRequest {
+            this.soundData = bytes
+            this.sourceLanguage = sourceLanguage
+            this.translationLanguage = translationLanguage
+        }
+        return stub.translateFile(request)
+    }
+
+    suspend fun diarizateSpeakers(filePath: String, language : String): List<SpeakerAndLine> {
+        val bytes = File(filePath).readBytes().toByteString()
+        val request = transcriptionRequest {
+            this.soundData = bytes
+            this.sourceLanguage = sourceLanguage
+        }
+
+        val response = stub.diarizateFile(request)
+        val out = mutableListOf<SpeakerAndLine>()
+        for (i in 0..<response.speakerNameList.size) {
+            out.add(SpeakerAndLine(response.speakerNameList[i], response.textList[i]))
+        }
+        return out.toList()
     }
 
     fun stopStream() {
