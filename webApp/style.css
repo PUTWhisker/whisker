@@ -48,16 +48,24 @@ body::-webkit-scrollbar {
 }
 
 #top_menu {
-    background-color: rgb(86, 58, 156);
+    background-color: rgb(91, 71, 143);
     overflow: hidden;
     display: flex;
+    font-size: 1.5vw;
 }
 
-#top_menu a {
+
+@media(max-aspect-ratio:1/1) {
+    #top_menu {
+        font-size: 3vw;
+    }
+}
+
+#top_menu a,
+#top_menu p {
     /* float: left; */
-    font-size: 20px;
     color: white;
-    background-color: rgb(86, 58, 156);
+    background-color: rgb(91, 71, 143);
     padding: 14px 16px;
     margin: auto;
     display: inline-block;
@@ -94,7 +102,8 @@ body::-webkit-scrollbar {
 
 #submit_file_container {
     border-style: dashed;
-    border-width: 3px;
+    border-color: grey;
+    border-width: 4px;
 }
 
 #main_buttons {
@@ -126,7 +135,7 @@ body::-webkit-scrollbar {
     /* min-width: 25%; */
     /* padding: 0 2vw; */
     flex: 1;
-    background-color: blue;
+    background-color: #ddd;
     /* width: 15vw; */
     max-width: 18vw;
     /* min-width: 13vw; */
@@ -138,6 +147,7 @@ body::-webkit-scrollbar {
 }
 
 .options_div.locked {
+    background-color: darkgray;
     opacity: 0.5;
 }
 
@@ -145,7 +155,7 @@ body::-webkit-scrollbar {
     position: absolute;
     top: -4.5vh;
     left: -4.5vh;
-    background-color: yellow;
+    background-color: rgb(190, 126, 255);
     border-radius: 4.5vh;
     height: 9vh;
     width: 9vh;
@@ -250,8 +260,10 @@ body::-webkit-scrollbar {
 
     #input_file,
     #choose_lang,
-    #start {
-        font-size: 4vw;
+    #start,
+    .step_label,
+    #choose_trans_lang {
+        font-size: 3vw;
     }
 }
 
@@ -273,13 +285,13 @@ input[type="checkbox"]:checked+.custom_check {
 
 .step_label {
     font-size: 1.5vw;
-    color: rgba(255, 255, 255, 0.8);
+    color: black;
     text-align: center;
     padding: 0 15%;
 }
 
 #file_name {
-    font-size: 1vw;
+    /* font-size: 1vw; */
 }
 
 input[type='checkbox'] {
@@ -291,7 +303,6 @@ input[type='checkbox'] {
 .checkbox_label {
     display: inline-block;
     transform: translate(0.35em, -0.05em);
-    color: white;
     font-size: 1.5vw;
 }
 
@@ -301,6 +312,14 @@ input[type='checkbox'] {
     #choose_lang_msg,
     .checkbox_label {
         font-size: 3.2vw;
+    }
+
+    #file_name {
+        font-size: 2vw;
+    }
+
+    .result_windows {
+        padding: 2vw;
     }
 
 }
@@ -327,8 +346,8 @@ input[type='checkbox'] {
     transform: translateY(15%);
 }
 
-#copy_button {
-    float: right;
+.copy_button {
+    cursor: pointer;
 }
 
 #transcribe {
@@ -339,12 +358,14 @@ input[type='checkbox'] {
     border-radius: 5px;
     width: 100%;
     position: relative;
+    /* padding: 1vw; */
 
 }
 
 .result_windows>button {
     margin-left: auto;
     position: absolute;
+    top: -0.5em;
     right: 0.5em;
     border: none;
     background: none;

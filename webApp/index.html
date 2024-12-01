@@ -55,10 +55,16 @@
 <body>
   <main>
     <div id="top_menu">
+      <p>Name</p>
       <a href="http://127.0.0.1:5500/webApp/record.html">Switch to dictate</a>
+      <a href="http://127.0.0.1:5500/webApp/about.html">About</a>
       <div id="blank_space"></div>
-      <a href="http://127.0.0.1:5500/webApp/login.html">Log in</a>
-      <a href="http://127.0.0.1:5500/webApp/signup.html">Sign up</a>
+      <a href="http://127.0.0.1:5500/webApp/login.html" class="icon_button">Log in&nbsp;<span
+          class="material-symbols-outlined">login</span>
+      </a>
+      <a href="http://127.0.0.1:5500/webApp/signup.html" class="icon_button">Sign up&nbsp;<span
+          class="material-symbols-outlined">person_add</span>
+      </a>
     </div>
     <div id="settings_fields">
       <div id="submit_file_container" class="options_div">
@@ -111,7 +117,7 @@
           </div>
           <div class="field_container hidden" id="trans_lang_list">
             <select id="choose_trans_lang" disabled>
-              <option disabled selected>Choose language</option>
+              <option disabled selected>Select...</option>
               <option>Polish</option>
               <option>English</option>
               <option>German</option>
@@ -145,7 +151,8 @@
       </fieldset> -->
       <fieldset id="show_transcript" class="result_windows">
         <legend>Transcript</legend>
-        <button onclick="copyToClipboard(document.getElementById('transcription_result').innerText)">
+        <button onclick="copyToClipboard(document.getElementById('transcription_result').innerText)"
+          class="copy_button">
           <span class="material-symbols-outlined">content_copy</span>
         </button>
         <span id="transcription_result" class="result_span">&nbsp; en en en en en en en en en en en en en en en en en en
@@ -155,7 +162,7 @@
       </fieldset>
       <fieldset id="show_translation" class="result_windows hidden">
         <legend>Translation</legend>
-        <button onclick="copyToClipboard(document.getElementById('translation_result').innerText)">
+        <button onclick="copyToClipboard(document.getElementById('translation_result').innerText)" class="copy_button">
           <span class="material-symbols-outlined">content_copy</span>
         </button>
         <span id="translation_result" class="result_span">&nbsp;</span>
