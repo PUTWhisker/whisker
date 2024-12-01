@@ -291,7 +291,7 @@ input[type="checkbox"]:checked+.custom_check {
 }
 
 #file_name {
-    /* font-size: 1vw; */
+    font-size: 1vw;
 }
 
 input[type='checkbox'] {
