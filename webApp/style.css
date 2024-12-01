@@ -168,14 +168,38 @@ body::-webkit-scrollbar {
     text-align: center;
 }
 
+
 .field_container>* {
     flex: 1;
+}
+
+#optional_checkboxes {
+    flex-direction: column;
+    flex: 2;
+}
+
+#role_devision_checkbox,
+#translate_checkbox {
+    position: relative;
+}
+
+#role_devision_checkbox>*,
+#translate_checkbox>* {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#role_devision_checkbox>input[type='checkbox'],
+#translate_checkbox>[type='checkbox'] {
+    transform: scale(1.5) translateY(-50%);
 }
 
 .fields_in_options {
     display: flex;
     flex-direction: column;
     height: 100%;
+    padding: 0.7vw;
 }
 
 @media(max-aspect-ratio:1/1) {
