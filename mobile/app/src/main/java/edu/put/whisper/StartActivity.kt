@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -31,6 +32,7 @@ class StartActivity : AppCompatActivity() {
     private lateinit var btnRecordActivity: CardView
     private lateinit var btnChooseFile: CardView
     private lateinit var btnTranscriptLive: CardView
+    private lateinit var logoWhisper: ImageView
     private lateinit var tvSelectedFile: TextView
     private lateinit var tvTranscriptedFile: TextView
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
@@ -57,6 +59,7 @@ class StartActivity : AppCompatActivity() {
     private val PICK_FILE_REQUEST_CODE = 1
     private lateinit var authClient: AuthenticationClient
     private var soundTransferClient : SoundTransferClient? = null
+    private var isUserLoggedIn = false
 
 
     var is_recording = false
@@ -90,6 +93,7 @@ class StartActivity : AppCompatActivity() {
         btnBack = findViewById(R.id.btnBack)
         rvTranscriptions = findViewById(R.id.rvTranscriptions)
         llFileRecord = findViewById(R.id.llFileRecord)
+        logoWhisper = findViewById(R.id.logoWhisper)
         rvTranscriptions.layoutManager = LinearLayoutManager(this)
 
         val bottomSheetL: LinearLayout = findViewById(R.id.bottomSheetL)
@@ -189,7 +193,8 @@ class StartActivity : AppCompatActivity() {
         }
 
         btnHistory.setOnClickListener{
-            startActivity(Intent(this, GalleryActivity::class.java))
+            val intent = Intent(this, HistoryActivity::class.java)
+            startActivity(intent)
         }
 
         btnRecordActivity.setOnClickListener {
@@ -244,7 +249,7 @@ class StartActivity : AppCompatActivity() {
                             utilities.uploadRecording(filePath, "pl") { transcription ->
                                 runOnUiThread {
                                     if (transcription != null) {
-                                        utilities.setVisibility(View.GONE, btnRecordActivity, btnChooseFile, btnLogin, btnRegister, tvChoose, btnTranscriptLive)
+                                        utilities.setVisibility(View.GONE, btnRecordActivity, btnChooseFile, btnLogin, btnRegister, tvChoose, btnTranscriptLive, logoWhisper)
                                         utilities.setVisibility(View.VISIBLE, btnCopy, btnBack)
                                         tvTranscriptedFile.text = transcription
                                     } else {

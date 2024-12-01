@@ -296,7 +296,8 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                android:background="@color/primary">
+                android:background="@color/primary"
+                android:visibility="gone">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
