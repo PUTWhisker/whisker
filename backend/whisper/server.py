@@ -11,6 +11,8 @@ import diarizate
 import concurrent.futures
 import sys
 import inspect
+import time
+import uuid
 
 curDir = os.path.dirname(__file__)
 protoDir = os.path.join(curDir, "proto")
@@ -28,8 +30,9 @@ sys.path.insert(0, curDir)
 """
 
 logging.basicConfig(format="%(levelname)s:%(name)s:%(message)s", level=logging.INFO)
-_cleanup_coroutines = []  # Needed for asyncio graceful shutdown
-
+_cleanupCoroutines = list()  # Needed for asyncio graceful shutdown
+_clientData = dict()
+_CLEANUP_PERIOD = 5
 
 def _errorMessages(e: Exception, func: callable):
     if isinstance(e, FileNotFoundError):
@@ -50,6 +53,16 @@ def run_transcribe(file_path, data:TranscriptionData):
         str(file_path), data
     )
     return res
+
+
+async def cleanupWebSessions():
+    while True:
+        curTime = time.time()
+        for index, value in _clientData.items():
+            if curTime - value[1] > _CLEANUP_PERIOD:
+                logging.info(f"Client cleanup initiated for id: {value[0].sessionId}")
+                _clientData.pop(index)
+        await asyncio.sleep(_CLEANUP_PERIOD)
 
 class SoundService(Services.SoundServiceServicer):
     def __init__(self):
@@ -178,9 +191,9 @@ class SoundService(Services.SoundServiceServicer):
             )
         
     #TODO: add language to metadata (probably), return detected language (metadata or more likely new field in proto message)
-    @_errorStreamHandler  # TODO: Resolve async_generator problem to add errorHandler
+    @_errorStreamHandler 
     async def TranscribeLive(self, requestIter, context):
-        logging.info("Received record streaming.")
+        logging.info("Received live transcription request.")
         transcriptionData = TranscriptionData()
         transcriptionData.processMetadata(context)
         async for request in requestIter:
@@ -203,6 +216,28 @@ class SoundService(Services.SoundServiceServicer):
                 text=transcriptionData.transcription[transcriptionData.curSegment],
                 new_chunk=transcriptionData.isSilence
             )
+
+
+    @_errorUnaryHandler
+    async def TranscribeLiveWeb(self, request, context):
+        logging.info("Received live transcription request from webApp")
+        transcriptionData = TranscriptionData()
+        transcriptionData.processMetadata(context)
+        logging.debug(context)
+        logging.debug(context.invocation_metadata())
+        if transcriptionData.sessionId is None:
+            transcriptionData.sessionId = uuid.uuid4()
+            _clientData[transcriptionData.sessionId] = [transcriptionData, time.time()]
+            return Variables.SoundStreamResponse(
+                text = str(transcriptionData.sessionId)
+            )
+        transcriptionData = _clientData[transcriptionData.sessionId]
+        transcriptionData.language += "A"
+        return Variables.SoundStreamResponse(
+            text = transcriptionData.language,
+            new_chunk = False
+        )
+
 
 
 async def server():
@@ -237,10 +272,12 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
+    cleanupTask = loop.create_task(cleanupWebSessions())
     try:
         loop.run_until_complete(server())
     except KeyboardInterrupt:
         logging.info("Detected keyboard interruption, shutting down...")
     finally:
-        loop.run_until_complete(asyncio.gather(*_cleanup_coroutines))
+        cleanupTask.cancel()
+        loop.run_until_complete(asyncio.gather(*_cleanupCoroutines))
         loop.close()

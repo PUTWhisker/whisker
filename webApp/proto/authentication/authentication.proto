@@ -1,0 +1,36 @@
+syntax = "proto3";
+option go_package = "inzynierka/authentication";
+option java_multiple_files = true;
+option java_package = "io.grpc.authentication";
+option java_outer_classname = "AuthenticationProto";
+import "google/protobuf/timestamp.proto";
+
+service ClientService {
+    rpc Login (UserCredits) returns (LoginResponse) {};
+    rpc GetTranslation (Empty) returns (stream TextHistory) {};
+    rpc Register (UserCredits) returns (StatusResponse) {};
+}
+
+message TextHistory {
+    string transcription = 1;
+    google.protobuf.Timestamp created_at = 2;
+}
+
+message UserCredits {
+    string username = 1;
+    string password = 2;
+}
+
+message StatusResponse {
+    string error = 1;
+    bool successful = 2;
+}
+
+message LoginResponse {
+    string JWT = 1;
+    bool successful = 2;
+}
+
+message Empty {
+
+}

@@ -25,6 +25,7 @@ type SoundServiceClient interface {
 	TestConnection(ctx context.Context, in *TextMessage, opts ...grpc.CallOption) (*TextMessage, error)
 	TranscribeFile(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SoundResponse, error)
 	TranscribeLive(ctx context.Context, opts ...grpc.CallOption) (SoundService_TranscribeLiveClient, error)
+	TranscribeLiveWeb(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SoundStreamResponse, error)
 	TranslateFile(ctx context.Context, in *TranslationRequest, opts ...grpc.CallOption) (SoundService_TranslateFileClient, error)
 	DiarizateFile(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SpeakerAndLineResponse, error)
 }
@@ -86,6 +87,15 @@ func (x *soundServiceTranscribeLiveClient) Recv() (*SoundStreamResponse, error) 
 	return m, nil
 }
 
+func (c *soundServiceClient) TranscribeLiveWeb(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SoundStreamResponse, error) {
+	out := new(SoundStreamResponse)
+	err := c.cc.Invoke(ctx, "/SoundService/TranscribeLiveWeb", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *soundServiceClient) TranslateFile(ctx context.Context, in *TranslationRequest, opts ...grpc.CallOption) (SoundService_TranslateFileClient, error) {
 	stream, err := c.cc.NewStream(ctx, &SoundService_ServiceDesc.Streams[1], "/SoundService/TranslateFile", opts...)
 	if err != nil {
@@ -134,6 +144,7 @@ type SoundServiceServer interface {
 	TestConnection(context.Context, *TextMessage) (*TextMessage, error)
 	TranscribeFile(context.Context, *TranscriptionRequest) (*SoundResponse, error)
 	TranscribeLive(SoundService_TranscribeLiveServer) error
+	TranscribeLiveWeb(context.Context, *TranscriptionRequest) (*SoundStreamResponse, error)
 	TranslateFile(*TranslationRequest, SoundService_TranslateFileServer) error
 	DiarizateFile(context.Context, *TranscriptionRequest) (*SpeakerAndLineResponse, error)
 	mustEmbedUnimplementedSoundServiceServer()
@@ -151,6 +162,9 @@ func (UnimplementedSoundServiceServer) TranscribeFile(context.Context, *Transcri
 }
 func (UnimplementedSoundServiceServer) TranscribeLive(SoundService_TranscribeLiveServer) error {
 	return status.Errorf(codes.Unimplemented, "method TranscribeLive not implemented")
+}
+func (UnimplementedSoundServiceServer) TranscribeLiveWeb(context.Context, *TranscriptionRequest) (*SoundStreamResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TranscribeLiveWeb not implemented")
 }
 func (UnimplementedSoundServiceServer) TranslateFile(*TranslationRequest, SoundService_TranslateFileServer) error {
 	return status.Errorf(codes.Unimplemented, "method TranslateFile not implemented")
@@ -233,6 +247,24 @@ func (x *soundServiceTranscribeLiveServer) Recv() (*TranscirptionLiveRequest, er
 	return m, nil
 }
 
+func _SoundService_TranscribeLiveWeb_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TranscriptionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SoundServiceServer).TranscribeLiveWeb(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/SoundService/TranscribeLiveWeb",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SoundServiceServer).TranscribeLiveWeb(ctx, req.(*TranscriptionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _SoundService_TranslateFile_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(TranslationRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -286,6 +318,10 @@ var SoundService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TranscribeFile",
 			Handler:    _SoundService_TranscribeFile_Handler,
+		},
+		{
+			MethodName: "TranscribeLiveWeb",
+			Handler:    _SoundService_TranscribeLiveWeb_Handler,
 		},
 		{
 			MethodName: "DiarizateFile",

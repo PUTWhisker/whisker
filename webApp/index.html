@@ -52,7 +52,7 @@
   <link rel="shortcut icon" href="#">
 </head>
 
-<body>
+<body style="background-color:grey;">
   <main>
     <div id="top_menu">
       <a href="http://127.0.0.1:5500/webApp/record.html">Switch to dictate</a>
@@ -85,7 +85,7 @@
           </div>
           <div class="field_container">
             <select id="choose_lang" disabled>
-              <option disabled selected>Choose language</option>
+              <option disabled selected>Select...</option>
               <option>Polish</option>
               <option>English</option>
               <option>German</option>
@@ -98,11 +98,15 @@
       </div>
       <div id="translation_options_container" class="options_div locked">
         <div class="fields_in_options">
-          <div class="field_container">
+          <div class="field_container" id="optional_checkboxes">
             <!-- <p id="choose_lang_msg">Choose the source language of your file</p> -->
+            <label id="role_devision_checkbox">
+              <input type="checkbox" id="role_devision" disabled>
+              <span class="checkbox_label">Differentiate speakers</span>
+            </label>
             <label id="translate_checkbox">
               <input type="checkbox" id="translate" onclick="showTransOptions()" disabled>
-              <span class="checkbox_label">Translate</span></input>
+              <span class="checkbox_label">Translate</span>
             </label>
           </div>
           <div class="field_container hidden" id="trans_lang_list">
@@ -144,10 +148,7 @@
         <button onclick="copyToClipboard(document.getElementById('transcription_result').innerText)">
           <span class="material-symbols-outlined">content_copy</span>
         </button>
-        <span id="transcription_result" class="result_span">&nbsp; en en en en en en en en en en en en en en en en en en
-          en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en
-          en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en
-          en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en en </span>
+        <span id="transcription_result" class="result_span">&nbsp; </span>
       </fieldset>
       <fieldset id="show_translation" class="result_windows hidden">
         <legend>Translation</legend>
@@ -163,6 +164,7 @@
     const languageChooser = document.getElementById("choose_lang");
     const optionsTile = document.getElementById("translation_options_container");
     const translationCheckbox = document.getElementById("translate");
+    const rolesCheckbox = document.getElementById("role_devision");
     const translationList = document.getElementById("choose_trans_lang");
     const fourthTile = document.getElementById("fourth_tile");
     document.body.addEventListener("drop", (e) => {
@@ -191,6 +193,7 @@
       if (languageChooser.selectedIndex != 0) {
         optionsTile.classList.remove("locked");
         translationCheckbox.disabled = false;
+        rolesCheckbox.disabled = false;
         translationList.disabled = false;
         fourthTile.classList.remove("locked");
       }
