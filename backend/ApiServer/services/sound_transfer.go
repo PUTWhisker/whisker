@@ -126,7 +126,16 @@ func (s *SoundServer) TranscribeLive(stream pb.SoundService_TranscribeLiveServer
 	if !ok {
 		return status.Errorf(codes.DataLoss, "Failed to get metadata")
 	}
-	newCtx := metadata.NewOutgoingContext(context.Background(), md)
+	language := md["source_language"]
+
+	whisperMd := metadata.New(map[string]string{})
+	if language != nil {
+		whisperMd = metadata.New(map[string]string{
+			"source_language": language[0],
+		})
+	}
+
+	newCtx := metadata.NewOutgoingContext(context.Background(), whisperMd)
 	whisperStream, _ := WhisperServer.TranscribeLive(newCtx)
 	errChannel := make(chan error)
 

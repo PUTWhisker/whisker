@@ -21,7 +21,7 @@ class TranscriptionData():
                  curSegment:int=0,
                  curSeconds:int=0,
                  silenceAudio:bool=False,
-                 language:str=None,
+                 language:str="",
                  translate:str=None,
                  diarizate:bool=False
                  ):
@@ -82,7 +82,7 @@ class TranscriptionData():
                     if languageKey == value or languageValue == value:
                         self.language = value
                 if (
-                    self.language is None and value != ""
+                    self.language == "" and value != ""
                 ):  # Raise error if chosen language is not in M2M100 available language list
                     raise WrongLanguage(
                         "Given language is not supported for translation."
