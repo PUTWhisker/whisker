@@ -46,7 +46,7 @@ class AudioStreamManager {
         audioRecord?.startRecording()
     }
 
-    fun record(): Flow<SoundRequest> = flow {
+    fun record(): Flow<TranscirptionLiveRequest> = flow {
         isRecordingAudio = true
         recordingThread = thread(true) {
             val data = ByteArray(BUFFER_SIZE_RECORDING / 2)
@@ -75,7 +75,7 @@ class AudioStreamManager {
         }
         while(isRecordingAudio){
             emit(
-                SoundRequest.newBuilder().setSoundData(ByteString.copyFrom(queue.take())).build()
+                transcirptionLiveRequest { this.soundData = ByteString.copyFrom(queue.take()) }
             )
         }
     }

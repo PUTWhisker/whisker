@@ -5,10 +5,8 @@ import warnings
 
 import sound_transfer_pb2 as sound__transfer__pb2
 
-GRPC_GENERATED_VERSION = '1.64.1'
+GRPC_GENERATED_VERSION = '1.68.0'
 GRPC_VERSION = grpc.__version__
-EXPECTED_ERROR_RELEASE = '1.65.0'
-SCHEDULED_RELEASE_DATE = 'June 25, 2024'
 _version_not_supported = False
 
 try:
@@ -18,15 +16,12 @@ except ImportError:
     _version_not_supported = True
 
 if _version_not_supported:
-    warnings.warn(
+    raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
         + f' but the generated code in sound_transfer_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
-        + f' This warning will become an error in {EXPECTED_ERROR_RELEASE},'
-        + f' scheduled for release on {SCHEDULED_RELEASE_DATE}.',
-        RuntimeWarning
     )
 
 
@@ -44,20 +39,25 @@ class SoundServiceStub(object):
                 request_serializer=sound__transfer__pb2.TextMessage.SerializeToString,
                 response_deserializer=sound__transfer__pb2.TextMessage.FromString,
                 _registered_method=True)
-        self.SendSoundFile = channel.unary_unary(
-                '/SoundService/SendSoundFile',
-                request_serializer=sound__transfer__pb2.SoundRequest.SerializeToString,
+        self.TranscribeFile = channel.unary_unary(
+                '/SoundService/TranscribeFile',
+                request_serializer=sound__transfer__pb2.TranscriptionRequest.SerializeToString,
                 response_deserializer=sound__transfer__pb2.SoundResponse.FromString,
                 _registered_method=True)
-        self.StreamSoundFile = channel.stream_stream(
-                '/SoundService/StreamSoundFile',
-                request_serializer=sound__transfer__pb2.SoundRequest.SerializeToString,
+        self.TranscribeLive = channel.stream_stream(
+                '/SoundService/TranscribeLive',
+                request_serializer=sound__transfer__pb2.TranscirptionLiveRequest.SerializeToString,
                 response_deserializer=sound__transfer__pb2.SoundStreamResponse.FromString,
                 _registered_method=True)
-        self.DiarizateSpeakers = channel.unary_stream(
-                '/SoundService/DiarizateSpeakers',
-                request_serializer=sound__transfer__pb2.SoundRequest.SerializeToString,
-                response_deserializer=sound__transfer__pb2.SpeakerAndLine.FromString,
+        self.TranslateFile = channel.unary_stream(
+                '/SoundService/TranslateFile',
+                request_serializer=sound__transfer__pb2.TranslationRequest.SerializeToString,
+                response_deserializer=sound__transfer__pb2.SoundResponse.FromString,
+                _registered_method=True)
+        self.DiarizateFile = channel.unary_unary(
+                '/SoundService/DiarizateFile',
+                request_serializer=sound__transfer__pb2.TranscriptionRequest.SerializeToString,
+                response_deserializer=sound__transfer__pb2.SpeakerAndLineResponse.FromString,
                 _registered_method=True)
 
 
@@ -70,19 +70,25 @@ class SoundServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SendSoundFile(self, request, context):
+    def TranscribeFile(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def StreamSoundFile(self, request_iterator, context):
+    def TranscribeLive(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def DiarizateSpeakers(self, request, context):
+    def TranslateFile(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DiarizateFile(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -96,20 +102,25 @@ def add_SoundServiceServicer_to_server(servicer, server):
                     request_deserializer=sound__transfer__pb2.TextMessage.FromString,
                     response_serializer=sound__transfer__pb2.TextMessage.SerializeToString,
             ),
-            'SendSoundFile': grpc.unary_unary_rpc_method_handler(
-                    servicer.SendSoundFile,
-                    request_deserializer=sound__transfer__pb2.SoundRequest.FromString,
+            'TranscribeFile': grpc.unary_unary_rpc_method_handler(
+                    servicer.TranscribeFile,
+                    request_deserializer=sound__transfer__pb2.TranscriptionRequest.FromString,
                     response_serializer=sound__transfer__pb2.SoundResponse.SerializeToString,
             ),
-            'StreamSoundFile': grpc.stream_stream_rpc_method_handler(
-                    servicer.StreamSoundFile,
-                    request_deserializer=sound__transfer__pb2.SoundRequest.FromString,
+            'TranscribeLive': grpc.stream_stream_rpc_method_handler(
+                    servicer.TranscribeLive,
+                    request_deserializer=sound__transfer__pb2.TranscirptionLiveRequest.FromString,
                     response_serializer=sound__transfer__pb2.SoundStreamResponse.SerializeToString,
             ),
-            'DiarizateSpeakers': grpc.unary_stream_rpc_method_handler(
-                    servicer.DiarizateSpeakers,
-                    request_deserializer=sound__transfer__pb2.SoundRequest.FromString,
-                    response_serializer=sound__transfer__pb2.SpeakerAndLine.SerializeToString,
+            'TranslateFile': grpc.unary_stream_rpc_method_handler(
+                    servicer.TranslateFile,
+                    request_deserializer=sound__transfer__pb2.TranslationRequest.FromString,
+                    response_serializer=sound__transfer__pb2.SoundResponse.SerializeToString,
+            ),
+            'DiarizateFile': grpc.unary_unary_rpc_method_handler(
+                    servicer.DiarizateFile,
+                    request_deserializer=sound__transfer__pb2.TranscriptionRequest.FromString,
+                    response_serializer=sound__transfer__pb2.SpeakerAndLineResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -150,7 +161,7 @@ class SoundService(object):
             _registered_method=True)
 
     @staticmethod
-    def SendSoundFile(request,
+    def TranscribeFile(request,
             target,
             options=(),
             channel_credentials=None,
@@ -163,8 +174,8 @@ class SoundService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/SoundService/SendSoundFile',
-            sound__transfer__pb2.SoundRequest.SerializeToString,
+            '/SoundService/TranscribeFile',
+            sound__transfer__pb2.TranscriptionRequest.SerializeToString,
             sound__transfer__pb2.SoundResponse.FromString,
             options,
             channel_credentials,
@@ -177,7 +188,7 @@ class SoundService(object):
             _registered_method=True)
 
     @staticmethod
-    def StreamSoundFile(request_iterator,
+    def TranscribeLive(request_iterator,
             target,
             options=(),
             channel_credentials=None,
@@ -190,8 +201,8 @@ class SoundService(object):
         return grpc.experimental.stream_stream(
             request_iterator,
             target,
-            '/SoundService/StreamSoundFile',
-            sound__transfer__pb2.SoundRequest.SerializeToString,
+            '/SoundService/TranscribeLive',
+            sound__transfer__pb2.TranscirptionLiveRequest.SerializeToString,
             sound__transfer__pb2.SoundStreamResponse.FromString,
             options,
             channel_credentials,
@@ -204,7 +215,7 @@ class SoundService(object):
             _registered_method=True)
 
     @staticmethod
-    def DiarizateSpeakers(request,
+    def TranslateFile(request,
             target,
             options=(),
             channel_credentials=None,
@@ -217,9 +228,36 @@ class SoundService(object):
         return grpc.experimental.unary_stream(
             request,
             target,
-            '/SoundService/DiarizateSpeakers',
-            sound__transfer__pb2.SoundRequest.SerializeToString,
-            sound__transfer__pb2.SpeakerAndLine.FromString,
+            '/SoundService/TranslateFile',
+            sound__transfer__pb2.TranslationRequest.SerializeToString,
+            sound__transfer__pb2.SoundResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DiarizateFile(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/SoundService/DiarizateFile',
+            sound__transfer__pb2.TranscriptionRequest.SerializeToString,
+            sound__transfer__pb2.SpeakerAndLineResponse.FromString,
             options,
             channel_credentials,
             insecure,

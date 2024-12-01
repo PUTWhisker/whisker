@@ -2,7 +2,6 @@ from faster_whisper import WhisperModel
 from pathlib import Path
 from typing import Union
 from transcrpitionData import TranscriptionData
-from translate import Translator
 import grpc
 import logging
 import time
@@ -10,12 +9,10 @@ import os
 from diarizate import Clip
 
 class FasterWhisperHandler:
-    model = None
 
     def __init__(
         self,
         whisperSize:str,
-        translator:str
     ):
         self.whisperSize = whisperSize
         super(FasterWhisperHandler, self).__init__()
@@ -23,7 +20,7 @@ class FasterWhisperHandler:
             self.whisperSize, device="cpu", compute_type="float32", cpu_threads=8
         )
         self.silenceLength = 1.5
-        self.translator = Translator(translator)
+        
 
     def preprocessStreaming(
         self,
@@ -35,6 +32,7 @@ class FasterWhisperHandler:
         filePath = data.saveFile()
         data.isSilence = data.detectSilence(filePath, self.silenceLength)
         return filePath, data
+    
 
     def preprocessRequest(
         self,
@@ -42,32 +40,29 @@ class FasterWhisperHandler:
         transcriptionData: TranscriptionData,
         context: grpc.ServicerContext,
     ) -> Path:
-        transcriptionData.processMetadata(context)
         transcriptionData.audio = data
         return transcriptionData.saveFile()
+    
 
     def transcribe(
         self,
-        data: Path,
-        language: str,
-        translationLanguage: str,
-        return_fragments=False,
+        audio: Path,
+        data: TranscriptionData,
     ) -> str:
-        startTime = time.time()
-        if language != "":
+        if data.language != "":
             segments, info = self.model.transcribe(
-                str(data), beam_size=3, language=language, word_timestamps=True
+                str(audio), beam_size=3, language=data.language, word_timestamps=True
             )
         else:
-            segments, info = self.model.transcribe(str(data), beam_size=3)
+            segments, info = self.model.transcribe(str(audio), beam_size=3)
         logging.info(
             "Detected language '%s' with probability %f"
             % (info.language, info.language_probability)
         )
-        if language == "":
-            language = info.language
+        if data.language == "":
+            data.language = info.language
         response = ""
-        if return_fragments:
+        if data.diarizate:
             response = []
             for segment in segments:
                 response.append(Clip(segment.start, segment.end, "", segment.text))
@@ -77,14 +72,9 @@ class FasterWhisperHandler:
                 "[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text)
             )
             response += segment.text
-        logging.info(f"Whsiper transcribing finished in: {time.time() - startTime}")
-        data.unlink()  # TODO: Instead of creating and deleting file all the time, just do it on one and delete it after all translations
-        if translationLanguage:
-            response = self.translator.translate(
-                response, language, translationLanguage
-            )[0]
-            logging.info(f"Translating finished in: {time.time() - startTime}")
+        audio.unlink()  # TODO: Instead of creating and deleting file all the time, just do it on one and delete it after all translations
         return response
+    
 
     def postprocess(self, data: TranscriptionData) -> TranscriptionData:
         if (
@@ -96,24 +86,20 @@ class FasterWhisperHandler:
             ]
         data.incrementData()
         return data
+    
 
     async def handleFile(
         self,
         receivedAudio: bytes,
         data: TranscriptionData,
-        context: grpc.ServicerContext,
-        diarizate_speakers=False,
+        context: grpc.ServicerContext
     ) -> str:
         filePath = self.preprocessRequest(receivedAudio, data, context)
-        if diarizate_speakers:
-            result = self.transcribe(
-                filePath, data.language, data.translate, return_fragments=True
+        result = self.transcribe(
+                filePath, data,
             )
-        else:
-            result = self.transcribe(
-                filePath, data.language, data.translate, return_fragments=False
-            )
-        return result
+        return result, data
+    
 
     async def handleRecord(
         self,
@@ -124,7 +110,7 @@ class FasterWhisperHandler:
         processedAudio, data = self.preprocessStreaming(receivedAudio, data, context)
         if not data.silenceAudio:
             data.transcription[data.curSegment] = self.transcribe(
-                processedAudio, data.language, data.translate
+                processedAudio, data,
             )
         data = self.postprocess(data)
         return data

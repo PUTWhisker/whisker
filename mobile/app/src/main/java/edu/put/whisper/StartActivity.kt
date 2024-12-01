@@ -209,8 +209,8 @@ class StartActivity : AppCompatActivity() {
 
         btnTranscriptLive.setOnClickListener {
             if (!is_recording){
-                soundTransferClient = SoundTransferClient(Uri.parse("http://10.0.2.2:7070/"))
-                soundTransferClient!!.streamSoundFile()
+                soundTransferClient = SoundTransferClient(Uri.parse(getResources().getString(R.string.server_url)))
+                soundTransferClient!!.transcribeLive()
 
             } else {
                 soundTransferClient!!.stopStream()
@@ -247,7 +247,7 @@ class StartActivity : AppCompatActivity() {
                     lifecycleScope.launch {
                         val filePath = getFilePathFromUri(uri)
                         if (filePath != null) {
-                            utilities.uploadRecording(filePath) { transcription ->
+                            utilities.uploadRecording(filePath, "pl") { transcription ->
                                 runOnUiThread {
                                     if (transcription != null) {
                                         utilities.setVisibility(View.GONE, btnRecordActivity, btnChooseFile, btnLogin, btnRegister, tvChoose, btnTranscriptLive)

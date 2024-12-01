@@ -9,7 +9,6 @@ import jWT
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.io.Closeable
 import java.io.File
@@ -29,9 +28,9 @@ class SoundTransferClient(uri: Uri) : Closeable {
         builder.executor(Dispatchers.IO.asExecutor()).build()
     }
     private val transferer = SoundServiceGrpcKt.SoundServiceCoroutineStub(channel)
-    val stub = SoundServiceGrpcKt.SoundServiceCoroutineStub(channel)
+    private val stub = SoundServiceGrpcKt.SoundServiceCoroutineStub(channel)
 
-    suspend fun sendSoundFile(filePath: String): String? {
+    suspend fun transcribeFile(filePath: String, language : String): String? {
         try {
             val metadata = Metadata()
             val key = Metadata.Key.of("JWT", Metadata.ASCII_STRING_MARSHALLER)
@@ -39,8 +38,8 @@ class SoundTransferClient(uri: Uri) : Closeable {
                 metadata.put(key, jWT)
             }
             val bytes = File(filePath).readBytes().toByteString()
-            val request = soundRequest { this.soundData = bytes }
-            val response = transferer.sendSoundFile(request, metadata)
+            val request = transcriptionRequest { this.soundData = bytes; this.sourceLanguage = language}
+            val response = transferer.transcribeFile(request, metadata)
             return response.text
         } catch (e: Exception) {
             e.printStackTrace()
@@ -48,15 +47,15 @@ class SoundTransferClient(uri: Uri) : Closeable {
         return null
     }
 
-    fun streamSoundFile() {
+    fun transcribeLive() {
         val metadata = Metadata()
         val key = Metadata.Key.of("language", Metadata.ASCII_STRING_MARSHALLER)
         metadata.put(key, "pl")
         audiStreamManager.initAudioRecorder()
         audiStreamManager.record()
         CoroutineScope(Dispatchers.Default).launch {
-            val requests: Flow<SoundRequest> = audiStreamManager.record()
-            stub.streamSoundFile(requests, metadata).collect { response ->
+            val requests = audiStreamManager.record()
+            stub.transcribeLive(requests, metadata).collect { response ->
                 Log.i("stream", "Got message: \"${response.text}\"")
             }
         }

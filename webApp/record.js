@@ -1,4 +1,4 @@
-const {client, SoundRequest} = require('./consts.js')
+const {soundClient, SoundRequest} = require('./consts.js')
 
 let chunks = []
 let record, finish
@@ -88,7 +88,7 @@ function sendFile(file) { // Send file to the server and return the answer
         request.setSoundData(byteArray)
         request.setFlagsList("model: small")
         request.setFlagsList("language: english")
-        client.sendSoundFile(request, {}, (err, response) => {
+        soundClient.sendSoundFile(request, {}, (err, response) => {
             if (err) {
                 console.log(`Could not send files to the server: code = ${err.code}, message = ${err.message}`)
                 return
