@@ -64,7 +64,7 @@ class StartActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
 
-        val serverUri = Uri.parse("http://100.80.80.156:50051/")
+        val serverUri = Uri.parse(getString(R.string.server_url))
         authClient = AuthenticationClient(serverUri)
         utilities = Utilities(this)
 
