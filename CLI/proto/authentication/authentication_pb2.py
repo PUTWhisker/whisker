@@ -25,7 +25,7 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x61uthentication.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"T\n\x0bTextHistory\x12\x15\n\rtranscription\x18\x01 \x01(\t\x12.\n\ncreated_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"1\n\x0bUserCredits\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"3\n\x0eStatusResponse\x12\r\n\x05\x65rror\x18\x01 \x01(\t\x12\x12\n\nsuccessful\x18\x02 \x01(\x08\"0\n\rLoginResponse\x12\x0b\n\x03JWT\x18\x01 \x01(\t\x12\x12\n\nsuccessful\x18\x02 \x01(\x08\"\x07\n\x05\x45mpty2\x91\x01\n\rClientService\x12\'\n\x05Login\x12\x0c.UserCredits\x1a\x0e.LoginResponse\"\x00\x12*\n\x0eGetTranslation\x12\x06.Empty\x1a\x0c.TextHistory\"\x00\x30\x01\x12+\n\x08Register\x12\x0c.UserCredits\x1a\x0f.StatusResponse\"\x00\x42J\n\x16io.grpc.authenticationB\x13\x41uthenticationProtoP\x01Z\x19inzynierka/authenticationb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x61uthentication.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"`\n\x0bTextHistory\x12\x15\n\rtranscription\x18\x01 \x01(\t\x12.\n\ncreated_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\n\n\x02id\x18\x03 \x01(\x05\"1\n\x0bUserCredits\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"3\n\x0eStatusResponse\x12\r\n\x05\x65rror\x18\x01 \x01(\t\x12\x12\n\nsuccessful\x18\x02 \x01(\x08\"0\n\rLoginResponse\x12\x0b\n\x03JWT\x18\x01 \x01(\t\x12\x12\n\nsuccessful\x18\x02 \x01(\x08\"\x10\n\x02Id\x12\n\n\x02id\x18\x01 \x01(\x05\")\n\nNewContent\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\"\x07\n\x05\x45mpty2\xf5\x01\n\rClientService\x12\'\n\x05Login\x12\x0c.UserCredits\x1a\x0e.LoginResponse\"\x00\x12+\n\x08Register\x12\x0c.UserCredits\x1a\x0f.StatusResponse\"\x00\x12*\n\x0eGetTranslation\x12\x06.Empty\x1a\x0c.TextHistory\"\x00\x30\x01\x12\x33\n\x11\x45\x64itTranscription\x12\x0b.NewContent\x1a\x0f.StatusResponse\"\x00\x12-\n\x13\x44\x65leteTranscription\x12\x03.Id\x1a\x0f.StatusResponse\"\x00\x42J\n\x16io.grpc.authenticationB\x13\x41uthenticationProtoP\x01Z\x19inzynierka/authenticationb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -34,15 +34,19 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'\n\026io.grpc.authenticationB\023AuthenticationProtoP\001Z\031inzynierka/authentication'
   _globals['_TEXTHISTORY']._serialized_start=57
-  _globals['_TEXTHISTORY']._serialized_end=141
-  _globals['_USERCREDITS']._serialized_start=143
-  _globals['_USERCREDITS']._serialized_end=192
-  _globals['_STATUSRESPONSE']._serialized_start=194
-  _globals['_STATUSRESPONSE']._serialized_end=245
-  _globals['_LOGINRESPONSE']._serialized_start=247
-  _globals['_LOGINRESPONSE']._serialized_end=295
-  _globals['_EMPTY']._serialized_start=297
-  _globals['_EMPTY']._serialized_end=304
-  _globals['_CLIENTSERVICE']._serialized_start=307
-  _globals['_CLIENTSERVICE']._serialized_end=452
+  _globals['_TEXTHISTORY']._serialized_end=153
+  _globals['_USERCREDITS']._serialized_start=155
+  _globals['_USERCREDITS']._serialized_end=204
+  _globals['_STATUSRESPONSE']._serialized_start=206
+  _globals['_STATUSRESPONSE']._serialized_end=257
+  _globals['_LOGINRESPONSE']._serialized_start=259
+  _globals['_LOGINRESPONSE']._serialized_end=307
+  _globals['_ID']._serialized_start=309
+  _globals['_ID']._serialized_end=325
+  _globals['_NEWCONTENT']._serialized_start=327
+  _globals['_NEWCONTENT']._serialized_end=368
+  _globals['_EMPTY']._serialized_start=370
+  _globals['_EMPTY']._serialized_end=377
+  _globals['_CLIENTSERVICE']._serialized_start=380
+  _globals['_CLIENTSERVICE']._serialized_end=625
 # @@protoc_insertion_point(module_scope)

@@ -6,12 +6,14 @@ from typing import ClassVar as _ClassVar, Mapping as _Mapping, Optional as _Opti
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class TextHistory(_message.Message):
-    __slots__ = ("transcription", "created_at")
+    __slots__ = ("transcription", "created_at", "id")
     TRANSCRIPTION_FIELD_NUMBER: _ClassVar[int]
     CREATED_AT_FIELD_NUMBER: _ClassVar[int]
+    ID_FIELD_NUMBER: _ClassVar[int]
     transcription: str
     created_at: _timestamp_pb2.Timestamp
-    def __init__(self, transcription: _Optional[str] = ..., created_at: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+    id: int
+    def __init__(self, transcription: _Optional[str] = ..., created_at: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., id: _Optional[int] = ...) -> None: ...
 
 class UserCredits(_message.Message):
     __slots__ = ("username", "password")
@@ -36,6 +38,20 @@ class LoginResponse(_message.Message):
     JWT: str
     successful: bool
     def __init__(self, JWT: _Optional[str] = ..., successful: bool = ...) -> None: ...
+
+class Id(_message.Message):
+    __slots__ = ("id",)
+    ID_FIELD_NUMBER: _ClassVar[int]
+    id: int
+    def __init__(self, id: _Optional[int] = ...) -> None: ...
+
+class NewContent(_message.Message):
+    __slots__ = ("id", "content")
+    ID_FIELD_NUMBER: _ClassVar[int]
+    CONTENT_FIELD_NUMBER: _ClassVar[int]
+    id: int
+    content: str
+    def __init__(self, id: _Optional[int] = ..., content: _Optional[str] = ...) -> None: ...
 
 class Empty(_message.Message):
     __slots__ = ()

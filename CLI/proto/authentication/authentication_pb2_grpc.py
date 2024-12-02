@@ -5,7 +5,7 @@ import warnings
 
 import authentication_pb2 as authentication__pb2
 
-GRPC_GENERATED_VERSION = '1.68.0'
+GRPC_GENERATED_VERSION = '1.68.1'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -39,14 +39,24 @@ class ClientServiceStub(object):
                 request_serializer=authentication__pb2.UserCredits.SerializeToString,
                 response_deserializer=authentication__pb2.LoginResponse.FromString,
                 _registered_method=True)
+        self.Register = channel.unary_unary(
+                '/ClientService/Register',
+                request_serializer=authentication__pb2.UserCredits.SerializeToString,
+                response_deserializer=authentication__pb2.StatusResponse.FromString,
+                _registered_method=True)
         self.GetTranslation = channel.unary_stream(
                 '/ClientService/GetTranslation',
                 request_serializer=authentication__pb2.Empty.SerializeToString,
                 response_deserializer=authentication__pb2.TextHistory.FromString,
                 _registered_method=True)
-        self.Register = channel.unary_unary(
-                '/ClientService/Register',
-                request_serializer=authentication__pb2.UserCredits.SerializeToString,
+        self.EditTranscription = channel.unary_unary(
+                '/ClientService/EditTranscription',
+                request_serializer=authentication__pb2.NewContent.SerializeToString,
+                response_deserializer=authentication__pb2.StatusResponse.FromString,
+                _registered_method=True)
+        self.DeleteTranscription = channel.unary_unary(
+                '/ClientService/DeleteTranscription',
+                request_serializer=authentication__pb2.Id.SerializeToString,
                 response_deserializer=authentication__pb2.StatusResponse.FromString,
                 _registered_method=True)
 
@@ -60,13 +70,25 @@ class ClientServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def Register(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def GetTranslation(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def Register(self, request, context):
+    def EditTranscription(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DeleteTranscription(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -80,14 +102,24 @@ def add_ClientServiceServicer_to_server(servicer, server):
                     request_deserializer=authentication__pb2.UserCredits.FromString,
                     response_serializer=authentication__pb2.LoginResponse.SerializeToString,
             ),
+            'Register': grpc.unary_unary_rpc_method_handler(
+                    servicer.Register,
+                    request_deserializer=authentication__pb2.UserCredits.FromString,
+                    response_serializer=authentication__pb2.StatusResponse.SerializeToString,
+            ),
             'GetTranslation': grpc.unary_stream_rpc_method_handler(
                     servicer.GetTranslation,
                     request_deserializer=authentication__pb2.Empty.FromString,
                     response_serializer=authentication__pb2.TextHistory.SerializeToString,
             ),
-            'Register': grpc.unary_unary_rpc_method_handler(
-                    servicer.Register,
-                    request_deserializer=authentication__pb2.UserCredits.FromString,
+            'EditTranscription': grpc.unary_unary_rpc_method_handler(
+                    servicer.EditTranscription,
+                    request_deserializer=authentication__pb2.NewContent.FromString,
+                    response_serializer=authentication__pb2.StatusResponse.SerializeToString,
+            ),
+            'DeleteTranscription': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteTranscription,
+                    request_deserializer=authentication__pb2.Id.FromString,
                     response_serializer=authentication__pb2.StatusResponse.SerializeToString,
             ),
     }
@@ -129,6 +161,33 @@ class ClientService(object):
             _registered_method=True)
 
     @staticmethod
+    def Register(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ClientService/Register',
+            authentication__pb2.UserCredits.SerializeToString,
+            authentication__pb2.StatusResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
     def GetTranslation(request,
             target,
             options=(),
@@ -156,7 +215,7 @@ class ClientService(object):
             _registered_method=True)
 
     @staticmethod
-    def Register(request,
+    def EditTranscription(request,
             target,
             options=(),
             channel_credentials=None,
@@ -169,8 +228,35 @@ class ClientService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/ClientService/Register',
-            authentication__pb2.UserCredits.SerializeToString,
+            '/ClientService/EditTranscription',
+            authentication__pb2.NewContent.SerializeToString,
+            authentication__pb2.StatusResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DeleteTranscription(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ClientService/DeleteTranscription',
+            authentication__pb2.Id.SerializeToString,
             authentication__pb2.StatusResponse.FromString,
             options,
             channel_credentials,
