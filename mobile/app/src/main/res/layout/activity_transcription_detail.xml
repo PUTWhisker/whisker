@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:orientation="vertical">
+
 
     <ScrollView
         android:layout_width="match_parent"
@@ -28,6 +28,7 @@
                     android:layout_height="48dp"
                     android:layout_above="@id/tvFullTranscription"
                     android:layout_marginTop="16dp"
+                    android:layout_marginEnd="24dp"
                     android:layout_alignParentRight="true"
                     android:layout_centerHorizontal="true"
                     android:background="?attr/selectableItemBackgroundBorderless"
@@ -63,7 +64,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center"
         android:background="#987bbd"
         android:paddingVertical="8dp">
 
@@ -72,11 +72,14 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless">
 
             <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:src="@drawable/ic_edit"
                 app:tint="@color/primaryDark"
                 android:contentDescription="Edit transcription" />
@@ -85,21 +88,25 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Edit"
-                android:textSize="12sp"
+                android:textSize="16sp"
                 android:textColor="@color/primaryDark" />
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/btnTranslate"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless">
 
             <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_edit"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_translate"
                 app:tint="@color/primaryDark"
                 android:contentDescription="Translate transcription" />
 
@@ -107,7 +114,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Translate"
-                android:textSize="12sp"
+                android:textSize="16sp"
                 android:textColor="@color/primaryDark" />
         </LinearLayout>
 
@@ -116,21 +123,25 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless">
 
             <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_edit"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_roles"
                 app:tint="@color/primaryDark"
                 android:contentDescription="Split transcription into roles" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Roles"
-                android:textSize="12sp"
+                android:text="Split into roles"
+                android:textSize="16sp"
                 android:textColor="@color/primaryDark" />
         </LinearLayout>
     </LinearLayout>
+
 </LinearLayout>
