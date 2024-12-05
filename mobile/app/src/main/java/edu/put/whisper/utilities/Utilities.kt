@@ -2,6 +2,7 @@ package edu.put.whisper.utilities
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import edu.put.whisper.R
@@ -17,7 +18,7 @@ class Utilities(private val context: Context) {
             val serverUri = Uri.parse(context.resources.getString(R.string.server_url))
             val transfer = SoundTransferClient(serverUri)
             val output: String? = transfer.transcribeFile(filePath, language)
-
+            Log.i("transcription", output!!)
             withContext(Dispatchers.Main) {
                 callback(output)
             }

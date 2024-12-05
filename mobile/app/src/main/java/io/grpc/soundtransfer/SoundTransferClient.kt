@@ -40,6 +40,7 @@ class SoundTransferClient(uri: Uri) : Closeable {
             val bytes = File(filePath).readBytes().toByteString()
             val request = transcriptionRequest { this.soundData = bytes; this.sourceLanguage = language}
             val response = transferer.transcribeFile(request, metadata)
+            Log.i("transcription", response.text)
             return response.text
         } catch (e: Exception) {
             e.printStackTrace()
@@ -68,5 +69,4 @@ class SoundTransferClient(uri: Uri) : Closeable {
     override fun close() {
         channel.shutdownNow()
     }
-
 }

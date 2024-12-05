@@ -61,7 +61,7 @@ func registerGrpcServices(server *grpc.Server) *pgxpool.Pool {
 func main() {
 	godotenv.Load()
 	lis := createTCPListener()
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(services.JwtUnaryInterceptor), grpc.StreamInterceptor(services.JwtStreamInterceptor))
 	dbPool := registerGrpcServices(grpcServer)
 	connected := false
 	for !connected {

@@ -23,7 +23,7 @@ CREATE TABLE transcription (
 );
 
 CREATE TABLE translation (
-    transcription_id INT UNIQUE REFERENCES transcription(id),
+    transcription_id INT UNIQUE REFERENCES transcription(id) ON DELETE CASCADE,
     lang VARCHAR(2) NOT NULL,
     content TEXT NOT NULL
 );
@@ -37,7 +37,7 @@ CREATE TABLE diarization (
 
 CREATE TABLE speaker_line(
     id INT,
-    diarization_id INT REFERENCES diarization(id),
+    diarization_id INT REFERENCES diarization(id) ON DELETE CASCADE,
     speaker VARCHAR(50),
     content TEXT,
     PRIMARY KEY (id, diarization_id)

@@ -6,33 +6,33 @@ services:
       dockerfile: Dockerfile
     environment:
      - HUGGING_FACE_API_KEY="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"
-    # ports:
-    #  - 7070:7070
+    ports:
+     - 7070:7070
 
-  golang-server:
-    build:
-      context: ../backend/ApiServer
-      dockerfile: Dockerfile
-    environment:
-      - SERVER_PORT=9900
-      - USE_DATABASE=True
-      - DATABASE_URL=postgres://postgres:password@postgres:5432/whisper
-      - WHISPER_SERVER=whisper-server
-    depends_on: # Change depends_on to healthcheck
-      - whisper-server
-      - postgres
-    ports:
-      - 9900:9900
+  # golang-server:
+  #   build:
+  #     context: ../backend/ApiServer
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     - SERVER_PORT=9900
+  #     - USE_DATABASE=True
+  #     - DATABASE_URL=postgres://postgres:password@postgres:5432/whisper
+  #     - WHISPER_SERVER=whisper-server
+  #   depends_on: # Change depends_on to healthcheck
+  #     - whisper-server
+  #     - postgres
+  #   ports:
+  #     - 9900:9900
     
-  proxy:
-    build:
-      context: .
-      dockerfile: proxy/Dockerfile
-    ports:
-      - 50051:50051
-      - 9901:9901
-    depends_on:
-      - golang-server
+  # proxy:
+  #   build:
+  #     context: .
+  #     dockerfile: proxy/Dockerfile
+  #   ports:
+  #     - 50051:50051
+  #     - 9901:9901
+  #   depends_on:
+  #     - golang-server
   
   postgres:
     image: postgres
@@ -45,14 +45,14 @@ services:
     environment:
       - POSTGRES_PASSWORD=password
 
-  client:
-    build:
-      context: ../webApp
-      dockerfile: docker/Dockerfile
-      args:
-        no-cache: "true"
-    ports:
-      - "8080:8080"
+  # client:
+  #   build:
+  #     context: ../webApp
+  #     dockerfile: docker/Dockerfile
+  #     args:
+  #       no-cache: "true"
+  #   ports:
+  #     - "8080:8080"
       
 volumes:
   postgres_data:
