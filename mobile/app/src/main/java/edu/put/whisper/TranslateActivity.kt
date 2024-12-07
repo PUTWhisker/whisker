@@ -21,6 +21,15 @@ class TranslateActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_translate)
 
+        val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+        toolbar.setNavigationOnClickListener {
+            onBackPressed() 
+        }
+
         val serverUrl = getString(R.string.server_url)
         val serverUri = Uri.parse(serverUrl)
         client = SoundTransferClient(serverUri)
@@ -33,7 +42,9 @@ class TranslateActivity : AppCompatActivity() {
         val buttonTranslate = findViewById<Button>(R.id.button_translate)
 
         val languages = resources.getStringArray(R.array.languages)
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, languages)
+        val languagesFull = resources.getStringArray(R.array.languages_full)
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, languagesFull)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
         spinnerLanguage.adapter = adapter
@@ -50,8 +61,8 @@ class TranslateActivity : AppCompatActivity() {
 
         buttonTranslate.setOnClickListener {
             val originalText = editTextOriginal.text.toString()
-            val sourceLanguage = spinnerLanguage.selectedItem.toString()
-            val targetLanguage = spinnerTargetLanguage.selectedItem.toString()
+            val sourceLanguage = languages[spinnerLanguage.selectedItemPosition]
+            val targetLanguage = languages[spinnerTargetLanguage.selectedItemPosition]
 
             if (originalText.isNotEmpty()) {
                 CoroutineScope(Dispatchers.Main).launch {
