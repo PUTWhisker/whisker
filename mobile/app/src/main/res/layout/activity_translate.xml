@@ -25,6 +25,13 @@
         android:gravity="top"
         android:inputType="textMultiLine"
         android:minHeight="100dp" />
+    <Spinner
+        android:id="@+id/spinner_target_language"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/rounded_border"
+        android:padding="12dp" />
 
     <EditText
         android:id="@+id/edit_text_translated"
