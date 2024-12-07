@@ -18,12 +18,10 @@ class TranscriptionDetailActivity : AppCompatActivity() {
         val transcriptionDate = intent.getStringExtra("EXTRA_TRANSCRIPTION_DATE")
 
         if (errorMessage != null) {
-            // Display the error message as a Toast
             Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
         }
 
         if (transcriptionText != null && transcriptionDate != null) {
-            // Proceed with displaying transcription details
             val tvTranscriptionText = findViewById<TextView>(R.id.tvFullTranscription)
             val tvTranscriptionDate = findViewById<TextView>(R.id.tvTranscriptionDate)
 
