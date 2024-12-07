@@ -40,8 +40,10 @@ class SoundTransferClient(uri: Uri) : Closeable {
             val bytes = File(filePath).readBytes().toByteString()
             val request = transcriptionRequest { this.soundData = bytes; this.sourceLanguage = language}
             val response = transferer.transcribeFile(request, metadata)
+            Log.i("DEBUG", "transcribefile: ${response.text}")
             return response.text
         } catch (e: Exception) {
+            Log.d("DEBUG", "jestem w kaczu")
             e.printStackTrace()
         }
         return null

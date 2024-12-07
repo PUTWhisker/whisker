@@ -4,10 +4,13 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -17,7 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import edu.put.whisper.utilities.Utilities
+import edu.put.whisper.utils.Utilities
 import io.grpc.authentication.AuthenticationClient
 import io.grpc.soundtransfer.SoundTransferClient
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +34,7 @@ class StartActivity : AppCompatActivity() {
     private lateinit var btnRecordActivity: CardView
     private lateinit var btnChooseFile: CardView
     private lateinit var btnTranscriptLive: CardView
+    private lateinit var logoWhisper: ImageView
     private lateinit var tvSelectedFile: TextView
     private lateinit var tvTranscriptedFile: TextView
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
@@ -50,16 +54,11 @@ class StartActivity : AppCompatActivity() {
     private lateinit var btnBack: ImageButton
     private lateinit var tvChoose: TextView
     private lateinit var rvTranscriptions: RecyclerView
-    private lateinit var transcriptionAdapter: TranscriptionAdapter
     private lateinit var llFileRecord: LinearLayout
     private lateinit var utilities: Utilities
-    private var tempFilePath: String? = null
     private val PICK_FILE_REQUEST_CODE = 1
     private lateinit var authClient: AuthenticationClient
-    private var soundTransferClient : SoundTransferClient? = null
 
-
-    var is_recording = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
@@ -90,6 +89,7 @@ class StartActivity : AppCompatActivity() {
         btnBack = findViewById(R.id.btnBack)
         rvTranscriptions = findViewById(R.id.rvTranscriptions)
         llFileRecord = findViewById(R.id.llFileRecord)
+        logoWhisper = findViewById(R.id.logoWhisper)
         rvTranscriptions.layoutManager = LinearLayoutManager(this)
 
         val bottomSheetL: LinearLayout = findViewById(R.id.bottomSheetL)
@@ -99,12 +99,14 @@ class StartActivity : AppCompatActivity() {
         bottomSheetBehavior.peekHeight = 0
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
 
+
         btnRegister.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             bottomSheetLogin.visibility = View.VISIBLE
             bottomSheetTitle.setText("Register")
             repeatPasswordInput.visibility = View.VISIBLE
             btnSubmit.text = "Register"
+            showKeyboard(loginInput)
 
         }
 
@@ -113,6 +115,7 @@ class StartActivity : AppCompatActivity() {
             bottomSheetLogin.visibility = View.VISIBLE
             bottomSheetTitle.setText("Log in")
             btnLogin.setText("Log in")
+            showKeyboard(loginInput)
         }
         btnCancelLog.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
@@ -121,6 +124,8 @@ class StartActivity : AppCompatActivity() {
             passwordInput.text.clear()
             repeatPasswordInput.text.clear()
             repeatPasswordInput.visibility = View.GONE
+            val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.hideSoftInputFromWindow(passwordInput.windowToken, 0)
 
         }
 
@@ -129,6 +134,8 @@ class StartActivity : AppCompatActivity() {
             val password = passwordInput.text.toString()
             val repeatPassword = repeatPasswordInput.text.toString()
             val title = bottomSheetTitle.text.toString()
+
+            hideKeyboard()
             if (title == "Register") {
                 if (password == repeatPassword) {
                     GlobalScope.launch(Dispatchers.IO) {
@@ -154,11 +161,9 @@ class StartActivity : AppCompatActivity() {
                                     "Registration failed. Try again.",
                                     Toast.LENGTH_SHORT
                                 ).show()
-
                             }
                         }
                     }
-
                 } else {
                     Toast.makeText(
                         this,
@@ -168,8 +173,7 @@ class StartActivity : AppCompatActivity() {
                     passwordInput.text.clear()
                     repeatPasswordInput.text.clear()
                 }
-            }
-            if(title == "Log in"){
+            } else if (title == "Log in") {
                 GlobalScope.launch(Dispatchers.IO) {
                     val success = authClient.Login(username, password)
                     withContext(Dispatchers.Main) {
@@ -189,7 +193,8 @@ class StartActivity : AppCompatActivity() {
         }
 
         btnHistory.setOnClickListener{
-            startActivity(Intent(this, GalleryActivity::class.java))
+            val intent = Intent(this, HistoryActivity::class.java)
+            startActivity(intent)
         }
 
         btnRecordActivity.setOnClickListener {
@@ -204,9 +209,6 @@ class StartActivity : AppCompatActivity() {
             }
             startActivityForResult(intent, PICK_FILE_REQUEST_CODE)
         }
-
-
-
         btnTranscriptLive.setOnClickListener {
             val intent = Intent(this, LiveTranscriptionActivity::class.java)
             startActivity(intent)
@@ -224,10 +226,15 @@ class StartActivity : AppCompatActivity() {
             utilities.setVisibility(View.VISIBLE, btnLogin, btnRegister, btnChooseFile, btnRecordActivity)
             utilities.setVisibility(View.GONE, btnHistory, btnLogout, tvHello)
             utilities.setVisibility(View.INVISIBLE, rvTranscriptions)
+            loginInput.text.clear()
+            passwordInput.text.clear()
             tvHello.text = ""
             authClient.Logout()
             Toast.makeText(this, "Successfully logged out.", Toast.LENGTH_SHORT).show()
         }
+
+
+
 
     }
 
@@ -238,39 +245,50 @@ class StartActivity : AppCompatActivity() {
                 val fileName = getFileNameFromUri(uri)
                 if (fileName != null) {
                     tvSelectedFile.text = "$fileName is being transcripted"
+                    Log.d("DEBUG", "File selected: $fileName")
+
                     lifecycleScope.launch {
                         val filePath = getFilePathFromUri(uri)
+                        Log.d("DEBUG", "File path resolved: $filePath")
+
                         if (filePath != null) {
-                            utilities.uploadRecording(filePath, "pl") { transcription ->
+                            utilities.uploadRecording(filePath, "en") { transcription ->
+                                Log.d("DEBUG", "Transcription result: $transcription")
                                 runOnUiThread {
+                                    val intent = Intent(this@StartActivity, TranscriptionDetailActivity::class.java)
                                     if (transcription != null) {
-                                        utilities.setVisibility(View.GONE, btnRecordActivity, btnChooseFile, btnLogin, btnRegister, tvChoose, btnTranscriptLive)
-                                        utilities.setVisibility(View.VISIBLE, btnCopy, btnBack)
-                                        tvTranscriptedFile.text = transcription
+                                        intent.putExtra("EXTRA_TRANSCRIPTION_TEXT", transcription)
+                                        intent.putExtra("EXTRA_TRANSCRIPTION_DATE", System.currentTimeMillis().toString())
                                     } else {
-                                        Toast.makeText(this@StartActivity, "Transcription failed.", Toast.LENGTH_SHORT).show()
+                                        intent.putExtra("EXTRA_ERROR_MESSAGE", "Transcription failed.")
+                                        Log.e("DEBUG", "Transcription failed: Result was null")
                                     }
+                                    startActivity(intent)
                                 }
                             }
                         } else {
-                            Toast.makeText(this@StartActivity, "Unable to get path", Toast.LENGTH_SHORT).show()
+                            Log.e("DEBUG", "Failed to get file path from URI")
+                            val intent = Intent(this@StartActivity, TranscriptionDetailActivity::class.java)
+                            intent.putExtra("EXTRA_ERROR_MESSAGE", "Unable to get path")
+                            startActivity(intent)
                         }
                     }
                 } else {
-                    Toast.makeText(this, "Unable to get file name", Toast.LENGTH_SHORT).show()
+                    Log.e("DEBUG", "Failed to get file name from URI")
+                    val intent = Intent(this@StartActivity, TranscriptionDetailActivity::class.java)
+                    intent.putExtra("EXTRA_ERROR_MESSAGE", "Unable to get file name")
+                    startActivity(intent)
                 }
             }
         }
     }
-
-
 
     private fun getFilePathFromUri(uri: Uri): String? {
         var inputStream = contentResolver.openInputStream(uri)
         return if (inputStream != null) {
             val tempFile = File.createTempFile("temp_audio", ".mp3", cacheDir)
             inputStream.copyTo(FileOutputStream(tempFile))
-            tempFile.absolutePath // Zwracamy ścieżkę do tymczasowego pliku
+            tempFile.absolutePath
         } else {
             null
         }
@@ -288,22 +306,18 @@ class StartActivity : AppCompatActivity() {
         return fileName
     }
 
-    private fun showTranslationHistory() {
-        llFileRecord.visibility = View.GONE
-        rvTranscriptions.visibility = View.VISIBLE
-
-        GlobalScope.launch(Dispatchers.IO) {
-            val history = authClient.GetTranslations()
-            val formattedHistory = history.map { "${it.text}, ${it.timestamp}" }
-            withContext(Dispatchers.Main) {
-                transcriptionAdapter = TranscriptionAdapter(formattedHistory) { transcription ->
-                    Toast.makeText(this@StartActivity, "Clicked: $transcription", Toast.LENGTH_SHORT).show()
-                }
-                rvTranscriptions.adapter = transcriptionAdapter
-            }
+    private fun hideKeyboard() {
+        val view = this.currentFocus
+        if (view != null) {
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
     }
 
-
+    private fun showKeyboard(editText: EditText) {
+        editText.requestFocus()
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+    }
 
 }
