@@ -12,30 +12,42 @@
       document.getElementById("show_transcript").style.display = 'block';
     }
 
-    function showTransOptions() {
-      const checkbox = document.getElementById("translate");
-      const langlist = document.getElementById("trans_lang_list");
+    function showTransOptions(button) {
+      const checkbox_translate = document.getElementById("translate");
+      const checkbox_speakers = document.getElementById("role_division");
+      const langlist = document.querySelectorAll("#choose_trans_lang, #trans_lang_list .custom_dropdown_arrow");
       const translationfield = document.getElementById("show_translation");
-      if (checkbox.checked) {
-        langlist.classList.remove('hidden');
+      const translationarrow = document.getElementById("arrow");
+      if (button.previous) {
+        button.checked = false;
+      }
+
+      button.previous = button.checked;
+
+      if (checkbox_translate.checked) {
+        langlist.forEach((e) => e.classList.remove('hidden'));
         translationfield.classList.remove('hidden');
+        translationarrow.classList.remove('hidden');
       } else {
-        langlist.classList.add('hidden');
+        langlist.forEach((e) => e.classList.add('hidden'));
         translationfield.classList.add('hidden');
+        translationarrow.classList.add('hidden');
       }
     }
     function handleUpload(file) {
-      const fileNameLabel = document.getElementById("file_name");
+      const fileNameLabel = document.getElementById("input_file");
       const sourceLangTile = document.getElementById("source_language_container");
       const languageChooser = document.getElementById("choose_lang");
-      console.log(`File ${file.name} hast became the chosen one`);
+      const closeButton = document.getElementById("delete_button");
+      console.log(`File ${file.name} was selected`);
       sourceLangTile.classList.remove("locked");
       languageChooser.disabled = false;
       fileNameLabel.classList.remove("hidden");
       var visibleName = file.name;
       if (visibleName.length > 20)
-        visibleName = `${visibleName.substring(0, 9)}...${visibleName.substring(visibleName.length - 8)}`
-      fileNameLabel.innerHTML = `Selected file:<br>${visibleName}`;
+        visibleName = `${visibleName.substring(0, 7)}...${visibleName.substring(visibleName.length - 8)}`
+      fileNameLabel.innerHTML = `${visibleName}`;
+      closeButton.classList.remove("hidden");
     }
     function dropHandle(event) {
       event.preventDefault();
@@ -46,6 +58,15 @@
           handleUpload(actuallyFile);
         }
       }
+    }
+
+    function deleteFile() {
+      const uploadButton = document.getElementById("upload");
+      const fileNameLabel = document.getElementById("input_file");
+      const closeButton = document.getElementById("delete_button");
+      uploadButton.value = '';
+      fileNameLabel.innerHTML = 'Browse <span class="material-symbols-outlined">folder_open</span>';
+      closeButton.classList.add("hidden")
     }
   </script>
   <link rel="stylesheet" href="style.css">
@@ -59,6 +80,14 @@
       <a href="http://127.0.0.1:5500/webApp/record.html" class="icon_button">Dictate <span
           class="material-symbols-outlined">
           mic
+        </span></a>
+      <a href="http://127.0.0.1:5500/webApp/history.html" class="icon_button">History <span
+          class="material-symbols-outlined">
+          lock
+        </span></a>
+      <a href="http://127.0.0.1:5500/webApp/history.html" class="icon_button">Swagger <span
+          class="material-symbols-outlined">
+          lock
         </span></a>
       <a href="http://127.0.0.1:5500/webApp/about.html" class="icon_button">About <span
           class="material-symbols-outlined">
@@ -74,6 +103,15 @@
     </div>
     <div id="settings_fields">
       <div id="submit_file_container" class="options_div">
+        <div class="help-icon">
+          <span class="material-symbols-outlined">help</span>
+          <div class="help-text">
+            nazywam sie wonsz długie mam ciało
+            me szczenki silne chodź głowę mam mało
+            gdy pora karmienia unosze łep
+            rozdziawiam szeroko i ciamkam chlep
+          </div>
+        </div>
         <div class="fields_in_options">
           <div class="field_container">
             <p id="upload_msg" class="step_label">Drag and drop an audio file or</p>
@@ -83,6 +121,9 @@
             <label for="upload" id="input_file" class="icon_button">Browse
               <span class="material-symbols-outlined">folder_open</span>
             </label>
+            <div class="custom_delete_button hidden" id="delete_button" onclick="deleteFile()">
+              <span class="material-symbols-outlined">close</span>
+            </div>
           </div>
           <div id="file_name" class="step_label hidden"></div>
         </div>
@@ -91,6 +132,15 @@
         </div>
       </div>
       <div id="source_language_container" class="options_div locked">
+        <div class="help-icon">
+          <span class="material-symbols-outlined">help</span>
+          <div class="help-text">
+            nazywam sie wonsz długie mam ciało
+            me szczenki silne chodź głowę mam mało
+            gdy pora karmienia unosze łep
+            rozdziawiam szeroko i ciamkam chlep
+          </div>
+        </div>
         <div class="fields_in_options">
           <div class="field_container">
             <p id="choose_lang_msg" class="step_label">Choose the source language of your file</p>
@@ -102,6 +152,9 @@
               <option>English</option>
               <option>German</option>
             </select>
+            <div class="custom_dropdown_arrow">
+              <span class="material-symbols-outlined">keyboard_arrow_down</span>
+            </div>
           </div>
         </div>
         <div class="steps">
@@ -109,25 +162,38 @@
         </div>
       </div>
       <div id="translation_options_container" class="options_div locked">
+        <div class="help-icon">
+          <span class="material-symbols-outlined">help</span>
+          <div class="help-text">
+            nazywam sie wonsz długie mam ciało
+            me szczenki silne chodź głowę mam mało
+            gdy pora karmienia unosze łep
+            rozdziawiam szeroko i ciamkam chlep
+          </div>
+        </div>
         <div class="fields_in_options">
           <div class="field_container" id="optional_checkboxes">
-            <!-- <p id="choose_lang_msg">Choose the source language of your file</p> -->
-            <label id="role_devision_checkbox">
-              <input type="checkbox" id="role_devision" disabled>
-              <span class="checkbox_label">Differentiate speakers</span>
-            </label>
-            <label id="translate_checkbox">
-              <input type="checkbox" id="translate" onclick="showTransOptions()" disabled>
-              <span class="checkbox_label">Translate</span>
-            </label>
+            <div id="optional_settings" class="step_label">
+              <div>
+                <input type="radio" name="optional" id="role_division" onclick="showTransOptions(this)" disabled />
+                <label for="role_division">Multiple speakers</label>
+              </div>
+              <div>
+                <input type="radio" name="optional" id="translate" onclick="showTransOptions(this)" disabled />
+                <label for="translate">Translate</label>
+              </div>
+            </div>
           </div>
-          <div class="field_container hidden" id="trans_lang_list">
-            <select id="choose_trans_lang" disabled>
+          <div class="field_container" id="trans_lang_list">
+            <select id="choose_trans_lang" class="hidden" disabled>
               <option disabled selected>Select...</option>
               <option>Polish</option>
               <option>English</option>
               <option>German</option>
             </select>
+            <div class="custom_dropdown_arrow hidden">
+              <span class="material-symbols-outlined">keyboard_arrow_down</span>
+            </div>
           </div>
         </div>
         <div class="steps">
@@ -135,12 +201,21 @@
         </div>
       </div>
       <div id="fourth_tile" class="options_div locked">
-        <div class="fields_in_options">
-          <div class="field_container">
-            <p id="ready_msg" class="step_label"></p>
+        <div class="help-icon">
+          <span class="material-symbols-outlined">help</span>
+          <div class="help-text">
+            nazywam sie wonsz długie mam ciało
+            me szczenki silne chodź głowę mam mało
+            gdy pora karmienia unosze łep
+            rozdziawiam szeroko i ciamkam chlep
           </div>
+        </div>
+        <div class="fields_in_options">
+          <div class="field_container"></div>
           <div class="field_container">
-            <button id="start" class="icon_button">START <span class="material-symbols-outlined">start</span></button>
+            <button id="start" class="icon_button">GENERATE
+              <span class="material-symbols-outlined">start</span>
+            </button>
           </div>
         </div>
         <div class="steps">
@@ -149,20 +224,18 @@
       </div>
     </div>
     <div id="results_fields">
-      <!-- <fieldset id="show_transcript">
-        <legend>Transcript</legend>
-        <form id="receive_transcript">
-          <p id="transcriptedText"></p>
-        </form>
-      </fieldset> -->
       <fieldset id="show_transcript" class="result_windows">
         <legend>Transcript</legend>
         <button onclick="copyToClipboard(document.getElementById('transcription_result').innerText)"
           class="copy_button">
           <span class="material-symbols-outlined">content_copy</span>
         </button>
-        <span id="transcription_result" class="result_span">&nbsp;</span>
+        &nbsp;
+        <span id="transcription_result" contenteditable="true" class="result_span"></span>
       </fieldset>
+      <div class="hidden" id="arrow">
+        <span class="material-symbols-outlined">sync_alt</span>
+      </div>
       <fieldset id="show_translation" class="result_windows hidden">
         <legend>Translation</legend>
         <button onclick="copyToClipboard(document.getElementById('translation_result').innerText)" class="copy_button">
@@ -177,9 +250,12 @@
     const languageChooser = document.getElementById("choose_lang");
     const optionsTile = document.getElementById("translation_options_container");
     const translationCheckbox = document.getElementById("translate");
-    const rolesCheckbox = document.getElementById("role_devision");
+    const rolesCheckbox = document.getElementById("role_division");
     const translationList = document.getElementById("choose_trans_lang");
     const fourthTile = document.getElementById("fourth_tile");
+    const translate_check = document.getElementById("translate");
+    const roles_check = document.getElementById("role_division");
+
     document.body.addEventListener("drop", (e) => {
       e.preventDefault();
       dropHandle(e);
@@ -209,6 +285,8 @@
         rolesCheckbox.disabled = false;
         translationList.disabled = false;
         fourthTile.classList.remove("locked");
+        translate_check.disabled = false;
+        roles_check.disabled = false;
       }
     });
 
