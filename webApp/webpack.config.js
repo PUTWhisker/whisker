@@ -1,12 +1,13 @@
-// Generated using webpack-cli https://github.com/webpack/webpack-cli
-
 const path = require('path');
 
 module.exports = {
-    entry: './client.js',
+    entry: {
+        './client': './src/client.js',
+        './record': './src/record.js',
+    },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'main.js',
+        filename: '[name].js',
     },
     module: {
         rules: [

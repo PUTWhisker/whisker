@@ -1,5 +1,5 @@
 
-const { connectionTest, sendFile, sendFileTranslation, diarizateFile} = require('./send_file.js')
+const { connectionTest, sendFile, sendFileTranslation, diarizateFile} = require('./send-file.js')
 const _validFileExtensions = [".mp3", ".wav"];
 
 window.onload = function() {

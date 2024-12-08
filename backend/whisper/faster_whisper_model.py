@@ -2,6 +2,7 @@ from faster_whisper import WhisperModel
 from pathlib import Path
 from typing import Union
 from transcrpitionData import TranscriptionData
+import numpy as np
 import grpc
 import logging
 import time
@@ -27,9 +28,10 @@ class FasterWhisperHandler:
         receivedAudio: bytes,
         data: TranscriptionData,
         context: grpc.ServicerContext,
+        webTranscription: bool
     ) -> Union[Path, TranscriptionData]:
         data.appendData(receivedAudio)
-        filePath = data.saveFile()
+        filePath = data.saveFile(webTranscription=True)
         data.isSilence = data.detectSilence(filePath, self.silenceLength)
         return filePath, data
     
@@ -106,8 +108,9 @@ class FasterWhisperHandler:
         receivedAudio: bytes,
         data: TranscriptionData,
         context: grpc.ServicerContext,
+        webTranscription: bool
     ) -> TranscriptionData:
-        processedAudio, data = self.preprocessStreaming(receivedAudio, data, context)
+        processedAudio, data = self.preprocessStreaming(receivedAudio, data, context, webTranscription)
         if not data.silenceAudio:
             data.transcription[data.curSegment] = self.transcribe(
                 processedAudio, data,

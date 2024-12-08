@@ -128,7 +128,7 @@ func (s *SoundServer) TranscribeLiveWeb(ctx context.Context, in *pb.Transcriptio
 		return nil, status.Errorf(codes.DataLoss, "Failed to get metadata")
 	}
 	log.Print(md) // JWT token for saving
-	newCtx := metadata.NewOutgoingContext(context.Background(), nil)
+	newCtx := metadata.NewOutgoingContext(context.Background(), md)
 	res, err := WhisperServer.TranscribeLiveWeb(newCtx, in)
 	if err != nil {
 		return res, err

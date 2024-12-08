@@ -4,7 +4,7 @@ const { authenticationClient,
         UserCredits, 
         StatusResponse, 
         LoginResponse, 
-        Empty} = require('./consts.js')
+        Empty} = require('consts.js')
 
 export function button_register(e)
 {

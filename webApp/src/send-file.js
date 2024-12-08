@@ -29,7 +29,6 @@ export function connectionTest() { // Verify whether we can connect with the Whi
 }
 
 
-
 export function sendFile(file, source_language) { // Send file to the server and return the answer
     console.log("Sending file for transcription")
     let reader = new FileReader()
@@ -140,33 +139,44 @@ export function diarizateFile(file, source_language) {
     })
 }
 
-
-
-
-export async function transcribeLiveWeb() {
-    console.log("dzialam wgl lol")
-    let sessionId = await getSessionId(new TranscriptionRequest())
-    let metadata = {"session_id": sessionId}
-    console.log(metadata)
-    let recording = recordInChunks()
-    for await (const audioChunk of recording) {
-        console.log(`I'm sending the request`)
-        let request = new TranscriptionRequest()
-        request.setSoundData(audioChunk.byteArray)
-        await soundClient.transcribeLiveWeb(request, metadata, (err, response) => {
-            if (err) {
-                console.log(`Could not establish connection with the server: code = ${err.code}, message = ${err.message}`)
-                return
-            }
-            console.log(`I got the response ${response.getText()}`)
-        })
+function convertFloat32ToUint8(float32Array) {
+    let array = new Uint8Array(float32Array.length * float32Array[0].length)
+    let length = 0
+    for (let i = 0; i < float32Array.length; i++) {
+        const uint8Array = new Uint8Array(float32Array[i].length);
+        for (let j = 0; j < float32Array[i].length; j++) {
+            let value = Math.max(-1, Math.min(1, float32Array[i][j]));
+            value = Math.floor((value + 1) * 128);
+            uint8Array[j] = Math.max(0, Math.min(255, value));
+        }
+        array.set(uint8Array, length)
+        length += float32Array[i].length
     }
+    return array;
 }
 
 
-async function getSessionId(request) {
+export async function transcribeLiveWeb(audioChunk, language, metadata) {
+    console.log("Sending recording for live transcription.")
+    let request = new TranscriptionRequest()
+    const uint8Array = convertFloat32ToUint8(audioChunk);
+    request.setSoundData(uint8Array)
+    request.setSourceLanguage(language)
     return new Promise((resolve, reject) => {
-        soundClient.transcribeLiveWeb(request, {}, (err, response) => {
+        soundClient.transcribeLiveWeb(request, metadata, (err, response) => {
+            if (err) {
+                console.log(`Could not establish connection with the server: code = ${err.code}, message = ${err.message}`)
+                reject(err)
+            }
+            resolve(response)
+        })
+    })
+}
+
+
+export async function getSessionId() {
+    return new Promise((resolve, reject) => {
+        soundClient.transcribeLiveWeb(new TranscriptionRequest(), {}, (err, response) => {
             if (err) {
                 reject(`Could not establish connection with the server: code = ${err.code}, message = ${err.message}`);
             } else {

@@ -51,9 +51,12 @@ class TranscriptionData():
             self.audio = self.previousAudio + receivedAudio
         self.previousAudio = self.audio
 
-    def _saveAudioFile(self, fileName: Path, data: bytes):
+    def _saveAudioFile(self, fileName: Path, data: bytes, webTranscription: bool):
         p = pyaudio.PyAudio()
-        sampleWidth = p.get_sample_size(pyaudio.paInt16)
+        if not webTranscription:
+            sampleWidth = p.get_sample_size(pyaudio.paInt16)
+        else:
+            sampleWidth = p.get_sample_size(pyaudio.paUInt8)
         output = wave.open(str(fileName), "wb")
         output.setnchannels(1)
         output.setsampwidth(sampleWidth)
@@ -61,10 +64,10 @@ class TranscriptionData():
         output.writeframes(b"".join([data]))
         output.close()
 
-    def saveFile(self, save_as_wav=True) -> Path:
+    def saveFile(self, save_as_wav=True, webTranscription=False) -> Path:
         if save_as_wav:
             self.filePath = self.filePath.with_suffix(".wav")
-            self._saveAudioFile(self.filePath, self.audio)
+            self._saveAudioFile(self.filePath, self.audio, webTranscription)
         else:
             with self.filePath.open("wb") as file:
                 file.write(self.audio)
@@ -93,6 +96,7 @@ class TranscriptionData():
                     raise WrongLanguage(
                         "Given language is not supported for translation."
                     )
+                self.language = language
                 break
             elif key == 'session_id':
                 self.sessionId = value
