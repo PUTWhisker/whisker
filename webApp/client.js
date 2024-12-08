@@ -1,19 +1,18 @@
 
-const { connectionTest, sendFile, sendFileTranslation} = require('./send_file.js')
+const { connectionTest, sendFile, sendFileTranslation, diarizateFile} = require('./send_file.js')
 const _validFileExtensions = [".mp3", ".wav"];
 
 window.onload = function() {
     connectionTest()
     submitButton = document.getElementById("start")
-    submitButton.addEventListener("click", validateAndSend)
+    submitButton.addEventListener("click", validateInput)
 }
 
 
 
-async function validateAndSend() {
+async function validateInput() {
     document.getElementById("transcription_result").textContent = ""
     document.getElementById("translation_result").textContent = ""
-    let translationCheckbox = document.getElementById("translate")
     let source_language = document.getElementById("choose_lang").value
     if (source_language == "Choose language") {
         source_language = ""
@@ -22,32 +21,40 @@ async function validateAndSend() {
     if (!validate(uploadedFile)) {
         return
     }
-
-    if (translationCheckbox.checked) {
-        console.log("Trying to execute translation")
-        let translate_language = document.getElementById("choose_trans_lang").value
-        if (translate_language == "Choose language") {
-            translate_language = ""
-        } 
-        console.log(translate_language)
-        let answer = sendFileTranslation(uploadedFile.files[0], source_language, translate_language)
-                let receivedTranscription = false
-                for await (const res of answer) {
-                    console.log(res)
-                    if (!receivedTranscription) {
-                        document.getElementById("transcription_result").textContent = res
-                        receivedTranscription = true
-                    } else {
-                        document.getElementById("translation_result").textContent = res
+    try {
+        if (document.getElementById("translate").checked) {
+            console.log("Trying to execute translation")
+            let translate_language = document.getElementById("choose_trans_lang").value
+            if (translate_language == "Choose language") {
+                translate_language = ""
+            } 
+            console.log(translate_language)
+            let answer = sendFileTranslation(uploadedFile.files[0], source_language, translate_language)
+                    let receivedTranscription = false
+                    for await (const res of answer) {
+                        console.log(res)
+                        if (!receivedTranscription) {
+                            document.getElementById("transcription_result").textContent = res
+                            receivedTranscription = true
+                        } else {
+                            document.getElementById("translation_result").textContent = res
+                        }
                     }
-                }
-    } else {
-        console.log("Trying to execute transcription")
-        res = await sendFile(uploadedFile.files[0], source_language)
-        console.log("AAAA")
-        console.log(res)
-        document.getElementById("transcription_result").textContent = res
+        } else if (document.getElementById("role_devision").checked){
+            let res = await diarizateFile(uploadedFile.files[0], source_language)
+            document.getElementById("transcription_result").textContent = res
+        } else {
+            console.log("Trying to execute transcription")
+            answer = await sendFile(uploadedFile.files[0], source_language)
+            console.log(answer)
+            for (res in answer) {
+                document.getElementById("transcription_result").textContent += res.getSpeakerName() + " " + res.getText()
+            }
+        }
+    } catch (err){
+        console.log(`An error occured when sending a file: code = ${err.code}, message = ${err.message}`)
     }
+   
 }
 
 async function validate(input) { // Validate input file format

@@ -115,6 +115,30 @@ export async function* sendFileTranslation(file, source_language, translation_la
 }
 
 
+export function diarizateFile(file, source_language) {
+    console.log("Sending file for diarization")
+    let reader = new FileReader()
+    reader.readAsArrayBuffer(file)
+    return new Promise((resolve, reject) => {
+        reader.onload = function (e) {
+            let buffer = e.target.result
+            let byteArray = new Uint8Array(buffer)
+            let request = new TranscriptionRequest()
+            request.setSoundData(byteArray)
+            request.setSourceLanguage(source_language)
+            soundClient.diarizateFile(request, {}, (err, response) => {
+                if (err) {
+                    console.log(`Could not send files to the server: code = ${err.code}, message = ${err.message}`)
+                    reject(err)
+                }
+                let answer = response.getText()
+                console.log(answer)
+                console.log("Success! Answer should be visible in the console")
+                resolve(answer)
+            })
+        }
+    })
+}
 
 
 
