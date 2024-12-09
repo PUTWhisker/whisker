@@ -40,7 +40,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:background="@drawable/rounded_border"
+                android:background="@drawable/rounded_border_spinner"
                 android:padding="12dp" />
 
             <EditText
@@ -60,7 +60,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:background="@drawable/rounded_border"
+                android:background="@drawable/rounded_border_spinner"
                 android:padding="12dp" />
 
             <EditText

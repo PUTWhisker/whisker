@@ -53,7 +53,7 @@ class SoundTransferClient(uri: Uri) : Closeable {
         return null
     }
 
-    fun transcribeLive() {
+    fun transcribeLive(callback: (String) -> Unit) {
         val metadata = Metadata()
         val key = Metadata.Key.of("language", Metadata.ASCII_STRING_MARSHALLER)
         metadata.put(key, "pl")
@@ -63,6 +63,7 @@ class SoundTransferClient(uri: Uri) : Closeable {
             val requests = audiStreamManager.record()
             stub.transcribeLive(requests, metadata).collect { response ->
                 Log.i("stream", "Got message: \"${response.text}\"")
+                callback(response.text)
             }
         }
     }

@@ -27,7 +27,7 @@ class TranslateActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
         toolbar.setNavigationOnClickListener {
-            onBackPressed() 
+            onBackPressed()
         }
 
         val serverUrl = getString(R.string.server_url)

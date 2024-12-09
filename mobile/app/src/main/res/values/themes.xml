@@ -26,6 +26,11 @@
 
     </style>
 
+    <style name="Spinner" parent="Widget.AppCompat.Spinner">
+        <item name="android:popupBackground">@color/primaryLight</item>
+        <item name="android:background">@color/primaryLight</item>
+    </style>
+
     <style name="SearchInputStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="boxBackgroundColor">@color/gray</item>
         <item name="boxStrokeWidth">0dp</item>
