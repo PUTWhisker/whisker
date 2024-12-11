@@ -37,7 +37,9 @@ class LiveTranscriptionActivity : AppCompatActivity() {
         val serverUri = Uri.parse(serverUrl)
         soundTransferClient = SoundTransferClient(serverUri)
 
+
         btnBack.setOnClickListener {
+            stopTranscription()
             utilities.goBack(this)
         }
         requestAudioPermission()
@@ -47,10 +49,16 @@ class LiveTranscriptionActivity : AppCompatActivity() {
         soundTransferClient.transcribeLive { transcribedText ->
             runOnUiThread {
                 tvTranscriptionsLive.append("\n$transcribedText")
-                scrollView.post {
-                    scrollView.fullScroll(View.FOCUS_DOWN)
-                }
             }
+        }
+    }
+
+    private fun stopTranscription() {
+        try {
+            soundTransferClient.stopStream()
+            Log.d("LiveTranscription", "Transcription stopped.")
+        } catch (e: Exception) {
+            Log.e("LiveTranscription", "Error stopping transcription: ${e.message}")
         }
     }
 
@@ -76,8 +84,24 @@ class LiveTranscriptionActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        stopTranscription()
+        try {
+            soundTransferClient.stopStream()
+        } catch (e: Exception) {
+            Log.e("LiveTranscription", "Error stopping stream: ${e.message}")
+        } finally {
+            soundTransferClient.close()
+        }
         super.onDestroy()
-        soundTransferClient.stopStream()
-        soundTransferClient.close()
+    }
+
+    @Synchronized
+    private fun safeCloseClient() {
+        try {
+            soundTransferClient.stopStream()
+            soundTransferClient.close()
+        } catch (e: Exception) {
+            Log.e("LiveTranscription", "Error closing client: ${e.message}")
+        }
     }
 }
