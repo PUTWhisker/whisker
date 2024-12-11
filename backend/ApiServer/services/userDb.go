@@ -6,6 +6,8 @@ import (
 	"log"
 	"strconv"
 
+	pb "inzynierka/server/proto/authentication"
+
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc/codes"
@@ -33,10 +35,10 @@ type UserDbModel interface {
 	getUserTranslationHistory(ctx context.Context, user_id string, start_time *timestamppb.Timestamp, endTime *timestamppb.Timestamp, limit int) (pgx.Rows, error)
 	editTranslation(edit_transcription bool, edit_translation bool, transcription_id int, new_transcription string, new_translation string, user_id string) error
 
-	// saveDiarization(text []string, speaker []string, username string, language string) error
-	// editDiarization(ctx context.Context, new_content []string, new_speaker []string, diarization_id string) error
-	// getUserDiarizationHistory(userId string) (pgx.Rows, error)
-	// deleteDiarization(ctx context.Context, id int, user_id string) error
+	saveDiarization(text []string, speaker []string, username string, language string) error
+	getUserDiarizationHistory(ctx context.Context, userId string, queryParameters *pb.QueryParamethers) (pgx.Rows, error)
+	editDiarization(ctx context.Context, new_content []string, new_speaker []string, id int, userId string) error
+	deleteDiarization(ctx context.Context, id int, user_id string) error
 }
 
 type UserDb struct {
@@ -74,14 +76,7 @@ func buildQuery(initialQuery string, startTime *timestamppb.Timestamp, endTime *
 func (db UserDb) getUserTranscriptionHistory(ctx context.Context, user_id string, startTime *timestamppb.Timestamp, endTime *timestamppb.Timestamp, limit int) (pgx.Rows, error) {
 	queryText := `SELECT id, content, created_at FROM transcription WHERE app_user_id=$1`
 	queryText = buildQuery(queryText, startTime, endTime, limit)
-	rows, err := db.pool.Query(ctx, queryText, user_id)
-
-	fmt.Println(queryText)
-	if err != nil {
-		log.Printf("Database error %v", err)
-		return nil, err
-	}
-	return rows, nil
+	return db.pool.Query(ctx, queryText, user_id)
 }
 
 func (db UserDb) editTranscription(ctx context.Context, id int, user_id string, new_content string) error {
@@ -158,20 +153,14 @@ func (db UserDb) getUserTranslationHistory(ctx context.Context, user_id string, 
 	WHERE transcription.id = $1;
 	`
 	query = buildQuery(query, start_time, endTime, limit)
-
-	rows, err := db.pool.Query(context.Background(), query, user_id)
-	if err != nil {
-		log.Printf("Database error %v", err)
-		return nil, err
-	}
-	return rows, nil
+	return db.pool.Query(ctx, query, user_id)
 }
 
 func (db UserDb) saveDiarization(text []string, speaker []string, user_id string, language string) error {
 	diarization_id := 0
 	err := db.pool.QueryRow(context.Background(), `
     INSERT INTO diarization(app_user_id, lang) 
-    VALUES ($1, $2, $3, $4)
+    VALUES ($1, $2)
 	RETURNING id;
 	`, user_id, language).Scan(&diarization_id)
 	if err != nil {
@@ -189,12 +178,32 @@ func (db UserDb) saveDiarization(text []string, speaker []string, user_id string
 	return nil
 }
 
-func (db UserDb) editDiarization(ctx context.Context, new_content []string, new_speaker []string, diarization_id string) error {
+func (db UserDb) getUserDiarizationHistory(ctx context.Context, userId string, queryParameters *pb.QueryParamethers) (pgx.Rows, error) {
+	query := `
+	SELECT id, created_at
+    FROM diarization
+    WHERE app_user_id = $1`
+
+	query = buildQuery(query, queryParameters.StartTime, queryParameters.EndTime, int(queryParameters.Limit))
+
+	query = "SELECT d.id, speaker_line.speaker, speaker_line.content, d.created_at from (" + query[0:len(query)-1] + ") AS d join speaker_line on d.id = speaker_line.diarization_id ORDER BY d.id;"
+	fmt.Println(query)
+
+	return db.pool.Query(ctx, query, userId)
+}
+
+func (db UserDb) editDiarization(ctx context.Context, new_content []string, new_speaker []string, id int, userId string) error {
 	conn, err := db.pool.Acquire(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to acquire connection: %v", err)
 	}
 	defer conn.Release()
+	var returnedID int
+	err = conn.QueryRow(ctx, "SELECT id from diarization where id = $1 and app_user_id = $2", strconv.Itoa(id), userId).Scan(&returnedID)
+
+	if err != nil {
+		return err
+	}
 
 	tx, err := conn.Begin(ctx)
 	if err != nil {
@@ -202,36 +211,22 @@ func (db UserDb) editDiarization(ctx context.Context, new_content []string, new_
 	}
 	defer tx.Rollback(ctx)
 
-	var min int
-	err = db.pool.QueryRow(context.Background(), `
-    select max(id), min(id) from speaker_line where diarization_id = $1;
-	`, diarization_id).Scan(&min)
-
-	if err != nil {
-		return fmt.Errorf("failed to create temporary table: %v", err)
-	}
-
-	_, err = tx.Exec(context.Background(), `
-	CREATE TEMP TABLE temp_updates (id INT, content TEXT) ON COMMIT DROP;
-	`)
-	if err != nil {
-		return fmt.Errorf("failed to create temporary table: %v", err)
-	}
-
 	batch := &pgx.Batch{}
-	for _, update := range new_content {
-		batch.Queue("INSERT INTO temp_updates (id, content) VALUES ($1, $2)", min, update)
+	for i := range new_content {
+		batch.Queue(`
+		UPDATE speaker_line SET
+			content = $1,
+			speaker = $2 
+		WHERE
+			id = $3 AND diarization_id = $4;`, new_content[i], new_speaker[i], i, strconv.Itoa(id))
 	}
-
-	_, err = tx.Exec(context.Background(), `
-        UPDATE speaker_line
-        SET content = temp_updates.content
-        FROM temp_updates
-        WHERE speaker_line.id = temp_updates.id;
-    `)
-	if err != nil {
-		return fmt.Errorf("failed to update target table: %v", err)
+	results := tx.SendBatch(ctx, batch)
+	for i := 0; i < len(new_content); i++ {
+		if _, err := results.Exec(); err != nil {
+			return fmt.Errorf("failed to execute batch operation: %v", err)
+		}
 	}
+	results.Close()
 
 	err = tx.Commit(ctx)
 	if err != nil {
@@ -245,8 +240,6 @@ func (db UserDb) deleteDiarization(ctx context.Context, id int, user_id string) 
     DELETE FROM diarization WHERE id = $1 and app_user_id = $2;
 	`, id, user_id)
 	nrows := result.RowsAffected()
-	fmt.Print(err)
-
 	if nrows < 1 {
 		return noRowsAffected
 	}

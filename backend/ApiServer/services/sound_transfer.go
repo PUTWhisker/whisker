@@ -86,19 +86,15 @@ func (s *SoundServer) DiarizateFile(ctx context.Context, in *pb.TranscriptionReq
 	if err != nil {
 		return res, err
 	}
-	// username, err := GetUserNameFromMetadata(md)
 
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// language := ""
-	// if md["language"] != nil {
-	// 	language = md["language"][0]
-	// }
+	username, err := GetUserNameFromMetadata(md)
+	if err != nil {
+		return nil, err
+	}
 
-	// if username != "" {
-	// 	s.Db.saveDiarization(res.Text, res.SpeakerName, username, language)
-	// }
+	if username != "" && s.Db != nil {
+		s.Db.saveDiarization(res.Text, res.SpeakerName, username, in.SourceLanguage)
+	}
 
 	return res, nil
 }

@@ -19,8 +19,6 @@ service ClientService {
     rpc EditTranslation(NewTranslation) returns (google.protobuf.Empty) {}
     rpc DeleteTranslation(Id) returns(google.protobuf.Empty) {}
 
-    
-
     rpc GetDiarization(QueryParamethers) returns (stream DiarizationHistory) {};
     rpc EditDiarization(NewDiarization) returns (google.protobuf.Empty) {};
     rpc DeleteDiarization(Id) returns (google.protobuf.Empty) {}
@@ -40,10 +38,10 @@ message TranslationHistory {
 }
 
 message DiarizationHistory {
-    int32 id = 1;
-    repeated string speaker = 2;
-    repeated string line = 3;
-    google.protobuf.Timestamp created_at = 4;
+    int32 diarization_id = 1;
+    repeated string speaker = 3;
+    repeated string line = 4;
+    google.protobuf.Timestamp created_at = 5;
 }
 
 message UserCredits {

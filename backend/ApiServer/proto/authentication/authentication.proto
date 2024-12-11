@@ -40,10 +40,10 @@ message TranslationHistory {
 }
 
 message DiarizationHistory {
-    int32 id = 1;
-    repeated string speaker = 2;
-    repeated string line = 3;
-    google.protobuf.Timestamp created_at = 4;
+    int32 diarization_id = 1;
+    repeated string speaker = 3;
+    repeated string line = 4;
+    google.protobuf.Timestamp created_at = 5;
 }
 
 message UserCredits {

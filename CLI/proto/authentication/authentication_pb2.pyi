@@ -30,16 +30,16 @@ class TranslationHistory(_message.Message):
     def __init__(self, id: _Optional[int] = ..., transcription: _Optional[str] = ..., translation: _Optional[str] = ..., created_at: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
 
 class DiarizationHistory(_message.Message):
-    __slots__ = ("id", "speaker", "line", "created_at")
-    ID_FIELD_NUMBER: _ClassVar[int]
+    __slots__ = ("diarization_id", "speaker", "line", "created_at")
+    DIARIZATION_ID_FIELD_NUMBER: _ClassVar[int]
     SPEAKER_FIELD_NUMBER: _ClassVar[int]
     LINE_FIELD_NUMBER: _ClassVar[int]
     CREATED_AT_FIELD_NUMBER: _ClassVar[int]
-    id: int
+    diarization_id: int
     speaker: _containers.RepeatedScalarFieldContainer[str]
     line: _containers.RepeatedScalarFieldContainer[str]
     created_at: _timestamp_pb2.Timestamp
-    def __init__(self, id: _Optional[int] = ..., speaker: _Optional[_Iterable[str]] = ..., line: _Optional[_Iterable[str]] = ..., created_at: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+    def __init__(self, diarization_id: _Optional[int] = ..., speaker: _Optional[_Iterable[str]] = ..., line: _Optional[_Iterable[str]] = ..., created_at: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
 
 class UserCredits(_message.Message):
     __slots__ = ("username", "password")

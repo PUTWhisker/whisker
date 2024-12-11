@@ -241,14 +241,65 @@ func (s *AuthenticationServer) DeleteTranslation(ctx context.Context, in *pb.Id)
 	return &emptypb.Empty{}, err
 }
 
-// func (s *AuthenticationServer) GetDiarization(in *pb.QueryParamethers, stream pb.ClientService_GetTranscriptionServer) error {
-// 	s.Db.getUserDiarizationHistory()
+func (s *AuthenticationServer) GetDiarization(in *pb.QueryParamethers, stream pb.ClientService_GetDiarizationServer) error {
+	sendHeader(stream)
+	defer sendTrailer(stream)
+	rows, err := s.Db.getUserDiarizationHistory(stream.Context(), stream.Context().Value("user_id").(string), in)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	defer rows.Close()
+	var oldId int32 = -1
+	var oldCreatedAt time.Time
+	var diarizationId int32
+	var speaker string
+	var line string
+	var createdAt time.Time
 
-// 	return nil
-// }
-// func (s *AuthenticationServer) EditDiarization(ctx context.Context, in *pb.NewDiarization) (*emptypb.Empty, error) {
-// 	s.Db.editDiarization(ctx, in)
+	speakers := []string{}
+	lines := []string{}
 
-// 	return &emptypb.Empty{}, nil
-// }
-// func (s *AuthenticationServer)
+	rows.Next()
+	err = rows.Scan(&diarizationId, &speaker, &line, &createdAt)
+	if err != nil {
+		return err
+	}
+	speakers = append(speakers, speaker)
+	lines = append(lines, line)
+	oldId = diarizationId
+	oldCreatedAt = createdAt
+	for rows.Next() {
+		err = rows.Scan(&diarizationId, &speaker, &line, &createdAt)
+		if err != nil {
+			return err
+		}
+		if oldId != diarizationId {
+			err = stream.Send(&pb.DiarizationHistory{DiarizationId: oldId, Speaker: speakers, Line: lines, CreatedAt: timestamppb.New(oldCreatedAt)})
+			if err != nil {
+				return err
+			}
+			speakers = []string{}
+			lines = []string{}
+			oldId = diarizationId
+			oldCreatedAt = createdAt
+		}
+		speakers = append(speakers, speaker)
+		lines = append(lines, line)
+	}
+	err = stream.Send(&pb.DiarizationHistory{DiarizationId: oldId, Speaker: speakers, Line: lines, CreatedAt: timestamppb.New(oldCreatedAt)})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *AuthenticationServer) EditDiarization(ctx context.Context, in *pb.NewDiarization) (*emptypb.Empty, error) {
+	err := s.Db.editDiarization(ctx, in.Line, in.Speaker, int(in.Id), ctx.Value("user_id").(string))
+	return &emptypb.Empty{}, err
+}
+
+func (s *AuthenticationServer) DeleteDiarization(ctx context.Context, in *pb.Id) (*emptypb.Empty, error) {
+	err := s.Db.deleteDiarization(ctx, int(in.Id), ctx.Value("user_id").(string))
+	return &emptypb.Empty{}, err
+}
