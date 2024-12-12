@@ -4,6 +4,8 @@ module.exports = {
     entry: {
         './client': './src/client.js',
         './record': './src/record.js',
+        './login-signup': './src/login-signup.js',
+        './history': './src/history.js',
     },
     output: {
         path: path.resolve(__dirname, 'dist'),

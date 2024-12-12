@@ -5,12 +5,12 @@ const _validFileExtensions = [".mp3", ".wav"];
 window.onload = function() {
     connectionTest()
     submitButton = document.getElementById("start")
-    submitButton.addEventListener("click", validateInput)
+    submitButton.addEventListener("click", processFile)
 }
 
 
 
-async function validateInput() {
+async function processFile() {
     document.getElementById("transcription_result").textContent = ""
     document.getElementById("translation_result").textContent = ""
     let source_language = document.getElementById("choose_lang").value
@@ -28,7 +28,6 @@ async function validateInput() {
             if (translate_language == "Choose language") {
                 translate_language = ""
             } 
-            console.log(translate_language)
             let answer = sendFileTranslation(uploadedFile.files[0], source_language, translate_language)
                     let receivedTranscription = false
                     for await (const res of answer) {
@@ -40,16 +39,16 @@ async function validateInput() {
                             document.getElementById("translation_result").textContent = res
                         }
                     }
-        } else if (document.getElementById("role_devision").checked){
+        } else if (document.getElementById("role_division").checked){
             let res = await diarizateFile(uploadedFile.files[0], source_language)
-            document.getElementById("transcription_result").textContent = res
+            for (res in answer) {
+                document.getElementById("transcription_result").textContent += res.getSpeakerName() + " " + res.getText()
+            }
         } else {
             console.log("Trying to execute transcription")
             answer = await sendFile(uploadedFile.files[0], source_language)
             console.log(answer)
-            for (res in answer) {
-                document.getElementById("transcription_result").textContent += res.getSpeakerName() + " " + res.getText()
-            }
+            document.getElementById("transcription_result").textContent = answer.getText()
         }
     } catch (err){
         console.log(`An error occured when sending a file: code = ${err.code}, message = ${err.message}`)

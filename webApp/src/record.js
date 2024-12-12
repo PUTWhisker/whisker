@@ -37,16 +37,15 @@ window.onload = async function() {
         source.connect(myAudioWorkletNode)
         myAudioWorkletNode.connect(audioContext.destination)
     
-        // Collect audio data in chunks
         myAudioWorkletNode.port.onmessage = (event) => {
-            audioChunks.push(event.data); // Collect raw PCM data
+            audioChunks.push(event.data)
         };
         console.log("Before metadata")
         let sessionId = await getSessionId()
         let metadata = {"session_id": sessionId}
         intervalId = setInterval(() => {
             if (audioChunks.length > 0) {
-                const currentChunk = audioChunks.splice(0); // Extract all available chunks
+                const currentChunk = audioChunks.splice(0)
                 transcribeLiveWeb(currentChunk, "pl", metadata).then((response) => {
                             console.log(response.getText())
                         })
@@ -57,7 +56,7 @@ window.onload = async function() {
         stopButton.disabled = true
         recordButton.disabled = false
     
-        clearInterval(intervalId) // Stop the interval
+        clearInterval(intervalId)
         myAudioWorkletNode.disconnect()
         audioContext.close()
         console.log("Koniec nagrywania")

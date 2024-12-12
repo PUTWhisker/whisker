@@ -9,6 +9,8 @@ const { soundClient,
 
 const { recordInChunks } = require('./record.js')
 
+const { getCookie } = require('./token.js')
+
 export function connectionTest() { // Verify whether we can connect with the Whisper server
     let randomNum = Math.random()
     let request = new TextMessage();
@@ -41,16 +43,19 @@ export function sendFile(file, source_language) { // Send file to the server and
             console.log(byteArray)
             let request = new TranscriptionRequest()
             request.setSoundData(byteArray)
-            request.setSourceLanguage(source_language)
-            soundClient.transcribeFile(request, {}, (err, response) => {
+            request.setSourceLanguage("en")
+            let metadata = {}
+            let token = getCookie("acs")
+            if (token) {
+                metadata = {"jwt": token}
+            }
+            soundClient.transcribeFile(request, metadata, (err, response) => {
                 if (err) {
                     console.log(`Could not send files to the server: code = ${err.code}, message = ${err.message}`)
                     reject(err)
                 }
-                let answer = response.getText()
-                console.log(answer)
                 console.log("Success! Answer should be visible in the console")
-                resolve(answer)
+                resolve(response)
             })
         }
     })
@@ -73,7 +78,12 @@ export async function* sendFileTranslation(file, source_language, translation_la
     request.setSoundData(byteArray)
     request.setSourceLanguage(source_language)
     request.setTranslationLanguage(translation_language)
-    const stream = soundClient.translateFile(request, {})
+    let metadata = {}
+    let token = getCookie("acs")
+    if (token) {
+        metadata = {"jwt": token}
+    }
+    const stream = soundClient.translateFile(request, metadata)
 
     const responseQueue = []
     let resolveQueue = null
@@ -125,7 +135,12 @@ export function diarizateFile(file, source_language) {
             let request = new TranscriptionRequest()
             request.setSoundData(byteArray)
             request.setSourceLanguage(source_language)
-            soundClient.diarizateFile(request, {}, (err, response) => {
+            let metadata = {}
+            let token = getCookie("acs")
+            if (token) {
+                metadata = {"jwt": token}
+            }
+            soundClient.diarizateFile(request, metadata, (err, response) => {
                 if (err) {
                     console.log(`Could not send files to the server: code = ${err.code}, message = ${err.message}`)
                     reject(err)
@@ -156,7 +171,7 @@ function convertFloat32ToUint8(float32Array) {
 }
 
 
-export async function transcribeLiveWeb(audioChunk, language, metadata) {
+export async function transcribeLiveWeb(audioChunk, language, metadata) { //TODO: add token to metadata
     console.log("Sending recording for live transcription.")
     let request = new TranscriptionRequest()
     const uint8Array = convertFloat32ToUint8(audioChunk);

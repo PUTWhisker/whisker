@@ -9,11 +9,16 @@ const { TextMessage,
         SpeakerAndLineResponse } = require('../proto/sound_transfer/sound_transfer_pb.js')
 
 const { ClientServiceClient } = require('../proto/authentication/authentication_grpc_web_pb.js')
-const { TextHistory, 
+const { TranscriptionHistory, 
+        TranslationHistory, 
+        DiarizationHistory, 
         UserCredits, 
-        StatusResponse, 
         LoginResponse, 
-        Empty } = require('../proto/authentication/authentication_pb.js')
+        Id,
+        NewTranscription, 
+        NewTranslation, 
+        NewDiarization,
+        QueryParamethers } = require('../proto/authentication/authentication_pb.js')
 
 const soundClient = new SoundServiceClient('http://127.0.0.1:50051')
 const authenticationClient = new ClientServiceClient('http://127.0.0.1:50051')
@@ -27,8 +32,13 @@ module.exports = {  soundClient,
                     SoundStreamResponse,
                     SpeakerAndLineResponse,
                     authenticationClient,
-                    TextHistory,
-                    UserCredits,
-                    StatusResponse,
-                    LoginResponse,
-                    Empty}
+                    TranscriptionHistory, 
+                    TranslationHistory, 
+                    DiarizationHistory, 
+                    UserCredits, 
+                    LoginResponse, 
+                    Id,
+                    NewTranscription, 
+                    NewTranslation, 
+                    NewDiarization,
+                    QueryParamethers}
