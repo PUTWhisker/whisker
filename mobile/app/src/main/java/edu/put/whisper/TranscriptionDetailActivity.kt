@@ -16,6 +16,8 @@ class TranscriptionDetailActivity : AppCompatActivity() {
         val errorMessage = intent.getStringExtra("EXTRA_ERROR_MESSAGE")
         val transcriptionText = intent.getStringExtra("EXTRA_TRANSCRIPTION_TEXT")
         val transcriptionDate = intent.getStringExtra("EXTRA_TRANSCRIPTION_DATE")
+        val filePath = intent.getStringExtra("EXTRA_FILE_PATH")
+        val language = intent.getStringExtra("EXTRA_LANGUAGE")
 
         if (errorMessage != null) {
             Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
@@ -31,6 +33,14 @@ class TranscriptionDetailActivity : AppCompatActivity() {
             findViewById<LinearLayout>(R.id.btnTranslate).setOnClickListener {
                 val intent = Intent(this, TranslateActivity::class.java)
                 intent.putExtra("EXTRA_TRANSCRIPTION_TEXT", transcriptionText)
+                startActivity(intent)
+            }
+
+            findViewById<LinearLayout>(R.id.btnRoles).setOnClickListener {
+                val intent = Intent(this, RolesActivity::class.java)
+                intent.putExtra("EXTRA_TRANSCRIPTION_TEXT", transcriptionText)
+                intent.putExtra("EXTRA_FILE_PATH", filePath)
+                intent.putExtra("EXTRA_LANGUAGE", language)
                 startActivity(intent)
             }
         }

@@ -259,6 +259,8 @@ class StartActivity : AppCompatActivity() {
                                     if (transcription != null) {
                                         intent.putExtra("EXTRA_TRANSCRIPTION_TEXT", transcription)
                                         intent.putExtra("EXTRA_TRANSCRIPTION_DATE", System.currentTimeMillis().toString())
+                                        intent.putExtra("EXTRA_FILE_PATH", filePath)
+                                        intent.putExtra("EXTRA_LANGUAGE", "en")
                                     } else {
                                         intent.putExtra("EXTRA_ERROR_MESSAGE", "Transcription failed.")
                                         Log.e("DEBUG", "Transcription failed: Result was null")

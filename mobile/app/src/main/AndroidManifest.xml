@@ -26,6 +26,10 @@
             android:exported="false"
             android:theme="@style/Theme.Voicememos" />
         <activity
+            android:name=".RolesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Voicememos" />
+        <activity
             android:name=".StartActivity"
             android:exported="true"
             android:label="@string/title_activity_start"

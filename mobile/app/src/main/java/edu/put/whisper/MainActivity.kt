@@ -195,11 +195,14 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             val filePath = tempFilePath ?: return@launch
+            val language = "en"
             utilities.uploadRecording(filePath, "en") { output ->
                 runOnUiThread {
                     if (output != null) {
                         val intent = Intent(this@MainActivity, TranscriptionDetailActivity::class.java).apply {
                             putExtra("EXTRA_TRANSCRIPTION_TEXT", output)
+                            putExtra("EXTRA_FILE_PATH", filePath)
+                            putExtra("EXTRA_LANGUAGE", language)
                             putExtra("EXTRA_TRANSCRIPTION_DATE", SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()))
                         }
                         startActivity(intent)
