@@ -113,6 +113,10 @@ func (s *SoundServer) TranslateFile(in *pb.TranslationRequest, stream pb.SoundSe
 		return err
 	}
 	stream.Send(translation)
+	userId, _ := GetUserNameFromMetadata(md)
+	if userId != "" && s.Db != nil {
+		s.Db.saveTranslation(transcription.Text, userId, in.SourceLanguage, translation.Text, in.TranslationLanguage)
+	}
 	return nil
 }
 

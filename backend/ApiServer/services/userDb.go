@@ -31,7 +31,7 @@ type UserDbModel interface {
 	editTranscription(ctx context.Context, id int, user_id string, new_content string) error
 	deleteTranscription(ctx context.Context, id int, user_id string) error
 
-	saveTranslation(text string, username string, is_translation bool, language string, translated_text string, translation_language string) error
+	saveTranslation(text string, username string, language string, translated_text string, translation_language string) error
 	getUserTranslationHistory(ctx context.Context, user_id string, start_time *timestamppb.Timestamp, endTime *timestamppb.Timestamp, limit int) (pgx.Rows, error)
 	editTranslation(edit_transcription bool, edit_translation bool, transcription_id int, new_transcription string, new_translation string, user_id string) error
 
@@ -106,13 +106,13 @@ func (db UserDb) deleteTranscription(ctx context.Context, id int, user_id string
 	return err
 }
 
-func (db UserDb) saveTranslation(text string, user_id string, is_translation bool, language string, translated_text string, translation_language string) error {
+func (db UserDb) saveTranslation(text string, user_id string, language string, translated_text string, translation_language string) error {
 	transcription_id := 0
 	err := db.pool.QueryRow(context.Background(), `
     INSERT INTO transcription(app_user_id, content, is_translation, lang) 
     VALUES ($1, $2, $3, $4)
 	RETURNING id;
-	`, user_id, text, is_translation, language).Scan(&transcription_id)
+	`, user_id, text, true, language).Scan(&transcription_id)
 	if err != nil {
 		return (err)
 	}
