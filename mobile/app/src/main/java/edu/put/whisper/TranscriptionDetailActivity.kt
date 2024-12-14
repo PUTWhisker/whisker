@@ -1,17 +1,29 @@
 package edu.put.whisper
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import android.content.Context
 
 class TranscriptionDetailActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_transcription_detail)
+
+        val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
 
         val errorMessage = intent.getStringExtra("EXTRA_ERROR_MESSAGE")
         val transcriptionText = intent.getStringExtra("EXTRA_TRANSCRIPTION_TEXT")
@@ -43,6 +55,17 @@ class TranscriptionDetailActivity : AppCompatActivity() {
                 intent.putExtra("EXTRA_LANGUAGE", language)
                 startActivity(intent)
             }
+
+            findViewById<ImageButton>(R.id.btnCopyTranscription).setOnClickListener {
+                copyToClipboard(transcriptionText)
+            }
         }
+    }
+    private fun copyToClipboard(text: String) {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("Transcription", text)
+        clipboard.setPrimaryClip(clip)
+
+        Toast.makeText(this, "Transcription copied", Toast.LENGTH_SHORT).show()
     }
 }

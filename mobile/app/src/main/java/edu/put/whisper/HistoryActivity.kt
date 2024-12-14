@@ -3,6 +3,7 @@ package edu.put.whisper
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,6 +24,14 @@ class HistoryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_history)
+
+        val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
 
         rvTranscriptions = findViewById(R.id.rvTranscriptions)
         rvTranscriptions.layoutManager = LinearLayoutManager(this)
@@ -50,6 +59,7 @@ class HistoryActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
+                    Log.e("HistoryActivity", "Error loading transcriptions", e)
                     Toast.makeText(this@HistoryActivity, "Failed to load transcriptions", Toast.LENGTH_SHORT).show()
                 }
             }
