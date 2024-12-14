@@ -17,7 +17,7 @@ import (
 
 var (
 	noRowsAffected = status.Errorf(codes.NotFound, "No rows affected")
-	timeFormat     = "2024-11-24 12:00:00"
+	timeFormat     = "2006-01-02 15:04:05"
 )
 
 // TODO make those lines consistent with implementation
@@ -61,10 +61,10 @@ func (db UserDb) saveTranscription(text string, user_id string, is_translation b
 
 func buildQuery(initialQuery string, startTime *timestamppb.Timestamp, endTime *timestamppb.Timestamp, limit int) string {
 	if startTime != nil {
-		initialQuery += " AND crated_at >= " + startTime.AsTime().Format(timeFormat)
+		initialQuery += " AND created_at >= '" + startTime.AsTime().UTC().Format(timeFormat) + "'"
 	}
 	if endTime != nil {
-		initialQuery += " AND created_at <= " + endTime.AsTime().Format(timeFormat)
+		initialQuery += " AND created_at <= '" + endTime.AsTime().UTC().Format(timeFormat) + "'"
 	}
 	if limit != 0 {
 		initialQuery += " LIMIT " + strconv.Itoa(limit)
@@ -76,6 +76,7 @@ func buildQuery(initialQuery string, startTime *timestamppb.Timestamp, endTime *
 func (db UserDb) getUserTranscriptionHistory(ctx context.Context, user_id string, startTime *timestamppb.Timestamp, endTime *timestamppb.Timestamp, limit int) (pgx.Rows, error) {
 	queryText := `SELECT id, content, created_at FROM transcription WHERE app_user_id=$1`
 	queryText = buildQuery(queryText, startTime, endTime, limit)
+	log.Print(queryText)
 	return db.pool.Query(ctx, queryText, user_id)
 }
 
