@@ -52,9 +52,10 @@ func NewUserDb(pool *pgxpool.Pool) *UserDb {
 }
 
 func (db UserDb) saveTranscription(text string, user_id string, is_translation bool, language string) error {
+	fmt.Println("🔴 Here", text, user_id, is_translation, language)
 	_, err := db.pool.Exec(context.Background(), `
     INSERT INTO transcription(app_user_id, content, is_translation, lang) 
-    VALUES $1, $2, $3, $4);
+    VALUES ($1, $2, $3, $4);
 	`, user_id, text, is_translation, language)
 	return err
 }

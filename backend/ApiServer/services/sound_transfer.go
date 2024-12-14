@@ -58,17 +58,12 @@ func (s *SoundServer) TranscribeFile(ctx context.Context, in *pb.TranscriptionRe
 	if err != nil {
 		return res, err
 	}
-	username, err := GetUserNameFromMetadata(md)
-	language := ""
-	if md["language"] != nil {
-		language = md["language"][0]
-	}
-	if err != nil {
-		return nil, err
-	}
-
+	username, _ := GetUserNameFromMetadata(md)
 	if username != "" && s.Db != nil {
-		s.Db.saveTranscription(res.Text, username, false, language)
+		err = s.Db.saveTranscription(res.Text, username, false, in.SourceLanguage)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	return res, nil
