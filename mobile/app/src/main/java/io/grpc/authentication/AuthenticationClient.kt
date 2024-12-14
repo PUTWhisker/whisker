@@ -37,7 +37,7 @@ class AuthenticationClient(uri: Uri) : Closeable {
     private  val transfer = ClientServiceGrpcKt.ClientServiceCoroutineStub(channel)
 
     override fun close() {
-        channel.shutdownNow()
+        channel.shutdown()
     }
     suspend fun Login(user : String, password : String) : Boolean {
         val arg = userCredits { this.username = user; this.password = password }
