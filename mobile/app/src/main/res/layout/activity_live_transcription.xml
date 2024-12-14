@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     tools:context=".LiveTranscriptionActivity">
 
-    <!-- TextView do transkrypcji -->
     <TextView
         android:id="@+id/tvTranscriptionsLive"
         android:layout_width="0dp"

@@ -1,0 +1,47 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#F9F9F9">
+
+    <Spinner
+        android:id="@+id/spinner_language"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/rounded_border"
+        android:padding="12dp" />
+
+    <EditText
+        android:id="@+id/edit_text_original"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Tekst oryginalny"
+        android:background="@drawable/rounded_border"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp"
+        android:gravity="top"
+        android:inputType="textMultiLine"
+        android:minHeight="100dp" />
+
+    <EditText
+        android:id="@+id/edit_text_translated"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Przetłumaczony tekst"
+        android:background="@drawable/rounded_border"
+        android:padding="12dp"
+        android:gravity="top"
+        android:inputType="textMultiLine"
+        android:minHeight="100dp"
+        android:focusable="false" />
+
+    <Button
+        android:id="@+id/button_translate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Przetłumacz"
+        android:layout_marginTop="16dp" />
+</LinearLayout>
