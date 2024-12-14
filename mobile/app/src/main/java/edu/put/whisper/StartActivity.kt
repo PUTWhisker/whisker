@@ -16,6 +16,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -58,6 +59,7 @@ class StartActivity : AppCompatActivity() {
     private lateinit var utilities: Utilities
     private val PICK_FILE_REQUEST_CODE = 1
     private lateinit var authClient: AuthenticationClient
+    private var isUserLoggedIn = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -178,12 +180,22 @@ class StartActivity : AppCompatActivity() {
                     val success = authClient.Login(username, password)
                     withContext(Dispatchers.Main) {
                         if (success) {
+                            isUserLoggedIn = true
                             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
                             bottomSheetLogin.visibility = View.GONE
                             Toast.makeText(this@StartActivity, "Login successful!", Toast.LENGTH_SHORT).show()
                             utilities.setVisibility(View.GONE, btnLogin, btnRegister)
                             tvHello.text = "Hello $username"
-                            utilities.setVisibility(View.VISIBLE, btnHistory, btnLogout, tvHello)
+                            utilities.setVisibility(View.VISIBLE, btnLogout, tvHello)
+                            val icHistoryImageView: ImageView = findViewById(R.id.ic_history)
+                            val icArrowImageView: ImageView = findViewById(R.id.ic_arrow)
+                            icHistoryImageView.backgroundTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.primary)
+                            icHistoryImageView.imageTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.primaryLight)
+                            findViewById<TextView>(R.id.historyText).text = "History"
+                            findViewById<TextView>(R.id.historyText).setTextColor(ContextCompat.getColor(this@StartActivity, R.color.primary))
+                            icArrowImageView.imageTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.primary)
+
+
                         } else {
                             Toast.makeText(this@StartActivity, "Login failed. Try again.", Toast.LENGTH_SHORT).show()
                         }
@@ -193,8 +205,12 @@ class StartActivity : AppCompatActivity() {
         }
 
         btnHistory.setOnClickListener{
+            if(isUserLoggedIn){
             val intent = Intent(this, HistoryActivity::class.java)
             startActivity(intent)
+            } else {
+                Toast.makeText(this, "Please log in to view history.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         btnRecordActivity.setOnClickListener {
@@ -224,11 +240,18 @@ class StartActivity : AppCompatActivity() {
 
         btnLogout.setOnClickListener {
             utilities.setVisibility(View.VISIBLE, btnLogin, btnRegister, btnChooseFile, btnRecordActivity)
-            utilities.setVisibility(View.GONE, btnHistory, btnLogout, tvHello)
+            utilities.setVisibility(View.GONE, btnLogout, tvHello)
             utilities.setVisibility(View.INVISIBLE, rvTranscriptions)
             loginInput.text.clear()
             passwordInput.text.clear()
             tvHello.text = ""
+            val icHistoryImageView: ImageView = findViewById(R.id.ic_history)
+            val icArrowImageView: ImageView = findViewById(R.id.ic_arrow)
+            icHistoryImageView.backgroundTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.grayDarkDisabled)
+            icHistoryImageView.imageTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.white)
+            findViewById<TextView>(R.id.historyText).text = "Log in to view history"
+            findViewById<TextView>(R.id.historyText).setTextColor(ContextCompat.getColor(this@StartActivity, R.color.grayDarkDisabled))
+            icArrowImageView.imageTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.gray)
             authClient.Logout()
             Toast.makeText(this, "Successfully logged out.", Toast.LENGTH_SHORT).show()
         }

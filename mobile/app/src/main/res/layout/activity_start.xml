@@ -296,8 +296,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                android:background="@color/primary"
-                android:visibility="gone">
+                android:background="@color/primary">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -306,34 +305,37 @@
                     android:layout_gravity="center">
 
                     <ImageView
-                        android:id="@+id/icon4"
+                        android:id="@+id/ic_history"
                         android:layout_width="65dp"
                         android:layout_height="65dp"
                         android:padding="20dp"
                         android:src="@drawable/ic_history"
                         android:background="@drawable/circle_icon_background"
-                        app:tint="@color/primaryLight"
+                        android:backgroundTint="@color/grayDarkDisabled"
+                        app:tint="@color/white"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent" />
 
                     <TextView
+                        android:id="@+id/historyText"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="History"
+                        android:text="Log in to view history"
                         android:textSize="18sp"
-                        android:textColor="@color/playerColor"
-                        app:layout_constraintStart_toEndOf="@id/icon4"
+                        android:textColor="@color/grayDarkDisabled"
+                        app:layout_constraintStart_toEndOf="@id/ic_history"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         android:layout_marginStart="12dp" />
 
                     <ImageView
+                        android:id="@+id/ic_arrow"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_arrow"
-                        app:tint="@color/primary"
+                        app:tint="@color/gray"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
