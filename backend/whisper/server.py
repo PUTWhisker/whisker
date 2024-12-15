@@ -11,6 +11,8 @@ import diarizate
 import concurrent.futures
 import sys
 import inspect
+import time
+import uuid
 
 curDir = os.path.dirname(__file__)
 protoDir = os.path.join(curDir, "proto")
@@ -28,8 +30,9 @@ sys.path.insert(0, curDir)
 """
 
 logging.basicConfig(format="%(levelname)s:%(name)s:%(message)s", level=logging.INFO)
-_cleanup_coroutines = []  # Needed for asyncio graceful shutdown
-
+_cleanupCoroutines = list()  # Needed for asyncio graceful shutdown
+_clientData = dict()
+_CLEANUP_PERIOD = 120
 
 def _errorMessages(e: Exception, func: callable):
     if isinstance(e, FileNotFoundError):
@@ -44,6 +47,26 @@ def _errorMessages(e: Exception, func: callable):
     return errorCode, errorMessage
 
 
+<<<<<<< HEAD
+=======
+def run_transcribe(file_path, data:TranscriptionData):
+    model = faster_whisper_model.FasterWhisperHandler(os.getenv("FASTER_WHISPER_MODEL"))
+    res = model.transcribe(
+        str(file_path), data
+    )
+    return res
+
+
+async def cleanupWebSessions():
+    while True:
+        await asyncio.sleep(_CLEANUP_PERIOD)
+        curTime = time.time()
+        for index, value in _clientData.items():
+            if curTime - value[1] > _CLEANUP_PERIOD:
+                logging.info(f"Client cleanup initiated for id: {value[0].sessionId}")
+                _clientData.pop(index)
+
+>>>>>>> main
 class SoundService(Services.SoundServiceServicer):
     def __init__(self):
         self.number = 0
@@ -169,12 +192,21 @@ class SoundService(Services.SoundServiceServicer):
         translation = self.translator.translate(
             transcription, transcriptionData.language, transcriptionData.translate
         )[0]
+<<<<<<< HEAD
         yield Variables.SoundResponse(text=translation)
 
     # TODO: add language to metadata (probably), return detected language (metadata or more likely new field in proto message)
     @_errorStreamHandler  # TODO: Resolve async_generator problem to add errorHandler
+=======
+        yield Variables.SoundResponse(
+                text=translation
+            )
+        
+    #TODO: add language to metadata (probably), return detected language (metadata or more likely new field in proto message)
+    @_errorStreamHandler 
+>>>>>>> main
     async def TranscribeLive(self, requestIter, context):
-        logging.info("Received record streaming.")
+        logging.info("Received live transcription request.")
         transcriptionData = TranscriptionData()
         transcriptionData.processMetadata(context)
         async for request in requestIter:
@@ -184,7 +216,7 @@ class SoundService(Services.SoundServiceServicer):
                 transcriptionData.curSeconds = 0
             try:
                 transcriptionData = await self.fastModel.handleRecord(
-                    request.sound_data, transcriptionData, context
+                    request.sound_data, transcriptionData, context, False
                 )
                 logging.info(transcriptionData.transcription)
             except Exception as e:
@@ -197,6 +229,38 @@ class SoundService(Services.SoundServiceServicer):
                 text=transcriptionData.transcription[transcriptionData.curSegment],
                 new_chunk=transcriptionData.isSilence,
             )
+
+
+    @_errorUnaryHandler
+    async def TranscribeLiveWeb(self, request, context):
+        logging.info("Received live transcription request from webApp")
+        transcriptionData = TranscriptionData()
+        transcriptionData.processMetadata(context)
+        if transcriptionData.sessionId is None:
+            transcriptionData.sessionId = uuid.uuid4()
+            _clientData[str(transcriptionData.sessionId)] = [transcriptionData, time.time()]
+            return Variables.SoundStreamResponse(
+                text = str(transcriptionData.sessionId)
+            )
+        sessionId = transcriptionData.sessionId
+        transcriptionData = _clientData[sessionId][0]
+        transcriptionData.language = request.source_language
+        try:
+            transcriptionData = await self.fastModel.handleRecord(
+                        request.sound_data, transcriptionData, context, True
+                    )
+            logging.info(transcriptionData.transcription)
+            _clientData[transcriptionData.sessionId] = [transcriptionData, time.time()]
+        except Exception as e:
+            if (
+                transcriptionData.filePath.exists()
+            ):  # To ensure tempFile gets deleted even when error occurs
+                transcriptionData.filePath.unlink()
+            raise e
+        return Variables.SoundStreamResponse(
+            text=transcriptionData.transcription[transcriptionData.curSegment],
+            new_chunk = False
+        )
 
 
 async def server():
@@ -231,10 +295,12 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
+    cleanupTask = loop.create_task(cleanupWebSessions())
     try:
         loop.run_until_complete(server())
     except KeyboardInterrupt:
         logging.info("Detected keyboard interruption, shutting down...")
     finally:
-        loop.run_until_complete(asyncio.gather(*_cleanup_coroutines))
+        cleanupTask.cancel()
+        loop.run_until_complete(asyncio.gather(*_cleanupCoroutines))
         loop.close()

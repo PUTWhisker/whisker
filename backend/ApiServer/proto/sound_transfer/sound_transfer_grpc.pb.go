@@ -32,8 +32,9 @@ const (
 type SoundServiceClient interface {
 	TestConnection(ctx context.Context, in *TextMessage, opts ...grpc.CallOption) (*TextMessage, error)
 	TranscribeFile(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SoundResponse, error)
-	TranscribeLive(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[TranscirptionLiveRequest, SoundStreamResponse], error)
-	TranslateFile(ctx context.Context, in *TranslationRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SoundResponse], error)
+	TranscribeLive(ctx context.Context, opts ...grpc.CallOption) (SoundService_TranscribeLiveClient, error)
+	TranscribeLiveWeb(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SoundStreamResponse, error)
+	TranslateFile(ctx context.Context, in *TranslationRequest, opts ...grpc.CallOption) (SoundService_TranslateFileClient, error)
 	DiarizateFile(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SpeakerAndLineResponse, error)
 }
 
@@ -78,9 +79,33 @@ func (c *soundServiceClient) TranscribeLive(ctx context.Context, opts ...grpc.Ca
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type SoundService_TranscribeLiveClient = grpc.BidiStreamingClient[TranscirptionLiveRequest, SoundStreamResponse]
 
-func (c *soundServiceClient) TranslateFile(ctx context.Context, in *TranslationRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SoundResponse], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &SoundService_ServiceDesc.Streams[1], SoundService_TranslateFile_FullMethodName, cOpts...)
+type soundServiceTranscribeLiveClient struct {
+	grpc.ClientStream
+}
+
+func (x *soundServiceTranscribeLiveClient) Send(m *TranscirptionLiveRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *soundServiceTranscribeLiveClient) Recv() (*SoundStreamResponse, error) {
+	m := new(SoundStreamResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *soundServiceClient) TranscribeLiveWeb(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SoundStreamResponse, error) {
+	out := new(SoundStreamResponse)
+	err := c.cc.Invoke(ctx, "/SoundService/TranscribeLiveWeb", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *soundServiceClient) TranslateFile(ctx context.Context, in *TranslationRequest, opts ...grpc.CallOption) (SoundService_TranslateFileClient, error) {
+	stream, err := c.cc.NewStream(ctx, &SoundService_ServiceDesc.Streams[1], "/SoundService/TranslateFile", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -113,8 +138,9 @@ func (c *soundServiceClient) DiarizateFile(ctx context.Context, in *Transcriptio
 type SoundServiceServer interface {
 	TestConnection(context.Context, *TextMessage) (*TextMessage, error)
 	TranscribeFile(context.Context, *TranscriptionRequest) (*SoundResponse, error)
-	TranscribeLive(grpc.BidiStreamingServer[TranscirptionLiveRequest, SoundStreamResponse]) error
-	TranslateFile(*TranslationRequest, grpc.ServerStreamingServer[SoundResponse]) error
+	TranscribeLive(SoundService_TranscribeLiveServer) error
+	TranscribeLiveWeb(context.Context, *TranscriptionRequest) (*SoundStreamResponse, error)
+	TranslateFile(*TranslationRequest, SoundService_TranslateFileServer) error
 	DiarizateFile(context.Context, *TranscriptionRequest) (*SpeakerAndLineResponse, error)
 	mustEmbedUnimplementedSoundServiceServer()
 }
@@ -135,7 +161,10 @@ func (UnimplementedSoundServiceServer) TranscribeFile(context.Context, *Transcri
 func (UnimplementedSoundServiceServer) TranscribeLive(grpc.BidiStreamingServer[TranscirptionLiveRequest, SoundStreamResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method TranscribeLive not implemented")
 }
-func (UnimplementedSoundServiceServer) TranslateFile(*TranslationRequest, grpc.ServerStreamingServer[SoundResponse]) error {
+func (UnimplementedSoundServiceServer) TranscribeLiveWeb(context.Context, *TranscriptionRequest) (*SoundStreamResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TranscribeLiveWeb not implemented")
+}
+func (UnimplementedSoundServiceServer) TranslateFile(*TranslationRequest, SoundService_TranslateFileServer) error {
 	return status.Errorf(codes.Unimplemented, "method TranslateFile not implemented")
 }
 func (UnimplementedSoundServiceServer) DiarizateFile(context.Context, *TranscriptionRequest) (*SpeakerAndLineResponse, error) {
@@ -205,6 +234,24 @@ func _SoundService_TranscribeLive_Handler(srv interface{}, stream grpc.ServerStr
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type SoundService_TranscribeLiveServer = grpc.BidiStreamingServer[TranscirptionLiveRequest, SoundStreamResponse]
 
+func _SoundService_TranscribeLiveWeb_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TranscriptionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SoundServiceServer).TranscribeLiveWeb(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/SoundService/TranscribeLiveWeb",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SoundServiceServer).TranscribeLiveWeb(ctx, req.(*TranscriptionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _SoundService_TranslateFile_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(TranslationRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -248,6 +295,10 @@ var SoundService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TranscribeFile",
 			Handler:    _SoundService_TranscribeFile_Handler,
+		},
+		{
+			MethodName: "TranscribeLiveWeb",
+			Handler:    _SoundService_TranscribeLiveWeb_Handler,
 		},
 		{
 			MethodName: "DiarizateFile",

@@ -137,16 +137,16 @@ proto.SoundServicePromiseClient.prototype.testConnection =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.SoundRequest,
+ *   !proto.TranscriptionRequest,
  *   !proto.SoundResponse>}
  */
-const methodDescriptor_SoundService_SendSoundFile = new grpc.web.MethodDescriptor(
-  '/SoundService/SendSoundFile',
+const methodDescriptor_SoundService_TranscribeFile = new grpc.web.MethodDescriptor(
+  '/SoundService/TranscribeFile',
   grpc.web.MethodType.UNARY,
-  proto.SoundRequest,
+  proto.TranscriptionRequest,
   proto.SoundResponse,
   /**
-   * @param {!proto.SoundRequest} request
+   * @param {!proto.TranscriptionRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
@@ -157,7 +157,7 @@ const methodDescriptor_SoundService_SendSoundFile = new grpc.web.MethodDescripto
 
 
 /**
- * @param {!proto.SoundRequest} request The
+ * @param {!proto.TranscriptionRequest} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -166,48 +166,48 @@ const methodDescriptor_SoundService_SendSoundFile = new grpc.web.MethodDescripto
  * @return {!grpc.web.ClientReadableStream<!proto.SoundResponse>|undefined}
  *     The XHR Node Readable Stream
  */
-proto.SoundServiceClient.prototype.sendSoundFile =
+proto.SoundServiceClient.prototype.transcribeFile =
     function(request, metadata, callback) {
   return this.client_.rpcCall(this.hostname_ +
-      '/SoundService/SendSoundFile',
+      '/SoundService/TranscribeFile',
       request,
       metadata || {},
-      methodDescriptor_SoundService_SendSoundFile,
+      methodDescriptor_SoundService_TranscribeFile,
       callback);
 };
 
 
 /**
- * @param {!proto.SoundRequest} request The
+ * @param {!proto.TranscriptionRequest} request The
  *     request proto
  * @param {?Object<string, string>=} metadata User defined
  *     call metadata
  * @return {!Promise<!proto.SoundResponse>}
  *     Promise that resolves to the response
  */
-proto.SoundServicePromiseClient.prototype.sendSoundFile =
+proto.SoundServicePromiseClient.prototype.transcribeFile =
     function(request, metadata) {
   return this.client_.unaryCall(this.hostname_ +
-      '/SoundService/SendSoundFile',
+      '/SoundService/TranscribeFile',
       request,
       metadata || {},
-      methodDescriptor_SoundService_SendSoundFile);
+      methodDescriptor_SoundService_TranscribeFile);
 };
 
 
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.SoundRequest,
+ *   !proto.TranscriptionRequest,
  *   !proto.SoundStreamResponse>}
  */
-const methodDescriptor_SoundService_SendSoundFileTranslation = new grpc.web.MethodDescriptor(
-  '/SoundService/SendSoundFileTranslation',
-  grpc.web.MethodType.SERVER_STREAMING,
-  proto.SoundRequest,
+const methodDescriptor_SoundService_TranscribeLiveWeb = new grpc.web.MethodDescriptor(
+  '/SoundService/TranscribeLiveWeb',
+  grpc.web.MethodType.UNARY,
+  proto.TranscriptionRequest,
   proto.SoundStreamResponse,
   /**
-   * @param {!proto.SoundRequest} request
+   * @param {!proto.TranscriptionRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
@@ -218,97 +218,158 @@ const methodDescriptor_SoundService_SendSoundFileTranslation = new grpc.web.Meth
 
 
 /**
- * @param {!proto.SoundRequest} request The request proto
- * @param {?Object<string, string>=} metadata User defined
+ * @param {!proto.TranscriptionRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.SoundStreamResponse>}
+ * @param {function(?grpc.web.RpcError, ?proto.SoundStreamResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.SoundStreamResponse>|undefined}
  *     The XHR Node Readable Stream
  */
-proto.SoundServiceClient.prototype.sendSoundFileTranslation =
-    function(request, metadata) {
-  return this.client_.serverStreaming(this.hostname_ +
-      '/SoundService/SendSoundFileTranslation',
+proto.SoundServiceClient.prototype.transcribeLiveWeb =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/SoundService/TranscribeLiveWeb',
       request,
       metadata || {},
-      methodDescriptor_SoundService_SendSoundFileTranslation);
+      methodDescriptor_SoundService_TranscribeLiveWeb,
+      callback);
 };
 
 
 /**
- * @param {!proto.SoundRequest} request The request proto
+ * @param {!proto.TranscriptionRequest} request The
+ *     request proto
  * @param {?Object<string, string>=} metadata User defined
  *     call metadata
- * @return {!grpc.web.ClientReadableStream<!proto.SoundStreamResponse>}
- *     The XHR Node Readable Stream
+ * @return {!Promise<!proto.SoundStreamResponse>}
+ *     Promise that resolves to the response
  */
-proto.SoundServicePromiseClient.prototype.sendSoundFileTranslation =
+proto.SoundServicePromiseClient.prototype.transcribeLiveWeb =
     function(request, metadata) {
-  return this.client_.serverStreaming(this.hostname_ +
-      '/SoundService/SendSoundFileTranslation',
+  return this.client_.unaryCall(this.hostname_ +
+      '/SoundService/TranscribeLiveWeb',
       request,
       metadata || {},
-      methodDescriptor_SoundService_SendSoundFileTranslation);
+      methodDescriptor_SoundService_TranscribeLiveWeb);
 };
 
 
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.SoundRequest,
- *   !proto.SpeakerAndLine>}
+ *   !proto.TranslationRequest,
+ *   !proto.SoundResponse>}
  */
-const methodDescriptor_SoundService_DiarizateSpeakers = new grpc.web.MethodDescriptor(
-  '/SoundService/DiarizateSpeakers',
-  grpc.web.MethodType.UNARY,
-  proto.SoundRequest,
-  proto.SpeakerAndLine,
+const methodDescriptor_SoundService_TranslateFile = new grpc.web.MethodDescriptor(
+  '/SoundService/TranslateFile',
+  grpc.web.MethodType.SERVER_STREAMING,
+  proto.TranslationRequest,
+  proto.SoundResponse,
   /**
-   * @param {!proto.SoundRequest} request
+   * @param {!proto.TranslationRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
     return request.serializeBinary();
   },
-  proto.SpeakerAndLine.deserializeBinary
+  proto.SoundResponse.deserializeBinary
 );
 
 
 /**
- * @param {!proto.SoundRequest} request The
+ * @param {!proto.TranslationRequest} request The request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!grpc.web.ClientReadableStream<!proto.SoundResponse>}
+ *     The XHR Node Readable Stream
+ */
+proto.SoundServiceClient.prototype.translateFile =
+    function(request, metadata) {
+  return this.client_.serverStreaming(this.hostname_ +
+      '/SoundService/TranslateFile',
+      request,
+      metadata || {},
+      methodDescriptor_SoundService_TranslateFile);
+};
+
+
+/**
+ * @param {!proto.TranslationRequest} request The request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!grpc.web.ClientReadableStream<!proto.SoundResponse>}
+ *     The XHR Node Readable Stream
+ */
+proto.SoundServicePromiseClient.prototype.translateFile =
+    function(request, metadata) {
+  return this.client_.serverStreaming(this.hostname_ +
+      '/SoundService/TranslateFile',
+      request,
+      metadata || {},
+      methodDescriptor_SoundService_TranslateFile);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.TranscriptionRequest,
+ *   !proto.SpeakerAndLineResponse>}
+ */
+const methodDescriptor_SoundService_DiarizateFile = new grpc.web.MethodDescriptor(
+  '/SoundService/DiarizateFile',
+  grpc.web.MethodType.UNARY,
+  proto.TranscriptionRequest,
+  proto.SpeakerAndLineResponse,
+  /**
+   * @param {!proto.TranscriptionRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.SpeakerAndLineResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.TranscriptionRequest} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
- * @param {function(?grpc.web.RpcError, ?proto.SpeakerAndLine)}
+ * @param {function(?grpc.web.RpcError, ?proto.SpeakerAndLineResponse)}
  *     callback The callback function(error, response)
- * @return {!grpc.web.ClientReadableStream<!proto.SpeakerAndLine>|undefined}
+ * @return {!grpc.web.ClientReadableStream<!proto.SpeakerAndLineResponse>|undefined}
  *     The XHR Node Readable Stream
  */
-proto.SoundServiceClient.prototype.diarizateSpeakers =
+proto.SoundServiceClient.prototype.diarizateFile =
     function(request, metadata, callback) {
   return this.client_.rpcCall(this.hostname_ +
-      '/SoundService/DiarizateSpeakers',
+      '/SoundService/DiarizateFile',
       request,
       metadata || {},
-      methodDescriptor_SoundService_DiarizateSpeakers,
+      methodDescriptor_SoundService_DiarizateFile,
       callback);
 };
 
 
 /**
- * @param {!proto.SoundRequest} request The
+ * @param {!proto.TranscriptionRequest} request The
  *     request proto
  * @param {?Object<string, string>=} metadata User defined
  *     call metadata
- * @return {!Promise<!proto.SpeakerAndLine>}
+ * @return {!Promise<!proto.SpeakerAndLineResponse>}
  *     Promise that resolves to the response
  */
-proto.SoundServicePromiseClient.prototype.diarizateSpeakers =
+proto.SoundServicePromiseClient.prototype.diarizateFile =
     function(request, metadata) {
   return this.client_.unaryCall(this.hostname_ +
-      '/SoundService/DiarizateSpeakers',
+      '/SoundService/DiarizateFile',
       request,
       metadata || {},
-      methodDescriptor_SoundService_DiarizateSpeakers);
+      methodDescriptor_SoundService_DiarizateFile);
 };
 
 
