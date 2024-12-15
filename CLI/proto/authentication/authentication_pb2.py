@@ -26,7 +26,7 @@ from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x61uthentication.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\"i\n\x14TranscriptionHistory\x12\x15\n\rtranscription\x18\x01 \x01(\t\x12.\n\ncreated_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\n\n\x02id\x18\x03 \x01(\x05\"|\n\x12TranslationHistory\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x15\n\rtranscription\x18\x02 \x01(\t\x12\x13\n\x0btranslation\x18\x03 \x01(\t\x12.\n\ncreated_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"{\n\x12\x44iarizationHistory\x12\x16\n\x0e\x64iarization_id\x18\x01 \x01(\x05\x12\x0f\n\x07speaker\x18\x03 \x03(\t\x12\x0c\n\x04line\x18\x04 \x03(\t\x12.\n\ncreated_at\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"1\n\x0bUserCredits\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"0\n\rLoginResponse\x12\x0b\n\x03JWT\x18\x01 \x01(\t\x12\x12\n\nsuccessful\x18\x02 \x01(\x08\"\x10\n\x02Id\x12\n\n\x02id\x18\x01 \x01(\x05\"/\n\x10NewTranscription\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\"~\n\x0eNewTranslation\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x15\n\rtranscription\x18\x02 \x01(\t\x12\x13\n\x0btranslation\x18\x03 \x01(\t\x12\x1a\n\x12\x65\x64it_transcription\x18\x04 \x01(\x08\x12\x18\n\x10\x65\x64it_translation\x18\x05 \x01(\x08\";\n\x0eNewDiarization\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04line\x18\x02 \x03(\t\x12\x0f\n\x07speaker\x18\x03 \x03(\t\"\x7f\n\x10QueryParamethers\x12.\n\nstart_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\r\n\x05limit\x18\x03 \x01(\x05\x32\x86\x05\n\rClientService\x12\'\n\x05Login\x12\x0c.UserCredits\x1a\x0e.LoginResponse\"\x00\x12\x32\n\x08Register\x12\x0c.UserCredits\x1a\x16.google.protobuf.Empty\"\x00\x12@\n\x10GetTranscription\x12\x11.QueryParamethers\x1a\x15.TranscriptionHistory\"\x00\x30\x01\x12@\n\x11\x45\x64itTranscription\x12\x11.NewTranscription\x1a\x16.google.protobuf.Empty\"\x00\x12\x34\n\x13\x44\x65leteTranscription\x12\x03.Id\x1a\x16.google.protobuf.Empty\"\x00\x12<\n\x0eGetTranslation\x12\x11.QueryParamethers\x1a\x13.TranslationHistory\"\x00\x30\x01\x12<\n\x0f\x45\x64itTranslation\x12\x0f.NewTranslation\x1a\x16.google.protobuf.Empty\"\x00\x12\x32\n\x11\x44\x65leteTranslation\x12\x03.Id\x1a\x16.google.protobuf.Empty\"\x00\x12<\n\x0eGetDiarization\x12\x11.QueryParamethers\x1a\x13.DiarizationHistory\"\x00\x30\x01\x12<\n\x0f\x45\x64itDiarization\x12\x0f.NewDiarization\x1a\x16.google.protobuf.Empty\"\x00\x12\x32\n\x11\x44\x65leteDiarization\x12\x03.Id\x1a\x16.google.protobuf.Empty\"\x00\x42J\n\x16io.grpc.authenticationB\x13\x41uthenticationProtoP\x01Z\x19inzynierka/authenticationb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x61uthentication.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\"{\n\x14TranscriptionHistory\x12\x15\n\rtranscription\x18\x01 \x01(\t\x12.\n\ncreated_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\n\n\x02id\x18\x03 \x01(\x05\x12\x10\n\x08language\x18\x04 \x01(\t\"\xba\x01\n\x12TranslationHistory\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x15\n\rtranscription\x18\x02 \x01(\t\x12\x13\n\x0btranslation\x18\x03 \x01(\t\x12.\n\ncreated_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1e\n\x16transcription_langauge\x18\x05 \x01(\t\x12\x1c\n\x14translation_langauge\x18\x06 \x01(\t\"\x8d\x01\n\x12\x44iarizationHistory\x12\x16\n\x0e\x64iarization_id\x18\x01 \x01(\x05\x12\x0f\n\x07speaker\x18\x03 \x03(\t\x12\x0c\n\x04line\x18\x04 \x03(\t\x12.\n\ncreated_at\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x10\n\x08language\x18\x06 \x01(\t\"1\n\x0bUserCredits\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"0\n\rLoginResponse\x12\x0b\n\x03JWT\x18\x01 \x01(\t\x12\x12\n\nsuccessful\x18\x02 \x01(\x08\"\x10\n\x02Id\x12\n\n\x02id\x18\x01 \x01(\x05\"/\n\x10NewTranscription\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\"~\n\x0eNewTranslation\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x15\n\rtranscription\x18\x02 \x01(\t\x12\x13\n\x0btranslation\x18\x03 \x01(\t\x12\x1a\n\x12\x65\x64it_transcription\x18\x04 \x01(\x08\x12\x18\n\x10\x65\x64it_translation\x18\x05 \x01(\x08\";\n\x0eNewDiarization\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04line\x18\x02 \x03(\t\x12\x0f\n\x07speaker\x18\x03 \x03(\t\"\xaf\x01\n\x10QueryParamethers\x12.\n\nstart_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\r\n\x05limit\x18\x03 \x01(\x05\x12\x10\n\x08language\x18\x04 \x01(\t\x12\x1c\n\x14translation_language\x18\x05 \x01(\t2\x86\x05\n\rClientService\x12\'\n\x05Login\x12\x0c.UserCredits\x1a\x0e.LoginResponse\"\x00\x12\x32\n\x08Register\x12\x0c.UserCredits\x1a\x16.google.protobuf.Empty\"\x00\x12@\n\x10GetTranscription\x12\x11.QueryParamethers\x1a\x15.TranscriptionHistory\"\x00\x30\x01\x12@\n\x11\x45\x64itTranscription\x12\x11.NewTranscription\x1a\x16.google.protobuf.Empty\"\x00\x12\x34\n\x13\x44\x65leteTranscription\x12\x03.Id\x1a\x16.google.protobuf.Empty\"\x00\x12<\n\x0eGetTranslation\x12\x11.QueryParamethers\x1a\x13.TranslationHistory\"\x00\x30\x01\x12<\n\x0f\x45\x64itTranslation\x12\x0f.NewTranslation\x1a\x16.google.protobuf.Empty\"\x00\x12\x32\n\x11\x44\x65leteTranslation\x12\x03.Id\x1a\x16.google.protobuf.Empty\"\x00\x12<\n\x0eGetDiarization\x12\x11.QueryParamethers\x1a\x13.DiarizationHistory\"\x00\x30\x01\x12<\n\x0f\x45\x64itDiarization\x12\x0f.NewDiarization\x1a\x16.google.protobuf.Empty\"\x00\x12\x32\n\x11\x44\x65leteDiarization\x12\x03.Id\x1a\x16.google.protobuf.Empty\"\x00\x42J\n\x16io.grpc.authenticationB\x13\x41uthenticationProtoP\x01Z\x19inzynierka/authenticationb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -35,25 +35,25 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'\n\026io.grpc.authenticationB\023AuthenticationProtoP\001Z\031inzynierka/authentication'
   _globals['_TRANSCRIPTIONHISTORY']._serialized_start=86
-  _globals['_TRANSCRIPTIONHISTORY']._serialized_end=191
-  _globals['_TRANSLATIONHISTORY']._serialized_start=193
-  _globals['_TRANSLATIONHISTORY']._serialized_end=317
-  _globals['_DIARIZATIONHISTORY']._serialized_start=319
-  _globals['_DIARIZATIONHISTORY']._serialized_end=442
-  _globals['_USERCREDITS']._serialized_start=444
-  _globals['_USERCREDITS']._serialized_end=493
-  _globals['_LOGINRESPONSE']._serialized_start=495
-  _globals['_LOGINRESPONSE']._serialized_end=543
-  _globals['_ID']._serialized_start=545
-  _globals['_ID']._serialized_end=561
-  _globals['_NEWTRANSCRIPTION']._serialized_start=563
-  _globals['_NEWTRANSCRIPTION']._serialized_end=610
-  _globals['_NEWTRANSLATION']._serialized_start=612
-  _globals['_NEWTRANSLATION']._serialized_end=738
-  _globals['_NEWDIARIZATION']._serialized_start=740
-  _globals['_NEWDIARIZATION']._serialized_end=799
-  _globals['_QUERYPARAMETHERS']._serialized_start=801
-  _globals['_QUERYPARAMETHERS']._serialized_end=928
-  _globals['_CLIENTSERVICE']._serialized_start=931
-  _globals['_CLIENTSERVICE']._serialized_end=1577
+  _globals['_TRANSCRIPTIONHISTORY']._serialized_end=209
+  _globals['_TRANSLATIONHISTORY']._serialized_start=212
+  _globals['_TRANSLATIONHISTORY']._serialized_end=398
+  _globals['_DIARIZATIONHISTORY']._serialized_start=401
+  _globals['_DIARIZATIONHISTORY']._serialized_end=542
+  _globals['_USERCREDITS']._serialized_start=544
+  _globals['_USERCREDITS']._serialized_end=593
+  _globals['_LOGINRESPONSE']._serialized_start=595
+  _globals['_LOGINRESPONSE']._serialized_end=643
+  _globals['_ID']._serialized_start=645
+  _globals['_ID']._serialized_end=661
+  _globals['_NEWTRANSCRIPTION']._serialized_start=663
+  _globals['_NEWTRANSCRIPTION']._serialized_end=710
+  _globals['_NEWTRANSLATION']._serialized_start=712
+  _globals['_NEWTRANSLATION']._serialized_end=838
+  _globals['_NEWDIARIZATION']._serialized_start=840
+  _globals['_NEWDIARIZATION']._serialized_end=899
+  _globals['_QUERYPARAMETHERS']._serialized_start=902
+  _globals['_QUERYPARAMETHERS']._serialized_end=1077
+  _globals['_CLIENTSERVICE']._serialized_start=1080
+  _globals['_CLIENTSERVICE']._serialized_end=1726
 # @@protoc_insertion_point(module_scope)

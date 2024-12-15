@@ -28,6 +28,7 @@ message TranscriptionHistory {
     string transcription = 1;
     google.protobuf.Timestamp created_at = 2;
     int32 id = 3;
+    string language = 4;
 }
 
 message TranslationHistory {
@@ -35,6 +36,8 @@ message TranslationHistory {
     string transcription = 2;
     string translation = 3;
     google.protobuf.Timestamp created_at = 4;
+    string transcription_langauge = 5;
+    string translation_langauge = 6;
 }
 
 message DiarizationHistory {
@@ -42,6 +45,7 @@ message DiarizationHistory {
     repeated string speaker = 3;
     repeated string line = 4;
     google.protobuf.Timestamp created_at = 5;
+    string language = 6;
 }
 
 message UserCredits {
@@ -81,4 +85,6 @@ message QueryParamethers {
     google.protobuf.Timestamp start_time = 1;
     google.protobuf.Timestamp end_time = 2;
     int32 limit = 3;
+    string language = 4;
+    string translation_language = 5; //used only by translation
 }

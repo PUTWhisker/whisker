@@ -12,7 +12,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var (
@@ -27,12 +26,12 @@ type UserDbModel interface {
 	addUserToDatabase(string, string) error
 
 	saveTranscription(text string, username string, is_translation bool, language string) error
-	getUserTranscriptionHistory(ctx context.Context, user_id string, start_time *timestamppb.Timestamp, endTime *timestamppb.Timestamp, limit int) (pgx.Rows, error)
+	getUserTranscriptionHistory(ctx context.Context, user_id string, query *pb.QueryParamethers) (pgx.Rows, error)
 	editTranscription(ctx context.Context, id int, user_id string, new_content string) error
 	deleteTranscription(ctx context.Context, id int, user_id string) error
 
 	saveTranslation(text string, username string, language string, translated_text string, translation_language string) error
-	getUserTranslationHistory(ctx context.Context, user_id string, start_time *timestamppb.Timestamp, endTime *timestamppb.Timestamp, limit int) (pgx.Rows, error)
+	getUserTranslationHistory(ctx context.Context, user_id string, query *pb.QueryParamethers) (pgx.Rows, error)
 	editTranslation(edit_transcription bool, edit_translation bool, transcription_id int, new_transcription string, new_translation string, user_id string) error
 
 	saveDiarization(text []string, speaker []string, username string, language string) error
@@ -60,24 +59,30 @@ func (db UserDb) saveTranscription(text string, user_id string, is_translation b
 	return err
 }
 
-func buildQuery(initialQuery string, startTime *timestamppb.Timestamp, endTime *timestamppb.Timestamp, limit int) string {
-	if startTime != nil {
-		initialQuery += " AND created_at >= '" + startTime.AsTime().UTC().Format(timeFormat) + "'"
+func buildQuery(initialQuery string, query *pb.QueryParamethers, mainTableName string) string {
+	if query.StartTime != nil {
+		initialQuery += " AND created_at >= '" + query.StartTime.AsTime().UTC().Format(timeFormat) + "'"
 	}
-	if endTime != nil {
-		initialQuery += " AND created_at <= '" + endTime.AsTime().UTC().Format(timeFormat) + "'"
+	if query.EndTime != nil {
+		initialQuery += " AND created_at <= '" + query.EndTime.AsTime().UTC().Format(timeFormat) + "'"
 	}
-	if limit != 0 {
-		initialQuery += " LIMIT " + strconv.Itoa(limit)
+	if query.Language != "" {
+		initialQuery += " AND " + mainTableName + ".lang = '" + query.Language + "'"
 	}
+	if query.TranslationLanguage != "" {
+		initialQuery += " AND translation.lang = '" + query.TranslationLanguage + "'"
+	}
+	if query.Limit != 0 {
+		initialQuery += " LIMIT " + strconv.Itoa(int(query.Limit))
+	}
+
 	initialQuery += ";"
 	return initialQuery
 }
 
-func (db UserDb) getUserTranscriptionHistory(ctx context.Context, user_id string, startTime *timestamppb.Timestamp, endTime *timestamppb.Timestamp, limit int) (pgx.Rows, error) {
-	queryText := `SELECT id, content, created_at FROM transcription WHERE app_user_id=$1`
-	queryText = buildQuery(queryText, startTime, endTime, limit)
-	log.Print(queryText)
+func (db UserDb) getUserTranscriptionHistory(ctx context.Context, user_id string, query *pb.QueryParamethers) (pgx.Rows, error) {
+	queryText := `SELECT id, content, created_at, lang FROM transcription WHERE app_user_id=$1`
+	queryText = buildQuery(queryText, query, "transcription")
 	return db.pool.Query(ctx, queryText, user_id)
 }
 
@@ -142,20 +147,22 @@ func (db UserDb) editTranslation(edit_transcription bool, edit_translation bool,
 	return nil
 }
 
-func (db UserDb) getUserTranslationHistory(ctx context.Context, user_id string, start_time *timestamppb.Timestamp, endTime *timestamppb.Timestamp, limit int) (pgx.Rows, error) {
-	query := `
+func (db UserDb) getUserTranslationHistory(ctx context.Context, user_id string, query *pb.QueryParamethers) (pgx.Rows, error) {
+	queryText := `
 	SELECT 
 		transcription.id, 
 		transcription.content AS transcription_content, 
 		translation.content AS translation_content,
-		transcription.created_at 
+		transcription.created_at,
+		transcription.lang AS transcription_language,
+		translation.lang AS translation_language
 	FROM transcription
 	JOIN translation 
-    ON transcription.id = translation.transcription_id 
-	WHERE transcription.id = $1;
+		ON transcription.id = translation.transcription_id 
+	WHERE transcription.app_user_id = $1
 	`
-	query = buildQuery(query, start_time, endTime, limit)
-	return db.pool.Query(ctx, query, user_id)
+	queryText = buildQuery(queryText, query, "transcription")
+	return db.pool.Query(ctx, queryText, user_id)
 }
 
 func (db UserDb) saveDiarization(text []string, speaker []string, user_id string, language string) error {
@@ -180,18 +187,18 @@ func (db UserDb) saveDiarization(text []string, speaker []string, user_id string
 	return nil
 }
 
-func (db UserDb) getUserDiarizationHistory(ctx context.Context, userId string, queryParameters *pb.QueryParamethers) (pgx.Rows, error) {
-	query := `
-	SELECT id, created_at
+func (db UserDb) getUserDiarizationHistory(ctx context.Context, userId string, query *pb.QueryParamethers) (pgx.Rows, error) {
+	queryText := `
+	SELECT id, created_at, lang 
     FROM diarization
     WHERE app_user_id = $1`
 
-	query = buildQuery(query, queryParameters.StartTime, queryParameters.EndTime, int(queryParameters.Limit))
+	queryText = buildQuery(queryText, query, "diarization")
 
-	query = "SELECT d.id, speaker_line.speaker, speaker_line.content, d.created_at from (" + query[0:len(query)-1] + ") AS d join speaker_line on d.id = speaker_line.diarization_id ORDER BY d.id;"
-	fmt.Println(query)
+	queryText = "SELECT d.id, speaker_line.speaker, speaker_line.content, d.created_at, d.lang from (" + queryText[0:len(queryText)-1] + ") AS d join speaker_line on d.id = speaker_line.diarization_id ORDER BY d.id;"
+	fmt.Println(queryText)
 
-	return db.pool.Query(ctx, query, userId)
+	return db.pool.Query(ctx, queryText, userId)
 }
 
 func (db UserDb) editDiarization(ctx context.Context, new_content []string, new_speaker []string, id int, userId string) error {

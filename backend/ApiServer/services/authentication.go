@@ -165,7 +165,7 @@ func sendTrailer(stream grpc.ServerStream) {
 func (s *AuthenticationServer) GetTranscription(in *pb.QueryParamethers, stream pb.ClientService_GetTranscriptionServer) error {
 	sendHeader(stream)
 	defer sendTrailer(stream)
-	rows, err := s.Db.getUserTranscriptionHistory(stream.Context(), stream.Context().Value("user_id").(string), in.StartTime, in.EndTime, int(in.Limit))
+	rows, err := s.Db.getUserTranscriptionHistory(stream.Context(), stream.Context().Value("user_id").(string), in)
 	if err != nil {
 		log.Fatal(err)
 		return err
@@ -175,12 +175,13 @@ func (s *AuthenticationServer) GetTranscription(in *pb.QueryParamethers, stream 
 		var transcirption_text string
 		var time_added time.Time
 		var id int32
-		err = rows.Scan(&id, &transcirption_text, &time_added)
+		var language string
+		err = rows.Scan(&id, &transcirption_text, &time_added, &language)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err := stream.Send(&pb.TranscriptionHistory{Transcription: transcirption_text, CreatedAt: timestamppb.New(time_added), Id: id})
+		err := stream.Send(&pb.TranscriptionHistory{Transcription: transcirption_text, CreatedAt: timestamppb.New(time_added), Id: id, Language: language})
 		if err != nil {
 			return err
 		}
@@ -198,10 +199,10 @@ func (s *AuthenticationServer) DeleteTranscription(ctx context.Context, in *pb.I
 	return &emptypb.Empty{}, err
 }
 
-func (s *AuthenticationServer) GetTranslation(parameters *pb.QueryParamethers, stream pb.ClientService_GetTranslationServer) error {
+func (s *AuthenticationServer) GetTranslation(in *pb.QueryParamethers, stream pb.ClientService_GetTranslationServer) error {
 	sendHeader(stream)
 	defer sendTrailer(stream)
-	rows, err := s.Db.getUserTranslationHistory(stream.Context(), stream.Context().Value("user_id").(string), parameters.StartTime, parameters.EndTime, int(parameters.Limit))
+	rows, err := s.Db.getUserTranslationHistory(stream.Context(), stream.Context().Value("user_id").(string), in)
 	if err != nil {
 		log.Fatal(err)
 		return err
@@ -212,12 +213,14 @@ func (s *AuthenticationServer) GetTranslation(parameters *pb.QueryParamethers, s
 		var translation_text string
 		var time_added time.Time
 		var id int32
-		err = rows.Scan(&id, &transcirption_text, &translation_text, &time_added)
+		var translation_language string
+		var transcription_language string
+		err = rows.Scan(&id, &transcirption_text, &translation_text, &time_added, &transcription_language, &translation_language)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err := stream.Send(&pb.TranslationHistory{Transcription: transcirption_text, Translation: translation_text, CreatedAt: timestamppb.New(time_added), Id: id})
+		err := stream.Send(&pb.TranslationHistory{Transcription: transcirption_text, Translation: translation_text, CreatedAt: timestamppb.New(time_added), Id: id, TranscriptionLangauge: transcription_language, TranslationLangauge: translation_language})
 		if err != nil {
 			return err
 		}
@@ -256,12 +259,13 @@ func (s *AuthenticationServer) GetDiarization(in *pb.QueryParamethers, stream pb
 	var speaker string
 	var line string
 	var createdAt time.Time
+	var language string
 
 	speakers := []string{}
 	lines := []string{}
 
 	rows.Next()
-	err = rows.Scan(&diarizationId, &speaker, &line, &createdAt)
+	err = rows.Scan(&diarizationId, &speaker, &line, &createdAt, &language)
 	if err != nil {
 		return err
 	}
@@ -270,12 +274,12 @@ func (s *AuthenticationServer) GetDiarization(in *pb.QueryParamethers, stream pb
 	oldId = diarizationId
 	oldCreatedAt = createdAt
 	for rows.Next() {
-		err = rows.Scan(&diarizationId, &speaker, &line, &createdAt)
+		err = rows.Scan(&diarizationId, &speaker, &line, &createdAt, &language)
 		if err != nil {
 			return err
 		}
 		if oldId != diarizationId {
-			err = stream.Send(&pb.DiarizationHistory{DiarizationId: oldId, Speaker: speakers, Line: lines, CreatedAt: timestamppb.New(oldCreatedAt)})
+			err = stream.Send(&pb.DiarizationHistory{DiarizationId: oldId, Speaker: speakers, Line: lines, CreatedAt: timestamppb.New(oldCreatedAt), Language: language})
 			if err != nil {
 				return err
 			}
@@ -287,7 +291,7 @@ func (s *AuthenticationServer) GetDiarization(in *pb.QueryParamethers, stream pb
 		speakers = append(speakers, speaker)
 		lines = append(lines, line)
 	}
-	err = stream.Send(&pb.DiarizationHistory{DiarizationId: oldId, Speaker: speakers, Line: lines, CreatedAt: timestamppb.New(oldCreatedAt)})
+	err = stream.Send(&pb.DiarizationHistory{DiarizationId: oldId, Speaker: speakers, Line: lines, CreatedAt: timestamppb.New(oldCreatedAt), Language: language})
 	if err != nil {
 		return err
 	}

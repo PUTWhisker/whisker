@@ -115,7 +115,6 @@ func JwtStreamInterceptor(srv any, ss grpc.ServerStream, info *grpc.StreamServer
 	}
 	user_id, err := getUserId(md["jwt"])
 	ctx := ss.Context()
-	fmt.Println("🟢", user_id)
 	new_ctx := context.WithValue(ctx, "user_id", user_id)
 	if err != nil {
 		return err
