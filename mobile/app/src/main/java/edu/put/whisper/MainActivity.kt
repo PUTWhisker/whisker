@@ -38,7 +38,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnDelete: ImageButton
     private lateinit var btnList: ImageButton
     private lateinit var btnRecord: ImageButton
-    private lateinit var btnCopy: ImageButton
     private lateinit var btnBack: ImageButton
     private lateinit var tvTranscript: TextView
     private lateinit var utilities: Utilities
@@ -62,6 +61,10 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var db : AppDatabase
 
+    private lateinit var spinnerLanguage: Spinner
+    private lateinit var languages: Array<String>
+    private lateinit var languagesFull: Array<String>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -83,9 +86,19 @@ class MainActivity : AppCompatActivity() {
         btnCancel = findViewById(R.id.btnCancel)
         btnOk = findViewById(R.id.btnOk)
         btnTranscript = findViewById(R.id.btnTranscript)
-        btnCopy = findViewById(R.id.btnCopy)
-        tvTranscript = findViewById(R.id.tvTranscript)
         btnBack = findViewById(R.id.btnBack)
+
+        spinnerLanguage = findViewById(R.id.spinner_language)
+        languages = resources.getStringArray(R.array.languages)
+        languagesFull = resources.getStringArray(R.array.languages_full)
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, languagesFull)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerLanguage.adapter = adapter
+
+
+        spinnerLanguage.setSelection(languages.indexOf("en")) // default language
+
 
 
         if (utilities.isMicrophonePresent()) {
@@ -195,14 +208,14 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             val filePath = tempFilePath ?: return@launch
-            val language = "en"
-            utilities.uploadRecording(filePath, "en") { output ->
+            val selectedLanguage = languages[spinnerLanguage.selectedItemPosition]
+            utilities.uploadRecording(filePath, selectedLanguage) { output ->
                 runOnUiThread {
                     if (output != null) {
                         val intent = Intent(this@MainActivity, TranscriptionDetailActivity::class.java).apply {
                             putExtra("EXTRA_TRANSCRIPTION_TEXT", output)
                             putExtra("EXTRA_FILE_PATH", filePath)
-                            putExtra("EXTRA_LANGUAGE", language)
+                            putExtra("EXTRA_LANGUAGE", selectedLanguage)
                             putExtra("EXTRA_TRANSCRIPTION_DATE", SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()))
                         }
                         startActivity(intent)

@@ -55,7 +55,7 @@
                     android:layout_height="48dp"
                     android:layout_alignTop="@id/tvFullTranscription"
                     android:layout_alignEnd="@id/tvFullTranscription"
-                    android:layout_margin="-24dp"
+                    android:layout_margin="5dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="Copy transcription"
                     android:src="@drawable/ic_copy"
