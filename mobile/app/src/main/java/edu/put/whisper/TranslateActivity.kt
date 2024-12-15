@@ -2,6 +2,7 @@ package edu.put.whisper
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -77,6 +78,7 @@ class TranslateActivity : AppCompatActivity() {
 
 
                         editTextTranslated.setText(translatedText)
+
 
                         tempFile.delete()
                     } catch (e: Exception) {

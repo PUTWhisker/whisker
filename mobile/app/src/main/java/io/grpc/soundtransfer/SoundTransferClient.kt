@@ -54,6 +54,7 @@ class SoundTransferClient(uri: Uri) : Closeable {
         return null
     }
 
+    // zamiast stringa obiekt ktory zwraca bula :3 i stringa
     fun transcribeLive(callback: (String) -> Unit) {
         val metadata = Metadata()
         val key = Metadata.Key.of("language", Metadata.ASCII_STRING_MARSHALLER)

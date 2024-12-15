@@ -106,3 +106,4 @@ class LiveTranscriptionActivity : AppCompatActivity() {
         }
     }
 }
+// jezeli newchunk jest na false to trzeba nadpisac wiadomosc
