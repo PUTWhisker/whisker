@@ -32,7 +32,7 @@ sys.path.insert(0, curDir)
 logging.basicConfig(format="%(levelname)s:%(name)s:%(message)s", level=logging.INFO)
 _cleanupCoroutines = list()  # Needed for asyncio graceful shutdown
 _clientData = dict()
-_CLEANUP_PERIOD = 5
+_CLEANUP_PERIOD = 120
 
 def _errorMessages(e: Exception, func: callable):
     if isinstance(e, FileNotFoundError):
@@ -57,12 +57,12 @@ def run_transcribe(file_path, data:TranscriptionData):
 
 async def cleanupWebSessions():
     while True:
+        await asyncio.sleep(_CLEANUP_PERIOD)
         curTime = time.time()
         for index, value in _clientData.items():
             if curTime - value[1] > _CLEANUP_PERIOD:
                 logging.info(f"Client cleanup initiated for id: {value[0].sessionId}")
                 _clientData.pop(index)
-        await asyncio.sleep(_CLEANUP_PERIOD)
 
 class SoundService(Services.SoundServiceServicer):
     def __init__(self):
@@ -203,7 +203,7 @@ class SoundService(Services.SoundServiceServicer):
                 transcriptionData.curSeconds = 0
             try:
                 transcriptionData = await self.fastModel.handleRecord(
-                    request.sound_data, transcriptionData, context
+                    request.sound_data, transcriptionData, context, False
                 )
                 logging.info(transcriptionData.transcription)
             except Exception as e:
@@ -223,21 +223,31 @@ class SoundService(Services.SoundServiceServicer):
         logging.info("Received live transcription request from webApp")
         transcriptionData = TranscriptionData()
         transcriptionData.processMetadata(context)
-        logging.debug(context)
-        logging.debug(context.invocation_metadata())
         if transcriptionData.sessionId is None:
             transcriptionData.sessionId = uuid.uuid4()
-            _clientData[transcriptionData.sessionId] = [transcriptionData, time.time()]
+            _clientData[str(transcriptionData.sessionId)] = [transcriptionData, time.time()]
             return Variables.SoundStreamResponse(
                 text = str(transcriptionData.sessionId)
             )
-        transcriptionData = _clientData[transcriptionData.sessionId]
-        transcriptionData.language += "A"
+        sessionId = transcriptionData.sessionId
+        transcriptionData = _clientData[sessionId][0]
+        transcriptionData.language = request.source_language
+        try:
+            transcriptionData = await self.fastModel.handleRecord(
+                        request.sound_data, transcriptionData, context, True
+                    )
+            logging.info(transcriptionData.transcription)
+            _clientData[transcriptionData.sessionId] = [transcriptionData, time.time()]
+        except Exception as e:
+            if (
+                transcriptionData.filePath.exists()
+            ):  # To ensure tempFile gets deleted even when error occurs
+                transcriptionData.filePath.unlink()
+            raise e
         return Variables.SoundStreamResponse(
-            text = transcriptionData.language,
+            text=transcriptionData.transcription[transcriptionData.curSegment],
             new_chunk = False
         )
-
 
 
 async def server():
