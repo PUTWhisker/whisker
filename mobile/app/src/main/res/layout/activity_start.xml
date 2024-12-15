@@ -41,23 +41,23 @@
                 android:layout_width="100dp"
                 android:layout_height="48dp"
                 android:layout_marginEnd="8dp"
-                android:backgroundTint="@color/gray"
+                android:backgroundTint="@color/primaryDark"
                 android:text="Log In"
-                android:textColor="@color/grayDark"
+                android:textColor="@color/primaryLight"
                 android:textSize="12sp"
                 app:cornerRadius="26dp"
-                app:rippleColor="@color/grayDark" />
+                app:rippleColor="@color/primaryDark" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnRegister"
                 android:layout_width="100dp"
                 android:layout_height="48dp"
-                android:backgroundTint="@color/gray"
+                android:backgroundTint="@color/primaryLight"
                 android:text="Register"
-                android:textColor="@color/grayDark"
+                android:textColor="@color/primaryDark"
                 android:textSize="12sp"
                 app:cornerRadius="26dp"
-                app:rippleColor="@color/grayDark" />
+                app:rippleColor="@color/primaryDark" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnHistoryMock"
@@ -144,7 +144,7 @@
                         android:padding="20dp"
                         android:src="@drawable/ic_mic"
                         android:background="@drawable/circle_icon_background"
-                        app:tint="@color/primaryLight"
+                        app:tint="@color/white"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent" />
@@ -201,7 +201,7 @@
                         android:padding="20dp"
                         android:src="@drawable/ic_file"
                         android:background="@drawable/circle_icon_background"
-                        app:tint="@color/primaryLight"
+                        app:tint="@color/white"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent" />
@@ -256,7 +256,7 @@
                         android:padding="20dp"
                         android:src="@drawable/ic_live"
                         android:background="@drawable/circle_icon_background"
-                        app:tint="@color/primaryLight"
+                        app:tint="@color/white"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent" />

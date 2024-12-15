@@ -20,7 +20,6 @@ class LiveTranscriptionActivity : AppCompatActivity() {
     private lateinit var soundTransferClient: SoundTransferClient
     private lateinit var tvTranscriptionsLive: TextView
     private lateinit var scrollView: ScrollView
-    private lateinit var btnBack: ImageButton
     private lateinit var utilities: Utilities
 
     private val REQUEST_RECORD_AUDIO_PERMISSION = 200
@@ -29,19 +28,21 @@ class LiveTranscriptionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_live_transcription)
 
+        val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
+
         tvTranscriptionsLive = findViewById(R.id.tvTranscriptionsLive)
         scrollView = findViewById(R.id.scrollView)
-        btnBack = findViewById(R.id.btnBack)
         utilities = Utilities(this)
         val serverUrl = getString(R.string.server_url)
         val serverUri = Uri.parse(serverUrl)
         soundTransferClient = SoundTransferClient(serverUri)
 
-
-        btnBack.setOnClickListener {
-            stopTranscription()
-            utilities.goBack(this)
-        }
         requestAudioPermission()
     }
 

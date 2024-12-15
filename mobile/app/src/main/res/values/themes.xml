@@ -17,8 +17,8 @@
     <style name="TextLayoutStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="android:layout_marginTop">20dp</item>
         <item name="android:layout_marginBottom">20dp</item>
-        <item name="boxBackgroundColor">@color/gray</item>
-        <item name="boxStrokeColor">@color/strokeColor</item>
+        <item name="boxBackgroundColor">#e2dfeb</item>
+        <item name="boxStrokeColor">@color/primaryDark</item>
         <item name="boxCornerRadiusBottomStart">26dp</item>
         <item name="boxCornerRadiusBottomEnd">26dp</item>
         <item name="boxCornerRadiusTopStart">26dp</item>
@@ -44,6 +44,12 @@
         <item name="startIconDrawable">@drawable/ic_search</item>
 
 
+    </style>
+
+
+    <style name="ToolbarTitleStyle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/primaryLight</item>
     </style>
     <!-- Base application theme. -->
     <style name="Base.Theme.Voicememos" parent="Theme.Material3.DayNight.NoActionBar">

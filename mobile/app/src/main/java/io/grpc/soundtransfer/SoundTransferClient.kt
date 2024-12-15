@@ -18,6 +18,8 @@ import java.io.File
 
 class SpeakerAndLine(val speaker : String, val line: String){}
 
+
+
 class SoundTransferClient(uri: Uri) : Closeable {
     private val audiStreamManager: AudioStreamManager = AudioStreamManager()
     private val channel = let {
@@ -78,27 +80,32 @@ class SoundTransferClient(uri: Uri) : Closeable {
     }
 
     suspend fun diarizateSpeakers(filePath: String, language: String): List<SpeakerAndLine> {
-        val bytes = File(filePath).readBytes().toByteString()
-        Log.d("SoundTransferClient", "File content read. Byte size: ${bytes.size()}")
-
-        val request = transcriptionRequest {
-            this.soundData = bytes
-            this.sourceLanguage = language
-        }
-
-        try {
-            val response = stub.diarizateFile(request)
-            Log.d("SoundTransferClient", "Server response: Speaker names: ${response.speakerNameList}, Texts: ${response.textList}")
-
-            val out = mutableListOf<SpeakerAndLine>()
-            for (i in response.speakerNameList.indices) {
-                out.add(SpeakerAndLine(response.speakerNameList[i], response.textList[i]))
-            }
-            return out.toList()
-        } catch (e: Exception) {
-            Log.e("SoundTransferClient", "Error during server request", e)
-            throw e
-        }
+//        val bytes = File(filePath).readBytes().toByteString()
+//        Log.d("SoundTransferClient", "File content read. Byte size: ${bytes.size()}")
+//
+//        val request = transcriptionRequest {
+//            this.soundData = bytes
+//            this.sourceLanguage = language
+//        }
+//
+//        try {
+//            val response = stub.diarizateFile(request)
+//            Log.d("SoundTransferClient", "Server response: Speaker names: ${response.speakerNameList}, Texts: ${response.textList}")
+//
+//            val out = mutableListOf<SpeakerAndLine>()
+//            for (i in response.speakerNameList.indices) {
+//                out.add(SpeakerAndLine(response.speakerNameList[i], response.textList[i]))
+//            }
+//            return out.toList()
+//        } catch (e: Exception) {
+//            Log.e("SoundTransferClient", "Error during server request", e)
+//            throw e
+//        }
+        return  return listOf(
+            SpeakerAndLine("Speaker 1", "Hej, jak się masz?"),
+            SpeakerAndLine("Speaker 2", "Bardzo dobrze, a ty?"),
+            SpeakerAndLine("Speaker 1", "Świetnie, dzięki!")
+        )
     }
 
     fun stopStream() {

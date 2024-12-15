@@ -10,8 +10,12 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import android.content.Context
+import android.view.View
+import android.widget.EditText
+import edu.put.whisper.utils.Utilities
 
 class TranscriptionDetailActivity : AppCompatActivity() {
+    private lateinit var utilities: Utilities
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,21 +29,31 @@ class TranscriptionDetailActivity : AppCompatActivity() {
             onBackPressed()
         }
 
+        utilities = Utilities(this)
+
         val errorMessage = intent.getStringExtra("EXTRA_ERROR_MESSAGE")
         val transcriptionText = intent.getStringExtra("EXTRA_TRANSCRIPTION_TEXT")
         val transcriptionDate = intent.getStringExtra("EXTRA_TRANSCRIPTION_DATE")
         val filePath = intent.getStringExtra("EXTRA_FILE_PATH")
         val language = intent.getStringExtra("EXTRA_LANGUAGE")
 
+        val btnTranslate = findViewById<LinearLayout>(R.id.btnTranslate)
+        val btnRoles = findViewById<LinearLayout>(R.id.btnRoles)
+        val btnEdit = findViewById<LinearLayout>(R.id.btnEdit)
+        val btnAcceptChanges = findViewById<LinearLayout>(R.id.btnAcceptChanges)
+        val btnDiscardChanges = findViewById<LinearLayout>(R.id.btnDiscardChanges)
+        val tvTranscriptionText = findViewById<EditText>(R.id.tvFullTranscription)
+        val tvTranscriptionDate = findViewById<TextView>(R.id.tvTranscriptionDate)
+
+
         if (errorMessage != null) {
             Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
         }
 
         if (transcriptionText != null && transcriptionDate != null) {
-            val tvTranscriptionText = findViewById<TextView>(R.id.tvFullTranscription)
-            val tvTranscriptionDate = findViewById<TextView>(R.id.tvTranscriptionDate)
 
-            tvTranscriptionText.text = transcriptionText
+
+            tvTranscriptionText.setText(transcriptionText)
             tvTranscriptionDate.text = transcriptionDate
 
             findViewById<LinearLayout>(R.id.btnTranslate).setOnClickListener {
@@ -58,6 +72,33 @@ class TranscriptionDetailActivity : AppCompatActivity() {
 
             findViewById<ImageButton>(R.id.btnCopyTranscription).setOnClickListener {
                 copyToClipboard(transcriptionText)
+            }
+
+            btnEdit.setOnClickListener {
+                utilities.setVisibility(View.GONE, btnEdit, btnRoles, btnTranslate)
+                utilities.setVisibility(View.VISIBLE, btnAcceptChanges, btnDiscardChanges)
+                tvTranscriptionText.isEnabled = true
+            }
+
+            btnAcceptChanges.setOnClickListener {
+                // Tutaj ten updatedText mozesz zapisac do bazy danych czy tam uzyc swojej funkcji, cokolwiek chcesz z tym zrobic :3
+                val updatedText = tvTranscriptionText.text.toString()
+                Toast.makeText(this, "Changes Accepted", Toast.LENGTH_SHORT).show()
+
+                utilities.setVisibility(View.GONE, btnAcceptChanges, btnDiscardChanges)
+                utilities.setVisibility(View.VISIBLE, btnEdit, btnRoles, btnTranslate)
+
+                tvTranscriptionText.isEnabled = false
+            }
+
+            btnDiscardChanges.setOnClickListener {
+                tvTranscriptionText.setText(transcriptionText)
+                Toast.makeText(this, "Changes Discarded", Toast.LENGTH_SHORT).show()
+
+                utilities.setVisibility(View.GONE, btnAcceptChanges, btnDiscardChanges)
+                utilities.setVisibility(View.VISIBLE, btnEdit, btnRoles, btnTranslate)
+
+                tvTranscriptionText.isEnabled = false
             }
         }
     }

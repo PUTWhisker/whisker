@@ -14,7 +14,8 @@
         android:elevation="4dp"
         app:title="Transcription"
         app:titleTextColor="@color/primaryLight"
-        app:navigationIcon="@drawable/ic_back"
+        app:navigationIcon="@drawable/ic_arrow_toolbar"
+        app:titleTextAppearance="@style/ToolbarTitleStyle"
         app:tint = "@color/primaryLight"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -38,7 +39,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="40dp">
 
-                <TextView
+                <EditText
                     android:id="@+id/tvFullTranscription"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -77,10 +78,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="#987bbd"
+        android:background="@color/primaryDark"
         android:paddingVertical="8dp">
 
         <LinearLayout
+            android:id="@+id/btnEdit"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -94,7 +96,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@drawable/ic_edit"
-                app:tint="@color/primaryDark"
+                app:tint="@color/primaryLight"
                 android:contentDescription="Edit transcription" />
 
             <TextView
@@ -102,7 +104,7 @@
                 android:layout_height="wrap_content"
                 android:text="Edit"
                 android:textSize="16sp"
-                android:textColor="@color/primaryDark" />
+                android:textColor="@color/primaryLight" />
         </LinearLayout>
 
         <LinearLayout
@@ -120,7 +122,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@drawable/ic_translate"
-                app:tint="@color/primaryDark"
+                app:tint="@color/primaryLight"
                 android:contentDescription="Translate transcription" />
 
             <TextView
@@ -128,7 +130,7 @@
                 android:layout_height="wrap_content"
                 android:text="Translate"
                 android:textSize="16sp"
-                android:textColor="@color/primaryDark" />
+                android:textColor="@color/primaryLight" />
         </LinearLayout>
 
         <LinearLayout
@@ -146,7 +148,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@drawable/ic_roles"
-                app:tint="@color/primaryDark"
+                app:tint="@color/primaryLight"
                 android:contentDescription="Split transcription into roles" />
 
             <TextView
@@ -154,8 +156,63 @@
                 android:layout_height="wrap_content"
                 android:text="Split into roles"
                 android:textSize="16sp"
-                android:textColor="@color/primaryDark" />
+                android:textColor="@color/primaryLight" />
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/btnDiscardChanges"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_delete"
+                app:tint="@color/primaryLight"
+                android:contentDescription="Split transcription into roles" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Discard"
+                android:textSize="16sp"
+                android:textColor="@color/primaryLight" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/btnAcceptChanges"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_done"
+                app:tint="@color/primaryLight"
+                android:contentDescription="Split transcription into roles" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Accept"
+                android:textSize="16sp"
+                android:textColor="@color/primaryLight" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>

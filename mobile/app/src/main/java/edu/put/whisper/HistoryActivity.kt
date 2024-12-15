@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +21,7 @@ class HistoryActivity : AppCompatActivity() {
     private lateinit var rvTranscriptions: RecyclerView
     private lateinit var transcriptionAdapter: TranscriptionAdapter
     private lateinit var authClient: AuthenticationClient
+    private lateinit var btnDelete: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,10 +37,19 @@ class HistoryActivity : AppCompatActivity() {
 
         rvTranscriptions = findViewById(R.id.rvTranscriptions)
         rvTranscriptions.layoutManager = LinearLayoutManager(this)
+        btnDelete = findViewById(R.id.btnDelete)
 
         authClient = AuthenticationClient(Uri.parse("http://100.80.80.156:50051/"))
 
         loadTranscriptions()
+
+        btnDelete.setOnClickListener {
+            val selectedItems = transcriptionAdapter.getSelectedItems()
+            // TU LOGIKA USUWANIA TRANSKRYPCJI
+            Toast.makeText(this, "Usunięto ${selectedItems.size} transkrypcji", Toast.LENGTH_SHORT).show()
+
+            //transcriptionAdapter.notifyDataSetChanged() // odświeżenie adaptera
+        }
     }
 
     private fun loadTranscriptions() {
@@ -46,7 +57,7 @@ class HistoryActivity : AppCompatActivity() {
             try {
                 val history = authClient.getTranscriptions()
                 withContext(Dispatchers.Main) {
-                    transcriptionAdapter = TranscriptionAdapter(history) { transcription ->
+                    transcriptionAdapter = TranscriptionAdapter(history.toMutableList()) { transcription ->
                         val intent = Intent(this@HistoryActivity, TranscriptionDetailActivity::class.java)
                         intent.putExtra("EXTRA_TRANSCRIPTION_TEXT", transcription.text)
                         intent.putExtra(

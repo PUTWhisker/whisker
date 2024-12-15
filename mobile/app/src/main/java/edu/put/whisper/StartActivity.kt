@@ -242,6 +242,7 @@ class StartActivity : AppCompatActivity() {
             utilities.setVisibility(View.VISIBLE, btnLogin, btnRegister, btnChooseFile, btnRecordActivity)
             utilities.setVisibility(View.GONE, btnLogout, tvHello)
             utilities.setVisibility(View.INVISIBLE, rvTranscriptions)
+            isUserLoggedIn = false
             loginInput.text.clear()
             passwordInput.text.clear()
             tvHello.text = ""

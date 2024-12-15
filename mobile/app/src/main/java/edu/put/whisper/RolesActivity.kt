@@ -24,6 +24,14 @@ class RolesActivity : AppCompatActivity() {
         Log.d("RolesActivity", "onCreate called")
         setContentView(R.layout.activity_roles)
 
+        val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
+
       //  tvDiarizedTranscription = findViewById(R.id.tvDiarizedTranscription)
 
         val serverUrl = getString(R.string.server_url)
@@ -72,7 +80,7 @@ class RolesActivity : AppCompatActivity() {
     private fun displaySpeakerLines(speakerLines: List<SpeakerAndLine>) {
         val textView = findViewById<TextView>(R.id.tvDiarizedTranscription)
         val displayText = speakerLines.joinToString(separator = "\n") { speakerAndLine ->
-            "Speaker: ${speakerAndLine.speaker}, Line: ${speakerAndLine.line}"
+            "${speakerAndLine.speaker}, ${speakerAndLine.line}"
         }
         textView.text = displayText
     }
