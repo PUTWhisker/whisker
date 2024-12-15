@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import java.time.Instant
 
-class TranscriptionElement(val text: String, val timestamp: Instant) {
+class TranscriptionElement(val text: String, val timestamp: Instant, val id: Int, val language: String) {
     override fun toString(): String {
         return "TranscriptionElement(text='$text', timestamp=$timestamp)"
     }
@@ -37,7 +37,7 @@ class AuthenticationClient(uri: Uri) : Closeable {
     private  val transfer = ClientServiceGrpcKt.ClientServiceCoroutineStub(channel)
 
     override fun close() {
-        channel.shutdown()
+        channel.shutdownNow()
     }
     suspend fun Login(user : String, password : String) : Boolean {
         val arg = userCredits { this.username = user; this.password = password }
@@ -53,17 +53,29 @@ class AuthenticationClient(uri: Uri) : Closeable {
 
     suspend fun Register(user : String, password : String) :Boolean {
         val arg = userCredits { this.username = user; this.password = password }
-        val response = transfer.register(arg)
-        return response.successful
+        try{
+            val response = transfer.register(arg)
+        }catch (e: Exception){
+            return false
+        }
+        return true
     }
 
-    suspend fun GetTranslations(): List<TranscriptionElement> {
+    suspend fun getTranscriptions(): List<TranscriptionElement> {
         val metadata = Metadata()
         val key = Metadata.Key.of("JWT", Metadata.ASCII_STRING_MARSHALLER)
         metadata.put(key, jWT)
-        return transfer.getTranslation(empty { }, metadata).map {
+        val query = queryParamethers{
+        }
+        return transfer.getTranscription(query, metadata).map {
             Log.d("DEBUG", "Received timestamp: seconds=${it.createdAt.seconds}, nanos=${it.createdAt.nanos}")
-            TranscriptionElement(it.transcription, Instant.ofEpochSecond(it.createdAt.seconds, it.createdAt.nanos.toLong()))
+            TranscriptionElement(
+                it.transcription,
+                Instant.ofEpochSecond(it.createdAt.seconds, it.createdAt.nanos.toLong()),
+                it.id,
+                it.language
+            )
+
         }.toList()
     }
 

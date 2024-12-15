@@ -4,16 +4,48 @@ option java_multiple_files = true;
 option java_package = "io.grpc.authentication";
 option java_outer_classname = "AuthenticationProto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
 
 service ClientService {
     rpc Login (UserCredits) returns (LoginResponse) {};
-    rpc GetTranslation (Empty) returns (stream TextHistory) {};
-    rpc Register (UserCredits) returns (StatusResponse) {};
+    rpc Register (UserCredits) returns (google.protobuf.Empty) {};
+
+    rpc GetTranscription(QueryParamethers) returns (stream TranscriptionHistory) {};
+    rpc EditTranscription(NewTranscription) returns (google.protobuf.Empty) {};
+    rpc DeleteTranscription(Id) returns (google.protobuf.Empty) {};
+
+    rpc GetTranslation(QueryParamethers) returns (stream TranslationHistory) {};
+    rpc EditTranslation(NewTranslation) returns (google.protobuf.Empty) {}
+    rpc DeleteTranslation(Id) returns(google.protobuf.Empty) {}
+
+    rpc GetDiarization(QueryParamethers) returns (stream DiarizationHistory) {};
+    rpc EditDiarization(NewDiarization) returns (google.protobuf.Empty) {};
+    rpc DeleteDiarization(Id) returns (google.protobuf.Empty) {}
 }
 
-message TextHistory {
+message TranscriptionHistory {
     string transcription = 1;
     google.protobuf.Timestamp created_at = 2;
+    int32 id = 3;
+    string language = 4;
+}
+
+message TranslationHistory {
+    int32 id = 1;
+    string transcription = 2;
+    string translation = 3;
+    google.protobuf.Timestamp created_at = 4;
+    string transcription_langauge = 5;
+    string translation_langauge = 6;
+}
+
+message DiarizationHistory {
+    int32 diarization_id = 1;
+    repeated string speaker = 3;
+    repeated string line = 4;
+    google.protobuf.Timestamp created_at = 5;
+    string language = 6;
 }
 
 message UserCredits {
@@ -21,16 +53,38 @@ message UserCredits {
     string password = 2;
 }
 
-message StatusResponse {
-    string error = 1;
-    bool successful = 2;
-}
-
 message LoginResponse {
     string JWT = 1;
     bool successful = 2;
 }
 
-message Empty {
+message Id {
+    int32 id = 1;
+}
 
+message NewTranscription {
+    int32 id = 1;
+    string content = 2;
+}
+
+message NewTranslation {
+    int32 id = 1;
+    string transcription = 2;
+    string translation = 3;
+    bool edit_transcription = 4;
+    bool edit_translation = 5;
+}
+
+message NewDiarization {
+    int32 id = 1;
+    repeated string  line = 2;
+    repeated string speaker = 3;
+}
+
+message QueryParamethers {
+    google.protobuf.Timestamp start_time = 1;
+    google.protobuf.Timestamp end_time = 2;
+    int32 limit = 3;
+    string language = 4;
+    string translation_language = 5; //used only by translation
 }
