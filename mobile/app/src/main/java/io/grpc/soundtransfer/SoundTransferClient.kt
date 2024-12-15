@@ -18,7 +18,6 @@ import java.io.File
 
 class SpeakerAndLine(val speaker : String, val line: String){}
 
-
 class SoundTransferClient(uri: Uri) : Closeable {
     private val audiStreamManager: AudioStreamManager = AudioStreamManager()
     private val channel = let {

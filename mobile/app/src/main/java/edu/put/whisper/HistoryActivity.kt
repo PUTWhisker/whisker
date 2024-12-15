@@ -44,7 +44,7 @@ class HistoryActivity : AppCompatActivity() {
     private fun loadTranscriptions() {
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                val history = authClient.GetTranslations()
+                val history = authClient.getTranscriptions()
                 withContext(Dispatchers.Main) {
                     transcriptionAdapter = TranscriptionAdapter(history) { transcription ->
                         val intent = Intent(this@HistoryActivity, TranscriptionDetailActivity::class.java)
