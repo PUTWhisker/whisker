@@ -12,8 +12,6 @@ body {
     background-position: center;
     min-height: 100vh;
     font-family: Lato, sans-serif;
-    /* position: relative;
-    overflow: hidden; */
 }
 
 body::-webkit-scrollbar {
@@ -52,13 +50,16 @@ select {
 }
 
 #top_menu {
-    background-color: rgb(91, 71, 143);
+    background-color: rgb(86, 58, 156);
     overflow: hidden;
     display: flex;
     font-size: 1.5vw;
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
 }
 
+#top_menu .locked {
+    opacity: 0.5;
+}
 
 @media(max-aspect-ratio:1/1) {
     #top_menu {
@@ -70,7 +71,7 @@ select {
 #top_menu p {
     /* float: left; */
     color: white;
-    background-color: rgb(91, 71, 143);
+    background-color: rgb(86, 58, 156);
     padding: 14px 16px;
     margin: auto;
     display: inline-block;
@@ -78,7 +79,7 @@ select {
 }
 
 #top_menu a:hover {
-    background-color: rgb(139, 93, 255);
+    background-color: rgb(106, 66, 194);
 }
 
 #blank_space {
@@ -103,12 +104,6 @@ select {
     border: 2px solid rgba(27, 27, 27, 0.8);
     font-size: 20px;
     margin: 20px;
-}
-
-#submit_file_container {
-    /* border-style: dashed;
-    border-color: grey;
-    border-width: 4px; */
 }
 
 #main_buttons {
@@ -154,12 +149,13 @@ select {
     position: absolute;
     top: -4.5vh;
     left: -4.5vh;
-    background-color: rgb(190, 126, 255);
+    background-color: rgb(139, 93, 255);
     border-radius: 4.5vh;
     height: 9vh;
     width: 9vh;
     font-size: 5vh;
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+    color: white;
 }
 
 .steps>div {
@@ -278,6 +274,7 @@ select {
     padding: 0.3vw;
     top: 0;
     right: 0;
+    /* opacity: 0.5; */
 }
 
 .help-text {
@@ -295,6 +292,7 @@ select {
     border-radius: 5px;
     border: 1px solid black;
     z-index: 9999;
+    /* opacity: 1; */
 }
 
 #results_fields {
@@ -317,6 +315,13 @@ select {
     cursor: pointer;
     text-align: center;
     padding: 1.5vw;
+}
+
+.step_label {
+    font-size: 1.5vw;
+    color: black;
+    text-align: center;
+    padding: 0 15%;
 }
 
 @media(max-aspect-ratio:1/1) {
@@ -344,13 +349,6 @@ input[type="checkbox"]:checked+.custom_check {
     justify-content: center;
     align-items: center;
     height: 50vh;
-}
-
-.step_label {
-    font-size: 1.5vw;
-    color: black;
-    text-align: center;
-    padding: 0 15%;
 }
 
 #file_name {
@@ -404,7 +402,7 @@ input[type='checkbox'] {
     font-size: 2em;
 }
 
-.copy_button {
+.result_option_button {
     cursor: pointer;
 }
 
@@ -418,18 +416,40 @@ input[type='checkbox'] {
     position: relative;
 }
 
-.result_windows>button {
+.result_windows>.result_option_button {
     margin-left: auto;
     position: absolute;
     top: -0.5em;
-    right: 0.5em;
     border: none;
     background: none;
+}
+
+.result_windows>.copy_button {
+    right: 0.5em;
+}
+
+.result_windows>.download_button {
+    right: 3em;
 }
 
 .result_span {
     margin: 1.5vw;
     display: inline-block;
+}
+
+.loading_text {
+    font-style: italic;
+    color: rgba(0, 0, 0, 0.5)
+}
+
+.loading_icon {
+    height: 1em;
+    transform: translateX(100%) scale(2);
+}
+
+.result_legend {
+    font-size: 120%;
+    margin-left: 1vw;
 }
 
 audio {

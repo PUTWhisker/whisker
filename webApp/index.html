@@ -7,6 +7,7 @@
   <meta charset="UTF-8">
   <title>DEMO PAGE</title>
   <script src="./dist/main.js"></script>
+  <!-- UI control -->
   <script>
     function showTransBox() {
       document.getElementById("show_transcript").style.display = 'block';
@@ -69,6 +70,46 @@
       closeButton.classList.add("hidden")
     }
   </script>
+  <!-- text & file I/O-->
+  <!-- API handler -->
+  <script src="text_file_io.js"></script>
+  <script>
+    function placeholderFetchTranscript() {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve("nazywam sie wonsz długie mam ciało me szczenki silne chodź głowę mam mało gdy pora karmienia unosze łep rozdziawiam szeroko i ciamkam chlep");
+        }, 2000);
+      });
+    }
+    function placeholderFetchTranslation() {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve("me llamo wonsz, tengo un cuerpo alargado, mis mandibulas son fuertes, aunque mi cabeza es pequeña, cuando llega la hora de comer levanto la cabeza, la abro de par en par y mastico la bazofia");
+        }, 2200);
+      });
+    }
+    function startTranscription() {
+      const translationCheckBox = document.getElementById("translate");
+      const transcriptionResult = document.getElementById("transcription_result");
+      const transciptionButtons = document.getElementById("show_transcript").querySelectorAll(".result_option_button");
+      const translationButtons = document.getElementById("show_translation").querySelectorAll(".result_option_button");
+      transcriptionResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
+      transciptionButtons.forEach((e) => e.disabled = true);
+      placeholderFetchTranscript().then((transcript) => {
+        transcriptionResult.innerHTML = transcript;
+        transciptionButtons.forEach((e) => e.disabled = false);
+      });
+      if (translationCheckBox.checked) {
+        const translationResult = document.getElementById("translation_result");
+        translationResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
+        translationButtons.forEach((e) => e.disabled = true);
+        placeholderFetchTranslation().then((translation) => {
+          translationResult.innerHTML = translation;
+          translationButtons.forEach((e) => e.disabled = false);
+        });
+      }
+    }
+  </script>
   <link rel="stylesheet" href="style.css">
   <link rel="shortcut icon" href="#">
 </head>
@@ -76,29 +117,25 @@
 <body">
   <main>
     <div id="top_menu">
-      <p>Name</p>
-      <a href="http://127.0.0.1:5500/webApp/record.html" class="icon_button">Dictate <span
-          class="material-symbols-outlined">
-          mic
-        </span></a>
-      <a href="http://127.0.0.1:5500/webApp/history.html" class="icon_button">History <span
-          class="material-symbols-outlined">
-          lock
-        </span></a>
-      <a href="http://127.0.0.1:5500/webApp/history.html" class="icon_button">Swagger <span
-          class="material-symbols-outlined">
-          lock
-        </span></a>
-      <a href="http://127.0.0.1:5500/webApp/about.html" class="icon_button">About <span
-          class="material-symbols-outlined">
-          help
-        </span></a>
-      <div id="blank_space"></div>
-      <a href="http://127.0.0.1:5500/webApp/login.html" class="icon_button">Log in&nbsp;<span
-          class="material-symbols-outlined">login</span>
+      <p>Whisker</p>
+      <a href="http://127.0.0.1:5500/webApp/record.html" class="icon_button">
+        Dictate <span class="material-symbols-outlined">mic</span>
       </a>
-      <a href="http://127.0.0.1:5500/webApp/signup.html" class="icon_button">Sign up&nbsp;<span
-          class="material-symbols-outlined">person_add</span>
+      <a href="http://127.0.0.1:5500/webApp/history.html" class="icon_button locked">
+        History <span class="material-symbols-outlined">lock</span>
+      </a>
+      <a href="http://127.0.0.1:5500/webApp/history.html" class="icon_button locked">
+        Swagger <span class="material-symbols-outlined">lock</span>
+      </a>
+      <a href="http://127.0.0.1:5500/webApp/about.html" class="icon_button">
+        About <span class="material-symbols-outlined">help</span>
+      </a>
+      <div id="blank_space"></div>
+      <a href="http://127.0.0.1:5500/webApp/login.html" class="icon_button">
+        Log in&nbsp;<span class="material-symbols-outlined">login</span>
+      </a>
+      <a href="http://127.0.0.1:5500/webApp/signup.html" class="icon_button">
+        Sign up&nbsp;<span class="material-symbols-outlined">person_add</span>
       </a>
     </div>
     <div id="settings_fields">
@@ -106,10 +143,9 @@
         <div class="help-icon">
           <span class="material-symbols-outlined">help</span>
           <div class="help-text">
-            nazywam sie wonsz długie mam ciało
-            me szczenki silne chodź głowę mam mało
-            gdy pora karmienia unosze łep
-            rozdziawiam szeroko i ciamkam chlep
+            Drag and drop or browse an audio file to transcribe.
+            Viable extensions: .mp3, .wav.
+            Maximum file size: 50Mb.
           </div>
         </div>
         <div class="fields_in_options">
@@ -117,7 +153,7 @@
             <p id="upload_msg" class="step_label">Drag and drop an audio file or</p>
           </div>
           <div class="field_container">
-            <input type="file" id="upload" hidden />
+            <input type="file" id="upload" accept=".mp3, .wav, .ogg, .m4a, .mp4" hidden />
             <label for="upload" id="input_file" class="icon_button">Browse
               <span class="material-symbols-outlined">folder_open</span>
             </label>
@@ -135,10 +171,9 @@
         <div class="help-icon">
           <span class="material-symbols-outlined">help</span>
           <div class="help-text">
-            nazywam sie wonsz długie mam ciało
-            me szczenki silne chodź głowę mam mało
-            gdy pora karmienia unosze łep
-            rozdziawiam szeroko i ciamkam chlep
+            Select a language of your audio file.
+            If no language is specified, AI model will try to detect it,
+            but the quality of the transcription might worsen.
           </div>
         </div>
         <div class="fields_in_options">
@@ -148,6 +183,7 @@
           <div class="field_container">
             <select id="choose_lang" disabled>
               <option disabled selected>Select...</option>
+              <option>Detect</option>
               <option>Polish</option>
               <option>English</option>
               <option>German</option>
@@ -165,10 +201,12 @@
         <div class="help-icon">
           <span class="material-symbols-outlined">help</span>
           <div class="help-text">
-            nazywam sie wonsz długie mam ciało
-            me szczenki silne chodź głowę mam mało
-            gdy pora karmienia unosze łep
-            rozdziawiam szeroko i ciamkam chlep
+            Select the language to which you wish to translate
+            original audio file.
+            Multiple speakers mode will result in transcript being split between
+            speakers who speak in the audio file.
+            You cannot translate and diarizate speakers at the same time.
+            Choosing no option will result in plain audio transcript.
           </div>
         </div>
         <div class="fields_in_options">
@@ -204,16 +242,14 @@
         <div class="help-icon">
           <span class="material-symbols-outlined">help</span>
           <div class="help-text">
-            nazywam sie wonsz długie mam ciało
-            me szczenki silne chodź głowę mam mało
-            gdy pora karmienia unosze łep
-            rozdziawiam szeroko i ciamkam chlep
+            Generate the results.
           </div>
         </div>
         <div class="fields_in_options">
           <div class="field_container"></div>
           <div class="field_container">
-            <button id="start" class="icon_button">GENERATE
+            <button id="start" class="icon_button" onclick="startTranscription()">
+              Generate
               <span class="material-symbols-outlined">start</span>
             </button>
           </div>
@@ -225,10 +261,14 @@
     </div>
     <div id="results_fields">
       <fieldset id="show_transcript" class="result_windows">
-        <legend>Transcript</legend>
+        <legend class="result_legend">Transcript</legend>
         <button onclick="copyToClipboard(document.getElementById('transcription_result').innerText)"
-          class="copy_button">
+          class="result_option_button copy_button" disabled>
           <span class="material-symbols-outlined">content_copy</span>
+        </button>
+        <button onclick="downloadAsFile(document.getElementById('transcription_result').innerText, 'transcript.txt')"
+          class="result_option_button download_button" disabled>
+          <span class="material-symbols-outlined">download</span>
         </button>
         &nbsp;
         <span id="transcription_result" contenteditable="true" class="result_span"></span>
@@ -237,9 +277,14 @@
         <span class="material-symbols-outlined">sync_alt</span>
       </div>
       <fieldset id="show_translation" class="result_windows hidden">
-        <legend>Translation</legend>
-        <button onclick="copyToClipboard(document.getElementById('translation_result').innerText)" class="copy_button">
+        <legend class="result_legend">Translation</legend>
+        <button onclick="copyToClipboard(document.getElementById('translation_result').innerText)"
+          class="result_option_button copy_button" disabled>
           <span class="material-symbols-outlined">content_copy</span>
+        </button>
+        <button onclick="downloadAsFile(document.getElementById('translation_result').innerText, 'translation.txt')"
+          class="result_option_button download_button" disabled>
+          <span class="material-symbols-outlined">download</span>
         </button>
         <span id="translation_result" class="result_span">&nbsp;</span>
       </fieldset>
@@ -252,9 +297,10 @@
     const translationCheckbox = document.getElementById("translate");
     const rolesCheckbox = document.getElementById("role_division");
     const translationList = document.getElementById("choose_trans_lang");
-    const fourthTile = document.getElementById("fourth_tile");
     const translate_check = document.getElementById("translate");
     const roles_check = document.getElementById("role_division");
+    const fourthTile = document.getElementById("fourth_tile");
+    const generateButton = document.getElementById("start");
 
     document.body.addEventListener("drop", (e) => {
       e.preventDefault();
@@ -284,31 +330,12 @@
         translationCheckbox.disabled = false;
         rolesCheckbox.disabled = false;
         translationList.disabled = false;
-        fourthTile.classList.remove("locked");
         translate_check.disabled = false;
         roles_check.disabled = false;
+        fourthTile.classList.remove("locked");
+        generateButton.disabled = false;
       }
     });
-
-    function copyToClipboard(text) {
-      if (location.protocol === 'https:') {
-        navigator.clipboard.writeText(text)
-          .then(() => { })
-          .catch((err) => console.error('Unable to copy to clipboard', err));
-      } else {
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        try {
-          document.execCommand('copy');
-        } catch (err) {
-          console.error('Unable to copy to clipboard', err);
-        }
-        document.body.removeChild(textArea);
-      }
-    }
   </script>
   </body>
 

@@ -103,3 +103,7 @@ body {
     background-color: white;
     color: gray;
 }
+
+.below_password {
+    height: 2vw;
+}

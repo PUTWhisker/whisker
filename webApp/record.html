@@ -1,31 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>DEMO PAGE</title>
-    <script src="./dist/main.js"></script>
-    <link rel="stylesheet" href="style.css">
-    <link rel="shortcut icon" href="#">
-  </head>
-  <body>
-    <main>
-        <div>
-            <a href="http://127.0.0.1:5500/webApp/index.html">
-                <button> GO TO FILE TRANSCRIPTION</button>
-            </a>
-        </div>
-        <div>
-          <fieldset>
-            <legend>Audio record</legend>
-            <form id="send_recording">
-              <input type="button" value="record" id="record" class="button"/> <br />
-              <input type="button" value="stop" id="stop" class="button"/> <br />
-            </form>
-            <article id="clips">
 
-            </article>
-          </fieldset>
-        </div>
-    </main>
-  </body>
+<head>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <meta charset="UTF-8">
+  <!-- <title>transkrip</title> -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="record_style.css">
+  <link rel="shortcut icon" href="#">
+</head>
+
+<body>
+  <main>
+    <div id="top_menu">
+      <p>Name</p>
+      <a href="http://127.0.0.1:5500/webApp/index.html" class="icon_button">
+        Transcribe <span class="material-symbols-outlined">edit_document</span>
+      </a>
+      <a href="http://127.0.0.1:5500/webApp/history.html" class="icon_button locked">
+        History <span class="material-symbols-outlined">lock</span>
+      </a>
+      <a href="http://127.0.0.1:5500/webApp/history.html" class="icon_button locked">
+        Swagger <span class="material-symbols-outlined">lock</span>
+      </a>
+      <a href="http://127.0.0.1:5500/webApp/about.html" class="icon_button">
+        About <span class="material-symbols-outlined">help</span>
+      </a>
+      <div id="blank_space"></div>
+      <a href="http://127.0.0.1:5500/webApp/login.html" class="icon_button">
+        Log in&nbsp;<span class="material-symbols-outlined">login</span>
+      </a>
+      <a href="http://127.0.0.1:5500/webApp/signup.html" class="icon_button">
+        Sign up&nbsp;<span class="material-symbols-outlined">person_add</span>
+      </a>
+    </div>
+    <center>
+      <fieldset id="show_transcript" class="result_windows">
+        <legend id="transcript_title">
+          <div id="top_options">
+            <div class="record_tip" contenteditable="true"></div>
+            <select id="choose_record_lang">
+              <option disabled selected>Detect language</option>
+              <option>Polish</option>
+              <option>English</option>
+              <option>German</option>
+            </select>
+          </div>
+        </legend>
+        <button onclick="copyToClipboard(document.getElementById('transcription_result').innerText)"
+          class="result_option_button copy_button" disabled>
+          <span class="material-symbols-outlined">content_copy</span>
+        </button>
+        <button onclick="downloadAsFile(document.getElementById('transcription_result').innerText, 'transcript.txt')"
+          class="result_option_button download_button" disabled>
+          <span class="material-symbols-outlined">download</span>
+        </button>
+        <br>
+        <span id="before_recording">
+          Click the microphone icon to start dictating.
+          <br>
+          You may edit, copy or download recorded text as a .txt file.
+        </span>
+        <br>
+        <span id="transcription_result" contenteditable="true" class="result_span"></span>
+      </fieldset>
+      <div id="mic_button" onclick="changeMicState(this)"><span class="material-symbols-outlined">mic</span></div>
+      <div id="recording_dots" class="hidden">
+        <div class="recording_info_element"> Recording &nbsp &nbsp</div>
+        <div class="recording_info_element loader"></div>
+      </div>
+    </center>
+  </main>
+  <script>
+    var recording = false;
+    function changeMicState(microphone) {
+      const recording_dots = document.getElementById("recording_dots");
+      recording = !recording;
+      const icon = microphone.querySelector('.material-symbols-outlined');
+      icon.innerText = recording ? 'stop_circle' : 'mic';
+      recording_dots.classList.toggle('hidden');
+    }
+  </script>
+</body>
+
 </html>
