@@ -46,4 +46,3 @@ message SpeakerAndLineResponse {
     repeated string speakerName = 2;
     string detected_language = 3;
 }
-
