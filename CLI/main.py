@@ -92,13 +92,6 @@ def parse() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "--edit",
-        type=str,
-        default=None,
-        help="Set this flag to modify saved transcription history"
-    )
-
-    parser.add_argument(
         "fileName", nargs="?", default=None, help="File to be transcripted"
     )
 
@@ -149,11 +142,9 @@ async def main(parser: argparse.ArgumentParser):
             await console.register()
         elif args.retrieve:
             if token != "":
-                await console.getTranslation()
+                await console.retrieveHistory()
             else:
                 print("Login into your account first!")
-        elif args.edit:
-            await console.edit()
         elif args.username is not None:
             token = await console.retreiveToken(args.username)
             set_key(env, "JWT_TOKEN", token)
