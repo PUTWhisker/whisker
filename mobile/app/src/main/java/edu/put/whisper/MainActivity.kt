@@ -18,7 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import edu.put.whisper.utilities.Utilities
+import edu.put.whisper.utils.Utilities
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
@@ -68,7 +68,6 @@ class MainActivity : AppCompatActivity() {
         utilities = Utilities(this)
         tvTimer = findViewById(R.id.tvTimer)
         waveformView = findViewById(R.id.waveformView)
-
         btnStop = findViewById(R.id.btnStop)
         btnResume = findViewById(R.id.btnResume)
         btnSave = findViewById(R.id.btnSave)
@@ -77,8 +76,6 @@ class MainActivity : AppCompatActivity() {
         btnRecord = findViewById(R.id.btnRecord)
         val bottomSheet: LinearLayout = findViewById(R.id.bottomSheet)
         bottomSheetBG = findViewById(R.id.bottomSheetBG)
-
-
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.peekHeight = 0
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
@@ -91,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         btnBack = findViewById(R.id.btnBack)
 
 
-        if (isMicrophonePresent()) {
+        if (utilities.isMicrophonePresent()) {
             getMicrophonePermission()
         }
 
@@ -155,7 +152,7 @@ class MainActivity : AppCompatActivity() {
 
 //    /storage/emulated/0/Android/data/edu.put.whisper/files/Music/test.mp3
     fun btnRecordPressed(v: View) {
-        tempFilePath = getTempRecordingFilePath()
+        tempFilePath = utilities.getTempRecordingFilePath()
         utilities.setVisibility(View.GONE, btnList, btnRecord, btnBack)
         utilities.setVisibility(View.VISIBLE, btnSave, btnStop, btnTranscript, btnDelete)
         btnStop.setImageResource(R.drawable.ic_pause)
@@ -190,23 +187,31 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "No text to copy", Toast.LENGTH_SHORT).show()
         }
     }
-    fun btnTranscriptPressed(v:View){
-
+    fun btnTranscriptPressed(v: View) {
         if (!isRecordingStopped) {
             Toast.makeText(this, "Please stop the recording first", Toast.LENGTH_LONG).show()
             return
         }
 
-        utilities.setVisibility(View.GONE, tvTimer, btnRecord, btnList, btnResume, btnStop, btnCancel, btnSave, btnDelete, waveformView, btnTranscript)
-        utilities.setVisibility(View.VISIBLE, tvTranscript, btnBack)
-
         lifecycleScope.launch {
             val filePath = tempFilePath ?: return@launch
-            uploadRecording(filePath, "pl")
+            utilities.uploadRecording(filePath, "en") { output ->
+                runOnUiThread {
+                    if (output != null) {
+                        val intent = Intent(this@MainActivity, TranscriptionDetailActivity::class.java).apply {
+                            putExtra("EXTRA_TRANSCRIPTION_TEXT", output)
+                            putExtra("EXTRA_TRANSCRIPTION_DATE", SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()))
+                        }
+                        startActivity(intent)
+                    } else {
+                        val intent = Intent(this@MainActivity, TranscriptionDetailActivity::class.java).apply {
+                            putExtra("EXTRA_ERROR_MESSAGE", "Transkrypcja nie jest dostępna.")
+                        }
+                        startActivity(intent)
+                    }
+                }
+            }
         }
-
-
-
     }
 
     fun btnStopPressed(v: View) {
@@ -230,9 +235,7 @@ class MainActivity : AppCompatActivity() {
     fun btnResumePressed(v: View) {
         try {
             mediaRecorder?.apply {
-                // Resetowanie MediaRecorder, aby przygotować go do ponownego użycia
                 reset()
-                // Ustawienie ustawień MediaRecorder na te same, co wcześniej
                 setAudioSource(MediaRecorder.AudioSource.MIC)
                 setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
                 setOutputFile(tempFilePath)
@@ -241,7 +244,6 @@ class MainActivity : AppCompatActivity() {
                 start()
             }
 
-            // Resetowanie zegara i innych zmiennych
             elapsedTime = 0L
             startTime = System.currentTimeMillis()
 
@@ -309,7 +311,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Generate a default file name based on the current date and time
-        val defaultFileName = generateDefaultFileName()
+        val defaultFileName = utilities.generateDefaultFileName()
 
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetBG.visibility = View.VISIBLE
@@ -317,11 +319,6 @@ class MainActivity : AppCompatActivity() {
         filenameInput.setText(defaultFileName) // Set the default file name
 
     }
-
-    private fun isMicrophonePresent(): Boolean {
-        return packageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)
-    }
-
     private fun getMicrophonePermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
             == PackageManager.PERMISSION_DENIED
@@ -334,26 +331,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getRecordingFilePath(fileName: String): String {
-        val musicDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC)
-        if (!musicDirectory.exists()) {
-            musicDirectory.mkdirs() // Utwórz katalog, jeśli nie istnieje
-        }
-        val file = File(musicDirectory, "$fileName.mp3")
-        return file.path
-    }
-
-    private fun getTempRecordingFilePath(): String {
-        val contextWrapper = ContextWrapper(applicationContext)
-        val musicDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
-        val tempFile = File(musicDirectory, "tempRecording.mp3")
-        return tempFile.path
-    }
-
     private fun saveRecording(fileName: String) {
         currentFileName = fileName
         try {
-            val finalFilePath = getRecordingFilePath(currentFileName!!)
+            val finalFilePath = utilities.getRecordingFilePath(currentFileName!!)
             val tempFile = File(tempFilePath!!)
             val finalFile = File(finalFilePath)
 
@@ -364,7 +345,6 @@ class MainActivity : AppCompatActivity() {
             mediaRecorder?.release()
             mediaRecorder = null
 
-            // Zapisywanie rekordu w bazie danych
             val dirPath = getExternalFilesDir(Environment.DIRECTORY_MUSIC)?.absolutePath
             if (dirPath == null) {
                 Toast.makeText(this, "Error: Unable to access music directory", Toast.LENGTH_LONG).show()
@@ -413,30 +393,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun generateDefaultFileName(): String {
-        val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-        val date = Date()
-        return "recording_${dateFormat.format(date)}"
-    }
-
-    private suspend fun uploadRecording(filePath: String, language: String) {
-        utilities.uploadRecording(filePath, language) { output ->
-            runOnUiThread {
-                if (output != null) {
-                    tvTranscript.text = output
-                    utilities.setVisibility(View.VISIBLE, btnCopy)
-                } else {
-                    tvTranscript.text = "Transkrypcja nie jest dostępna."
-                }
-            }
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         val tempFile = File(tempFilePath ?: return)
         if (tempFile.exists()) {
-            tempFile.delete() // Delete the temporary file if it exists
+            tempFile.delete()
         }
     }
 }
