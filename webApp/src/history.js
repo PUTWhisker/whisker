@@ -40,16 +40,13 @@ window.onload = function() {
 
 async function getTranscriptionEvent() {
     const start_time = new proto.google.protobuf.Timestamp()
-    let time = new Date("2024.01.01 00:00:00")
-    console.log(time)
-    start_time.fromDate(time)
+    start_time.fromDate(new Date("2024-01-01T00:00:00Z"))
     let end_time = new proto.google.protobuf.Timestamp()
     end_time.fromDate(new Date())
-    console.log(end_time)
     let limit = 2
     let transcriptions = getTranscription(start_time, end_time, limit)
     for await (const transcription of transcriptions) {
-        console.log(transcription)
+        console.log(transcription.getTranscription())
     }
 }
 
@@ -70,11 +67,16 @@ async function deleteTranscriptionEvent() {
 
 
 async function getTranslationEvent() {
-    let start_time = new Date()
-    let end_time = new Date()
-    let limit = 2
-    let translations = await getTranscription(start_time, end_time, limit)
-    console.log(translations)
+    const start_time = new proto.google.protobuf.Timestamp()
+    start_time.fromDate(new Date("2024-01-01T00:00:00Z"))
+    let end_time = new proto.google.protobuf.Timestamp()
+    end_time.fromDate(new Date())
+    let limit = 5
+    let translations = await getTranslation(start_time, end_time, limit)
+    for await (const translation of translations) {
+        console.log(translation.getTranslation())
+        console.log(translation.getTranscription())
+    }
 }
 
 
@@ -97,11 +99,15 @@ async function deleteTranslationEvent() {
 
 
 async function getDiarizationEvent() {
-    let start_time = new Date()
-    let end_time = new Date()
+    const start_time = new proto.google.protobuf.Timestamp()
+    start_time.fromDate(new Date("2024-01-01T00:00:00Z"))
+    let end_time = new proto.google.protobuf.Timestamp()
+    end_time.fromDate(new Date())
     let limit = 2
-    let dialogs = await getTranscription(start_time, end_time, limit)
-    console.log(dialogs)
+    let dialogs = await getDiarization(start_time, end_time, limit)
+    for await (const dialog of dialogs) {
+        console.log(dialog.getSpeaker() + "  " + dialog.getLine())
+    }
 }
 
 

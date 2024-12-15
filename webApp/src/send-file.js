@@ -49,6 +49,7 @@ export function sendFile(file, source_language) { // Send file to the server and
             if (token) {
                 metadata = {"jwt": token}
             }
+            console.log(metadata)
             soundClient.transcribeFile(request, metadata, (err, response) => {
                 if (err) {
                     console.log(`Could not send files to the server: code = ${err.code}, message = ${err.message}`)
@@ -76,8 +77,8 @@ export async function* sendFileTranslation(file, source_language, translation_la
     console.log(byteArray)
     let request = new TranslationRequest()
     request.setSoundData(byteArray)
-    request.setSourceLanguage(source_language)
-    request.setTranslationLanguage(translation_language)
+    request.setSourceLanguage("en")
+    request.setTranslationLanguage("pl")
     let metadata = {}
     let token = getCookie("acs")
     if (token) {
