@@ -9,6 +9,8 @@ import time
 import logging
 import os
 import math
+import subprocess
+import platform
 
 class LoginFailure(Exception):
     pass
@@ -166,6 +168,29 @@ class ConsolePrinter:
                 transcription.append("")
                 print()
         print() # Because sometimes the print "Execution time..." overlaps with the last line (idk why)
+
+    async def edit(self):
+        exampleText = "Never gonna give you up. Never gonna let you down. Never gonna run around and desert you."
+        # Get desired transcription history here
+        fileName = "./temp.txt"
+        with open(fileName, "w") as file:
+            file.write(exampleText)
+        if platform.system() == "Windows":
+            editor = "notepad.exe"
+        elif platform.system() == "Linux":
+            editor = "vim"
+        elif platform.system() == "Darwin":
+            editor = "vim"
+        else:
+            print("No support for text editing on this system.")
+            return
+        #subprocess.call(os.system(os.path.dirname(__file__) + fileName))
+        subprocess.call([editor, fileName])
+        with open(fileName, "r") as file:
+            exampleText = file.read()
+        print(f'{exampleText}')
+        # Submit changes here
+        os.remove("./temp.txt")
 
     def _waitingAnimation(self, dot: int) -> int:
         if dot == 3:

@@ -13,9 +13,11 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -26,7 +28,7 @@ type AuthenticationServer struct {
 }
 
 type UserClaims struct {
-	Username string `json:"username"`
+	User_id string `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
@@ -38,7 +40,12 @@ type JWTGenerator struct {
 	PrivateKeyPath string
 }
 
-func (g *JWTGenerator) generate(username string) (string, error) {
+var (
+	timestampFormat   = time.StampNano
+	errUserRegistered = status.Errorf(codes.AlreadyExists, "User already exist")
+)
+
+func (g *JWTGenerator) generate(database_id string) (string, error) {
 	var t *jwt.Token
 
 	key, err := loadPrivateECDSAKeyFromFile(g.PrivateKeyPath)
@@ -47,7 +54,7 @@ func (g *JWTGenerator) generate(username string) (string, error) {
 	}
 
 	claims := UserClaims{
-		username,
+		database_id,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
 			Issuer:    "krzysztof",
@@ -106,17 +113,18 @@ func comparePasswords(hashedPassword string, plainPassword string) bool {
 	return err == nil
 }
 
-func (s *AuthenticationServer) checkUserCredentials(email string, password string) bool {
-	password_hash, err := s.Db.getUserPassword(email)
+func (s *AuthenticationServer) checkUserCredentials(username string, password string) (string, bool) {
+	database_id, password_hash, err := s.Db.getUserInfo(username)
 	if err != nil {
-		return false
+		return "", false
 	}
-	return comparePasswords(password_hash, password)
+	return database_id, comparePasswords(password_hash, password)
 }
 
 func (s *AuthenticationServer) Login(ctx context.Context, in *pb.UserCredits) (*pb.LoginResponse, error) {
-	if s.checkUserCredentials(in.Username, in.Password) {
-		token, _ := s.JwtGenerator.generate(in.Username)
+	database_id, is_login_succesfull := s.checkUserCredentials(in.Username, in.Password)
+	if is_login_succesfull {
+		token, _ := s.JwtGenerator.generate(database_id)
 		return &pb.LoginResponse{Successful: true, JWT: token}, nil
 
 	}
@@ -128,98 +136,174 @@ func HashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-func (s *AuthenticationServer) Register(ctx context.Context, in *pb.UserCredits) (*pb.StatusResponse, error) {
-	if successful, err := s.Db.isUserInDatabase(in.Username); successful {
-		if err != nil {
-			return &pb.StatusResponse{Successful: false, Error: "Unknown error"}, nil
-		}
-		return &pb.StatusResponse{Successful: false, Error: "User already registered"}, nil
-	}
-	err := s.Db.addUserToDatabase(in.Username, in.Password)
+func (s *AuthenticationServer) Register(ctx context.Context, in *pb.UserCredits) (*emptypb.Empty, error) {
+
+	is_in_database, err := s.Db.isUserInDatabase(in.Username)
 	if err != nil {
-		return &pb.StatusResponse{Successful: false, Error: "Database error"}, nil
+		return &emptypb.Empty{}, err
 	}
-	return &pb.StatusResponse{Successful: true}, nil
+	if is_in_database {
+		return &emptypb.Empty{}, errUserRegistered
+	}
+	err = s.Db.addUserToDatabase(in.Username, in.Password)
+	if err != nil {
+		return &emptypb.Empty{}, err
+	}
+	return &emptypb.Empty{}, nil
 }
 
-func verifyJWT(tokenString string) (*jwt.Token, error) {
-	publicKey, err := loadPublicECDSAKeyFromFile(os.Getenv("JWT_PUBLIC_KEY_PATH"))
-
-	if err != nil {
-		log.Panicf("Failed to load public key %v", err)
-	}
-
-	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return publicKey, nil
-	})
-	if err != nil {
-		return nil, err
-	} else if _, ok := token.Claims.(*UserClaims); ok {
-	} else {
-		return nil, status.Error(1, "unknown claims type, cannot proceed")
-	}
-
-	// Check if the token is valid
-	if !token.Valid {
-		return nil, fmt.Errorf("invalid token")
-	}
-
-	// Return the verified token
-	return token, nil
-}
-
-func GetUserNameFromMetadata(metadata metadata.MD) (string, error) {
-	// no metadata attached
-	if metadata["jwt"] == nil {
-		return "", nil
-	}
-	unverifiedToken := metadata["jwt"][0]
-	token, err := verifyJWT(unverifiedToken)
-	if err != nil {
-		return "", err
-	}
-	claims := token.Claims.(*UserClaims)
-	return claims.Username, nil
-}
-
-func (s *AuthenticationServer) GetTranslation(_ *pb.Empty, stream pb.ClientService_GetTranslationServer) error {
-	timestampFormat := time.StampNano
-	defer func() {
-		trailer := metadata.Pairs("timestamp", time.Now().Format(timestampFormat))
-		stream.SetTrailer(trailer)
-	}()
-
-	md, ok := metadata.FromIncomingContext(stream.Context())
-	if !ok {
-		return status.Errorf(codes.DataLoss, "Failed to get metadata")
-	}
-	username, err := GetUserNameFromMetadata(md)
-
-	if err != nil {
-		return err
-	}
-
+func sendHeader(stream grpc.ServerStream) {
 	header := metadata.New(map[string]string{"location": "MTV", "timestamp": time.Now().Format(timestampFormat)})
 	stream.SendHeader(header)
+}
 
-	rows, err := s.Db.getUserTranscriptionHistory(username)
+func sendTrailer(stream grpc.ServerStream) {
+	trailer := metadata.Pairs("timestamp", time.Now().Format(timestampFormat))
+	stream.SetTrailer(trailer)
+}
+
+func (s *AuthenticationServer) GetTranscription(in *pb.QueryParamethers, stream pb.ClientService_GetTranscriptionServer) error {
+	sendHeader(stream)
+	defer sendTrailer(stream)
+	rows, err := s.Db.getUserTranscriptionHistory(stream.Context(), stream.Context().Value("user_id").(string), in)
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var transcirptionText string
+		var transcirption_text string
 		var time_added time.Time
-		err = rows.Scan(&transcirptionText, &time_added)
+		var id int32
+		var language string
+		err = rows.Scan(&id, &transcirption_text, &time_added, &language)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err := stream.Send(&pb.TextHistory{Transcription: transcirptionText, CreatedAt: timestamppb.New(time_added)})
+		err := stream.Send(&pb.TranscriptionHistory{Transcription: transcirption_text, CreatedAt: timestamppb.New(time_added), Id: id, Language: language})
 		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func (s *AuthenticationServer) EditTranscription(ctx context.Context, in *pb.NewTranscription) (*emptypb.Empty, error) {
+	err := s.Db.editTranscription(ctx, int(in.Id), ctx.Value("user_id").(string), in.Content)
+	return &emptypb.Empty{}, err
+}
+
+func (s *AuthenticationServer) DeleteTranscription(ctx context.Context, in *pb.Id) (*emptypb.Empty, error) {
+	err := s.Db.deleteTranscription(ctx, int(in.Id), ctx.Value("user_id").(string))
+	return &emptypb.Empty{}, err
+}
+
+func (s *AuthenticationServer) GetTranslation(in *pb.QueryParamethers, stream pb.ClientService_GetTranslationServer) error {
+	sendHeader(stream)
+	defer sendTrailer(stream)
+	rows, err := s.Db.getUserTranslationHistory(stream.Context(), stream.Context().Value("user_id").(string), in)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var transcirption_text string
+		var translation_text string
+		var time_added time.Time
+		var id int32
+		var translation_language string
+		var transcription_language string
+		err = rows.Scan(&id, &transcirption_text, &translation_text, &time_added, &transcription_language, &translation_language)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err := stream.Send(&pb.TranslationHistory{Transcription: transcirption_text, Translation: translation_text, CreatedAt: timestamppb.New(time_added), Id: id, TranscriptionLangauge: transcription_language, TranslationLangauge: translation_language})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *AuthenticationServer) EditTranslation(ctx context.Context, in *pb.NewTranslation) (*emptypb.Empty, error) {
+	err := s.Db.editTranslation(
+		in.EditTranscription,
+		in.EditTranslation,
+		int(in.Id),
+		in.Transcription,
+		in.Translation,
+		ctx.Value("user_id").(string))
+	return &emptypb.Empty{}, err
+}
+
+func (s *AuthenticationServer) DeleteTranslation(ctx context.Context, in *pb.Id) (*emptypb.Empty, error) {
+	err := s.Db.deleteTranscription(ctx, int(in.Id), ctx.Value("user_id").(string))
+	return &emptypb.Empty{}, err
+}
+
+func (s *AuthenticationServer) GetDiarization(in *pb.QueryParamethers, stream pb.ClientService_GetDiarizationServer) error {
+	sendHeader(stream)
+	defer sendTrailer(stream)
+	rows, err := s.Db.getUserDiarizationHistory(stream.Context(), stream.Context().Value("user_id").(string), in)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	defer rows.Close()
+	var oldId int32 = -1
+	var oldCreatedAt time.Time
+	var diarizationId int32
+	var speaker string
+	var line string
+	var createdAt time.Time
+	var language string
+
+	speakers := []string{}
+	lines := []string{}
+
+	rows.Next()
+	err = rows.Scan(&diarizationId, &speaker, &line, &createdAt, &language)
+	if err != nil {
+		return err
+	}
+	speakers = append(speakers, speaker)
+	lines = append(lines, line)
+	oldId = diarizationId
+	oldCreatedAt = createdAt
+	for rows.Next() {
+		err = rows.Scan(&diarizationId, &speaker, &line, &createdAt, &language)
+		if err != nil {
+			return err
+		}
+		if oldId != diarizationId {
+			err = stream.Send(&pb.DiarizationHistory{DiarizationId: oldId, Speaker: speakers, Line: lines, CreatedAt: timestamppb.New(oldCreatedAt), Language: language})
+			if err != nil {
+				return err
+			}
+			speakers = []string{}
+			lines = []string{}
+			oldId = diarizationId
+			oldCreatedAt = createdAt
+		}
+		speakers = append(speakers, speaker)
+		lines = append(lines, line)
+	}
+	err = stream.Send(&pb.DiarizationHistory{DiarizationId: oldId, Speaker: speakers, Line: lines, CreatedAt: timestamppb.New(oldCreatedAt), Language: language})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *AuthenticationServer) EditDiarization(ctx context.Context, in *pb.NewDiarization) (*emptypb.Empty, error) {
+	err := s.Db.editDiarization(ctx, in.Line, in.Speaker, int(in.Id), ctx.Value("user_id").(string))
+	return &emptypb.Empty{}, err
+}
+
+func (s *AuthenticationServer) DeleteDiarization(ctx context.Context, in *pb.Id) (*emptypb.Empty, error) {
+	err := s.Db.deleteDiarization(ctx, int(in.Id), ctx.Value("user_id").(string))
+	return &emptypb.Empty{}, err
 }

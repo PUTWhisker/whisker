@@ -109,5 +109,4 @@ class SoundTransferClient(uri: Uri) : Closeable {
     override fun close() {
         channel.shutdown()
     }
-
 }
