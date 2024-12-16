@@ -142,7 +142,7 @@ async def main(parser: argparse.ArgumentParser):
             await console.register()
         elif args.retrieve:
             if token != "":
-                await console.getTranslation()
+                await console.retrieveHistory()
             else:
                 print("Login into your account first!")
         elif args.username is not None:

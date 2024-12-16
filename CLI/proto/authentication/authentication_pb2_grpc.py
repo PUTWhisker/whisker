@@ -4,8 +4,9 @@ import grpc
 import warnings
 
 import authentication_pb2 as authentication__pb2
+from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
-GRPC_GENERATED_VERSION = '1.68.0'
+GRPC_GENERATED_VERSION = '1.68.1'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -39,15 +40,55 @@ class ClientServiceStub(object):
                 request_serializer=authentication__pb2.UserCredits.SerializeToString,
                 response_deserializer=authentication__pb2.LoginResponse.FromString,
                 _registered_method=True)
-        self.GetTranslation = channel.unary_stream(
-                '/ClientService/GetTranslation',
-                request_serializer=authentication__pb2.Empty.SerializeToString,
-                response_deserializer=authentication__pb2.TextHistory.FromString,
-                _registered_method=True)
         self.Register = channel.unary_unary(
                 '/ClientService/Register',
                 request_serializer=authentication__pb2.UserCredits.SerializeToString,
-                response_deserializer=authentication__pb2.StatusResponse.FromString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                _registered_method=True)
+        self.GetTranscription = channel.unary_stream(
+                '/ClientService/GetTranscription',
+                request_serializer=authentication__pb2.QueryParamethers.SerializeToString,
+                response_deserializer=authentication__pb2.TranscriptionHistory.FromString,
+                _registered_method=True)
+        self.EditTranscription = channel.unary_unary(
+                '/ClientService/EditTranscription',
+                request_serializer=authentication__pb2.NewTranscription.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                _registered_method=True)
+        self.DeleteTranscription = channel.unary_unary(
+                '/ClientService/DeleteTranscription',
+                request_serializer=authentication__pb2.Id.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                _registered_method=True)
+        self.GetTranslation = channel.unary_stream(
+                '/ClientService/GetTranslation',
+                request_serializer=authentication__pb2.QueryParamethers.SerializeToString,
+                response_deserializer=authentication__pb2.TranslationHistory.FromString,
+                _registered_method=True)
+        self.EditTranslation = channel.unary_unary(
+                '/ClientService/EditTranslation',
+                request_serializer=authentication__pb2.NewTranslation.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                _registered_method=True)
+        self.DeleteTranslation = channel.unary_unary(
+                '/ClientService/DeleteTranslation',
+                request_serializer=authentication__pb2.Id.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                _registered_method=True)
+        self.GetDiarization = channel.unary_stream(
+                '/ClientService/GetDiarization',
+                request_serializer=authentication__pb2.QueryParamethers.SerializeToString,
+                response_deserializer=authentication__pb2.DiarizationHistory.FromString,
+                _registered_method=True)
+        self.EditDiarization = channel.unary_unary(
+                '/ClientService/EditDiarization',
+                request_serializer=authentication__pb2.NewDiarization.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                _registered_method=True)
+        self.DeleteDiarization = channel.unary_unary(
+                '/ClientService/DeleteDiarization',
+                request_serializer=authentication__pb2.Id.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
 
 
@@ -60,13 +101,61 @@ class ClientServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def Register(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetTranscription(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def EditTranscription(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DeleteTranscription(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def GetTranslation(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def Register(self, request, context):
+    def EditTranslation(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DeleteTranslation(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetDiarization(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def EditDiarization(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DeleteDiarization(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -80,15 +169,55 @@ def add_ClientServiceServicer_to_server(servicer, server):
                     request_deserializer=authentication__pb2.UserCredits.FromString,
                     response_serializer=authentication__pb2.LoginResponse.SerializeToString,
             ),
-            'GetTranslation': grpc.unary_stream_rpc_method_handler(
-                    servicer.GetTranslation,
-                    request_deserializer=authentication__pb2.Empty.FromString,
-                    response_serializer=authentication__pb2.TextHistory.SerializeToString,
-            ),
             'Register': grpc.unary_unary_rpc_method_handler(
                     servicer.Register,
                     request_deserializer=authentication__pb2.UserCredits.FromString,
-                    response_serializer=authentication__pb2.StatusResponse.SerializeToString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+            'GetTranscription': grpc.unary_stream_rpc_method_handler(
+                    servicer.GetTranscription,
+                    request_deserializer=authentication__pb2.QueryParamethers.FromString,
+                    response_serializer=authentication__pb2.TranscriptionHistory.SerializeToString,
+            ),
+            'EditTranscription': grpc.unary_unary_rpc_method_handler(
+                    servicer.EditTranscription,
+                    request_deserializer=authentication__pb2.NewTranscription.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+            'DeleteTranscription': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteTranscription,
+                    request_deserializer=authentication__pb2.Id.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+            'GetTranslation': grpc.unary_stream_rpc_method_handler(
+                    servicer.GetTranslation,
+                    request_deserializer=authentication__pb2.QueryParamethers.FromString,
+                    response_serializer=authentication__pb2.TranslationHistory.SerializeToString,
+            ),
+            'EditTranslation': grpc.unary_unary_rpc_method_handler(
+                    servicer.EditTranslation,
+                    request_deserializer=authentication__pb2.NewTranslation.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+            'DeleteTranslation': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteTranslation,
+                    request_deserializer=authentication__pb2.Id.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+            'GetDiarization': grpc.unary_stream_rpc_method_handler(
+                    servicer.GetDiarization,
+                    request_deserializer=authentication__pb2.QueryParamethers.FromString,
+                    response_serializer=authentication__pb2.DiarizationHistory.SerializeToString,
+            ),
+            'EditDiarization': grpc.unary_unary_rpc_method_handler(
+                    servicer.EditDiarization,
+                    request_deserializer=authentication__pb2.NewDiarization.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+            'DeleteDiarization': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteDiarization,
+                    request_deserializer=authentication__pb2.Id.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -129,33 +258,6 @@ class ClientService(object):
             _registered_method=True)
 
     @staticmethod
-    def GetTranslation(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_stream(
-            request,
-            target,
-            '/ClientService/GetTranslation',
-            authentication__pb2.Empty.SerializeToString,
-            authentication__pb2.TextHistory.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
     def Register(request,
             target,
             options=(),
@@ -171,7 +273,250 @@ class ClientService(object):
             target,
             '/ClientService/Register',
             authentication__pb2.UserCredits.SerializeToString,
-            authentication__pb2.StatusResponse.FromString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetTranscription(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/ClientService/GetTranscription',
+            authentication__pb2.QueryParamethers.SerializeToString,
+            authentication__pb2.TranscriptionHistory.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def EditTranscription(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ClientService/EditTranscription',
+            authentication__pb2.NewTranscription.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DeleteTranscription(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ClientService/DeleteTranscription',
+            authentication__pb2.Id.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetTranslation(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/ClientService/GetTranslation',
+            authentication__pb2.QueryParamethers.SerializeToString,
+            authentication__pb2.TranslationHistory.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def EditTranslation(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ClientService/EditTranslation',
+            authentication__pb2.NewTranslation.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DeleteTranslation(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ClientService/DeleteTranslation',
+            authentication__pb2.Id.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetDiarization(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/ClientService/GetDiarization',
+            authentication__pb2.QueryParamethers.SerializeToString,
+            authentication__pb2.DiarizationHistory.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def EditDiarization(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ClientService/EditDiarization',
+            authentication__pb2.NewDiarization.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DeleteDiarization(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ClientService/DeleteDiarization',
+            authentication__pb2.Id.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options,
             channel_credentials,
             insecure,

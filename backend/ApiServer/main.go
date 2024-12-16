@@ -61,7 +61,7 @@ func registerGrpcServices(server *grpc.Server) *pgxpool.Pool {
 func main() {
 	godotenv.Load()
 	lis := createTCPListener()
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(services.JwtUnaryInterceptor), grpc.StreamInterceptor(services.JwtStreamInterceptor))
 	dbPool := registerGrpcServices(grpcServer)
 	connected := false
 	for !connected {
@@ -73,7 +73,6 @@ func main() {
 			connected = true
 		}
 	}
-	fmt.Printf("🟢 Connected to whisper server")
 	if dbPool != nil {
 		defer dbPool.Close()
 	}
