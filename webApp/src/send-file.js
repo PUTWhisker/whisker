@@ -43,7 +43,7 @@ export function sendFile(file, source_language) { // Send file to the server and
             console.log(byteArray)
             let request = new TranscriptionRequest()
             request.setSoundData(byteArray)
-            request.setSourceLanguage("en")
+            request.setSourceLanguage(source_language)
             let metadata = {}
             let token = getCookie("acs")
             if (token) {
@@ -77,8 +77,8 @@ export async function* sendFileTranslation(file, source_language, translation_la
     console.log(byteArray)
     let request = new TranslationRequest()
     request.setSoundData(byteArray)
-    request.setSourceLanguage("en")
-    request.setTranslationLanguage("pl")
+    request.setSourceLanguage(source_language)
+    request.setTranslationLanguage(translation_language)
     let metadata = {}
     let token = getCookie("acs")
     if (token) {
@@ -146,14 +146,13 @@ export function diarizateFile(file, source_language) {
                     console.log(`Could not send files to the server: code = ${err.code}, message = ${err.message}`)
                     reject(err)
                 }
-                let answer = response.getText()
-                console.log(answer)
                 console.log("Success! Answer should be visible in the console")
-                resolve(answer)
+                resolve(response)
             })
         }
     })
 }
+
 
 function convertFloat32ToUint8(float32Array) {
     let array = new Uint8Array(float32Array.length * float32Array[0].length)

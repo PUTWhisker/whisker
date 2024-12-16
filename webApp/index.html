@@ -73,41 +73,41 @@
   <!-- API handler -->
   <script src="text_file_io.js"></script>
   <script>
-    function placeholderFetchTranscript() {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve("nazywam sie wonsz długie mam ciało me szczenki silne chodź głowę mam mało gdy pora karmienia unosze łep rozdziawiam szeroko i ciamkam chlep");
-        }, 2000);
-      });
-    }
-    function placeholderFetchTranslation() {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve("me llamo wonsz, tengo un cuerpo alargado, mis mandibulas son fuertes, aunque mi cabeza es pequeña, cuando llega la hora de comer levanto la cabeza, la abro de par en par y mastico la bazofia");
-        }, 2200);
-      });
-    }
-    function startTranscription() {
-      const translationCheckBox = document.getElementById("translate");
-      const transcriptionResult = document.getElementById("transcription_result");
-      const transciptionButtons = document.getElementById("show_transcript").querySelectorAll(".result_option_button");
-      const translationButtons = document.getElementById("show_translation").querySelectorAll(".result_option_button");
-      transcriptionResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
-      transciptionButtons.forEach((e) => e.disabled = true);
-      placeholderFetchTranscript().then((transcript) => {
-        transcriptionResult.innerHTML = transcript;
-        transciptionButtons.forEach((e) => e.disabled = false);
-      });
-      if (translationCheckBox.checked) {
-        const translationResult = document.getElementById("translation_result");
-        translationResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
-        translationButtons.forEach((e) => e.disabled = true);
-        placeholderFetchTranslation().then((translation) => {
-          translationResult.innerHTML = translation;
-          translationButtons.forEach((e) => e.disabled = false);
-        });
-      }
-    }
+    // function placeholderFetchTranscript() {
+    //   return new Promise((resolve) => {
+    //     setTimeout(() => {
+    //       resolve("");
+    //     }, 2000);
+    //   });
+    // }
+    // function placeholderFetchTranslation() {
+    //   return new Promise((resolve) => {
+    //     setTimeout(() => {
+    //       resolve("");
+    //     }, 2200);
+    //   });
+    // }
+    // function startTranscription() {
+    //   const translationCheckBox = document.getElementById("translate");
+    //   const transcriptionResult = document.getElementById("transcription_result");
+    //   const transciptionButtons = document.getElementById("show_transcript").querySelectorAll(".result_option_button");
+    //   const translationButtons = document.getElementById("show_translation").querySelectorAll(".result_option_button");
+    //   transcriptionResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
+    //   transciptionButtons.forEach((e) => e.disabled = true);
+    //   placeholderFetchTranscript().then((transcript) => {
+    //     transcriptionResult.innerHTML = transcript;
+    //     transciptionButtons.forEach((e) => e.disabled = false);
+    //   });
+    //   if (translationCheckBox.checked) {
+    //     const translationResult = document.getElementById("translation_result");
+    //     translationResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
+    //     translationButtons.forEach((e) => e.disabled = true);
+    //     placeholderFetchTranslation().then((translation) => {
+    //       translationResult.innerHTML = translation;
+    //       translationButtons.forEach((e) => e.disabled = false);
+    //     });
+    //   }
+    // }
   </script>
   <link rel="stylesheet" href="style.css">
   <link rel="shortcut icon" href="#">
@@ -247,7 +247,7 @@
         <div class="fields_in_options">
           <div class="field_container"></div>
           <div class="field_container">
-            <button id="start" class="icon_button" onclick="startTranscription()">
+            <button id="start" class="icon_button">
               Generate
               <span class="material-symbols-outlined">start</span>
             </button>
@@ -262,11 +262,11 @@
       <fieldset id="show_transcript" class="result_windows">
         <legend class="result_legend">Transcript</legend>
         <button onclick="copyToClipboard(document.getElementById('transcription_result').innerText)"
-          class="result_option_button copy_button" disabled>
+          class="result_option_button copy_button">
           <span class="material-symbols-outlined">content_copy</span>
         </button>
         <button onclick="downloadAsFile(document.getElementById('transcription_result').innerText, 'transcript.txt')"
-          class="result_option_button download_button" disabled>
+          class="result_option_button download_button">
           <span class="material-symbols-outlined">download</span>
         </button>
         &nbsp;
@@ -278,11 +278,11 @@
       <fieldset id="show_translation" class="result_windows hidden">
         <legend class="result_legend">Translation</legend>
         <button onclick="copyToClipboard(document.getElementById('translation_result').innerText)"
-          class="result_option_button copy_button" disabled>
+          class="result_option_button copy_button">
           <span class="material-symbols-outlined">content_copy</span>
         </button>
         <button onclick="downloadAsFile(document.getElementById('translation_result').innerText, 'translation.txt')"
-          class="result_option_button download_button" disabled>
+          class="result_option_button download_button">
           <span class="material-symbols-outlined">download</span>
         </button>
         <span id="translation_result" class="result_span">&nbsp;</span>

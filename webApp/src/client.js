@@ -22,8 +22,12 @@ async function processFile() {
         return
     }
     try {
+        const transcriptionResult = document.getElementById("transcription_result");
+        transcriptionResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
         if (document.getElementById("translate").checked) {
             console.log("Trying to execute translation")
+            const translationResult = document.getElementById("translation_result");
+            translationResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
             let translate_language = document.getElementById("choose_trans_lang").value
             if (translate_language == "Choose language") {
                 translate_language = ""
@@ -40,9 +44,12 @@ async function processFile() {
                         }
                     }
         } else if (document.getElementById("role_division").checked){
-            let res = await diarizateFile(uploadedFile.files[0], source_language)
-            for (res in answer) {
-                document.getElementById("transcription_result").textContent += res.getSpeakerName() + " " + res.getText()
+            let answer = await diarizateFile(uploadedFile.files[0], source_language)
+            let speakers = answer.getSpeakernameList()
+            let line = answer.getTextList()
+            document.getElementById("transcription_result").textContent = ""
+            for (let i = 0; i < speakers.length; i++) {
+                document.getElementById("transcription_result").textContent += speakers[i] + ": " + line[i]
             }
         } else {
             console.log("Trying to execute transcription")
