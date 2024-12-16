@@ -19,7 +19,6 @@
                 {
                     'date': '24.12.2024',
                     'file_size': '25kB',
-                    'file_audio': 'https://dl.dropbox.com/scl/fi/yn7pa2tw6tra971elx9fu/wonsz.mp3?rlkey=w0a5cijnl2fogf0zcybjy0e5l&dl=1',
                     'transcription_result': 'Z podanej ilości składników otrzymasz całą kaczkę pieczoną z farszem z jabłek i żurawiny. Będą to cztery duże lub sześć mniejszych porcji.',
                     'translation_result': 'The given amount of ingredients will give you a whole duck baked with apple and cranberry stuffing. These will be four large or six smaller portions.',
                     'selected_options': {
@@ -31,7 +30,6 @@
                 {
                     'date': '04.12.2024',
                     'file_size': '6kB',
-                    'file_audio': 'https://dl.dropbox.com/scl/fi/z7167n9k8ayby0352fd4y/wonsz2.mp3?rlkey=i6sgqvu0re8bmy5b3ghfifcyg&dl=1',
                     'transcription_result': 'The meat should reach room temperature.',
                     'selected_options': {
                         'original_language': 'en_uk',
@@ -106,8 +104,10 @@
                     audioFileDownload.appendChild(audioIcon);
                     audioIcon.innerHTML = '<span class="material-symbols-outlined">brand_awareness</span>';
                     audioIcon.onclick = () => {
-                        const audio = new Audio(event.file_audio);
-                        audio.play();
+                        const message = new SpeechSynthesisUtterance();
+                        message.text = event.transcription_result;
+                        const speechSynthesis = window.speechSynthesis;
+                        speechSynthesis.speak(message);
                     };
 
                     // const downloadIcon = createElement('button', null, ['event_audio_download_icon']);
