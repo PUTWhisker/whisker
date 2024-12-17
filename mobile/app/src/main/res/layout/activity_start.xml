@@ -16,16 +16,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/llLoginRegister"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="end"
+            android:padding="16dp"
             android:orientation="horizontal"
-            android:padding="16dp">
+            android:background = "@color/primaryDark">
 
             <TextView
                 android:id="@+id/tvHello"
@@ -85,13 +85,34 @@
                 app:rippleColor="@color/grayDark" />
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/logoWhisper"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@drawable/logo_whisper"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="24dp" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primaryDark">
+
+            <ImageView
+                android:id="@+id/logoWhisper"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center"
+                app:tint="@color/white"
+                android:src="@drawable/voicememoslogo"/>
+        </FrameLayout>
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primaryDark">
+
+            <View
+                android:id="@+id/arcView"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/white_arc" />
+        </FrameLayout>
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTranscriptions"
@@ -124,12 +145,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="6dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:background="@color/primary">
+                style="@style/CardViewStyle">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -139,12 +155,8 @@
 
                     <ImageView
                         android:id="@+id/icon"
-                        android:layout_width="65dp"
-                        android:layout_height="65dp"
-                        android:padding="20dp"
                         android:src="@drawable/ic_mic"
-                        android:background="@drawable/circle_icon_background"
-                        app:tint="@color/white"
+                        style="@style/ImageViewStyle"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent" />
@@ -154,8 +166,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="Record a file to transcript"
-                        android:textSize="18sp"
-                        android:textColor="@color/playerColor"
+                        style="@style/TextViewStyle"
                         app:layout_constraintStart_toEndOf="@id/icon"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -164,10 +175,7 @@
 
                     <ImageView
                         android:id="@+id/arrow"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_arrow"
-                        app:tint="@color/primary"
+                        style="@style/ImageViewArrowStyle"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -181,12 +189,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="6dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:background="@color/primary">
+                style="@style/CardViewStyle">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -196,12 +199,8 @@
 
                     <ImageView
                         android:id="@+id/icon2"
-                        android:layout_width="65dp"
-                        android:layout_height="65dp"
-                        android:padding="20dp"
                         android:src="@drawable/ic_file"
-                        android:background="@drawable/circle_icon_background"
-                        app:tint="@color/white"
+                        style="@style/ImageViewStyle"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent" />
@@ -210,8 +209,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="Choose a file to transcript"
-                        android:textSize="18sp"
-                        android:textColor="@color/playerColor"
+                        style="@style/TextViewStyle"
                         app:layout_constraintStart_toEndOf="@id/icon2"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -219,10 +217,7 @@
                         android:layout_marginStart="12dp" />
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_arrow"
-                        app:tint="@color/primary"
+                        style="@style/ImageViewArrowStyle"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -236,12 +231,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="6dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:background="@color/primary">
+                style="@style/CardViewStyle">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -251,12 +241,8 @@
 
                     <ImageView
                         android:id="@+id/icon3"
-                        android:layout_width="65dp"
-                        android:layout_height="65dp"
-                        android:padding="20dp"
                         android:src="@drawable/ic_live"
-                        android:background="@drawable/circle_icon_background"
-                        app:tint="@color/white"
+                        style="@style/ImageViewStyle"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent" />
@@ -265,8 +251,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="Transcript live"
-                        android:textSize="18sp"
-                        android:textColor="@color/playerColor"
+                        style="@style/TextViewStyle"
                         app:layout_constraintStart_toEndOf="@id/icon3"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -274,10 +259,7 @@
                         android:layout_marginStart="12dp" />
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_arrow"
-                        app:tint="@color/primary"
+                        style="@style/ImageViewArrowStyle"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"

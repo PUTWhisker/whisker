@@ -168,6 +168,6 @@
         android:layout_height="match_parent"
         android:background="@color/opaqueBG"/>
 
-<!--    <include layout="@layout/bottom_popup"/>-->
+    <include layout="@layout/bottom_popup"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
