@@ -107,7 +107,7 @@ class GrpcClient:
         except Exception as e:
             raise e
         
-    #TODO: try to transfer message sending from audio.py to here
+
     async def transcribeLive(self) -> Union[bool, grpc.RpcError]:
         try:
             recording = audio.AudioRecorder(self.save)  # Initiate recording class
@@ -159,7 +159,6 @@ class GrpcClient:
             metadata = (
                 ("jwt", self.token),
             )
-            params.convertDate()
             responseIter = stub.GetTranscription(
                 authentication_pb2.QueryParamethers(
                     start_time=params.startTime,
@@ -222,7 +221,6 @@ class GrpcClient:
             metadata = (
                 ("jwt", self.token),
             )
-            params.convertDate()
             responseIter = stub.GetTranslation(
                 authentication_pb2.QueryParamethers(
                     start_time=params.startTime,
@@ -294,7 +292,6 @@ class GrpcClient:
             metadata = (
                 ("jwt", self.token),
             )
-            params.convertDate()
             responseIter = stub.GetDiarization(
                 authentication_pb2.QueryParamethers(
                     start_time=params.startTime,

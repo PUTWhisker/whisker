@@ -89,7 +89,7 @@ class ConsolePrinter:
         if self.language is None:
             print(f"Detected transcription language: {scripts.detected_language}")
         for speaker, text in zip(speakers, texts):
-            print(f"\033[1m\033[38;2;{speakerColors[speaker][0]};{speakerColors[speaker][1]};{speakerColors[speaker][2]}m{speaker}\033[0m: {text}")
+            print(f"\033[1m\033[38;2;{speakerColors[speaker][0]};{speakerColors[speaker][1]};{speakerColors[speaker][2]}m{speaker}: {text}\033[0m")
 
 
     @_errorHandler
@@ -196,29 +196,32 @@ class ConsolePrinter:
                 history[str(response.id)] = response.transcription
                 print(f'\033[1m[{response.id} | {creationTime} | {response.language}]:\033[0m {response.transcription}')
             return history
-        
-        print("Choose filters for transcription retrieving")
-        params = await self._setParameters(QuerryParameters(False))
-        print("Response structure: \033[1m[id | creation_time | lanugage]:\033[0m transcription")
-        history = await transcriptionHistoryRequest(params)
-        print("\nWrite 'e<id> to edit transcription. Write 'd<id>' to delete transcription. Write '0' to end program.")
-        choice = input()
-        while choice != 0:
-            if len(choice) > 1 and choice[1:len(choice)].isdigit() and choice[1:len(choice)] in history:
-                if choice[0] == "e":
-                    correctedTranscription = await self._editTranscription(history[choice[1:len(choice)]])
-                    await self.grpcClient.editTranscription(int(choice[1:len(choice)]), correctedTranscription)
-                    history = await transcriptionHistoryRequest(params)
-                    print("\nWrite 'e<id> to edit transcription. Write 'd<id>' to delete transcription. Write '0' to end program.")
-                elif choice[0] == "d":
-                    await self.grpcClient.deleteTranscription(int(choice[1:len(choice)]))
-                    history = await transcriptionHistoryRequest(params)
-                    print("\nWrite 'e<id> to edit transcription. Write 'd<id>' to delete transcription. Write '0' to end program.")
-            elif choice == "0":
-                break
-            else:
-                print("\033[1mIncorrect input.\033[0m")
+        try:
+            print("Choose filters for transcription retrieving")
+            params = await self._setParameters(QuerryParameters(False))
+            params.convertDate()
+            print("Response structure: \033[1m[id | creation_time | lanugage]:\033[0m transcription")
+            history = await transcriptionHistoryRequest(params)
+            print("\nWrite 'e<id>' to edit transcription. Write 'd<id>' to delete transcription. Write '0' to end program.")
             choice = input()
+            while choice != 0:
+                if len(choice) > 1 and choice[1:len(choice)].isdigit() and choice[1:len(choice)] in history:
+                    if choice[0] == "e":
+                        correctedTranscription = await self._editTranscription(history[choice[1:len(choice)]])
+                        await self.grpcClient.editTranscription(int(choice[1:len(choice)]), correctedTranscription)
+                        history = await transcriptionHistoryRequest(params)
+                        print("\nWrite 'e<id>' to edit transcription. Write 'd<id>' to delete transcription. Write '0' to end program.")
+                    elif choice[0] == "d":
+                        await self.grpcClient.deleteTranscription(int(choice[1:len(choice)]))
+                        history = await transcriptionHistoryRequest(params)
+                        print("\nWrite 'e<id>' to edit transcription. Write 'd<id>' to delete transcription. Write '0' to end program.")
+                elif choice == "0":
+                    break
+                else:
+                    print("\033[1mIncorrect input.\033[0m")
+                choice = input()
+        except Exception as e:
+            print(e)
         return
     
 
@@ -236,9 +239,10 @@ class ConsolePrinter:
         
         print("Choose filters for translation retrieving")
         params = await self._setParameters(QuerryParameters(True))
+        params.convertDate()
         print("Response structure: \033[1m[id | creation_time | audio_language -> translate_language]\033[0m\n transcription\n translation")
         history = await translationHistoryRequest(params)
-        print("\nWrite 'e<id> to edit translation. Write 'd<id>' to delete translation. Write '0' to end program.")
+        print("\nWrite 'e<id>' to edit translation. Write 'd<id>' to delete translation. Write '0' to end program.")
         choice = input()
         while choice != 0:
             if len(choice) > 1 and choice[1:len(choice)].isdigit() and choice[1:len(choice)] in history:
@@ -251,11 +255,11 @@ class ConsolePrinter:
                         editTranslation = True
                     await self.grpcClient.editTranslation(int(choice[1:len(choice)]), correctedTranslation[0], correctedTranslation[1], editTranscription, editTranslation)
                     history = await translationHistoryRequest(params)
-                    print("\nWrite 'e<id> to edit translation. Write 'd<id>' to delete translation. Write '0' to end program.")
+                    print("\nWrite 'e<id>' to edit translation. Write 'd<id>' to delete translation. Write '0' to end program.")
                 elif choice[0] == "d":
                     await self.grpcClient.deleteTranslation(int(choice[1:len(choice)]))
                     history = await translationHistoryRequest(params)
-                    print("\nWrite 'e<id> to edit translation. Write 'd<id>' to delete translation. Write '0' to end program.")
+                    print("\nWrite 'e<id>' to edit translation. Write 'd<id>' to delete translation. Write '0' to end program.")
             elif choice == "0":
                 break
             else:
@@ -276,14 +280,15 @@ class ConsolePrinter:
                 print(f'\033[1m[{response.diarization_id} | {creationTime} | {response.language}]:\033[0m')
                 speakerColors = self._generateRandomUniqueColors(response.speaker)
                 for speaker, line in zip(response.speaker, response.line):
-                    print(f"\033[1m\033[38;2;{speakerColors[speaker][0]};{speakerColors[speaker][1]};{speakerColors[speaker][2]}m{speaker}\033[0m: {line}")
+                    print(f"\033[1m\033[38;2;{speakerColors[speaker][0]};{speakerColors[speaker][1]};{speakerColors[speaker][2]}m{speaker}: {line}\033[0m")
             return history
         
         print("Choose filters for diarization retrieving")
-        params = await self._setParameters(QuerryParameters(True))
+        params = await self._setParameters(QuerryParameters(False))
+        params.convertDate()
         print("Response structure: \033[1m[id | creation_time | language]\033[0m\nspeaker: speaker_line")
         history = await diarizationHistoryRequest(params)
-        print("\nWrite 'e<id> to edit dialog. Write 'd<id>' to delete dialog. Write '0' to end program.")
+        print("\nWrite 'e<id>' to edit dialog. Write 'd<id>' to delete dialog. Write '0' to end program.")
         choice = input()
         while choice != 0:
             if len(choice) > 1 and choice[1:len(choice)].isdigit() and choice[1:len(choice)] in history:
@@ -291,11 +296,11 @@ class ConsolePrinter:
                     correctedDiarization = await self._editDiarization(history[choice[1:len(choice)]])
                     await self.grpcClient.editDiarization(int(choice[1:len(choice)]), correctedDiarization[0], correctedDiarization[1])
                     history = await diarizationHistoryRequest(params)
-                    print("\nWrite 'e<id> to edit dialog. Write 'd<id>' to delete dialog. Write '0' to end program.")
+                    print("\nWrite 'e<id>' to edit dialog. Write 'd<id>' to delete dialog. Write '0' to end program.")
                 elif choice[0] == "d":
                     await self.grpcClient.deleteDiarization(int(choice[1:len(choice)]))
                     history = await diarizationHistoryRequest(params)
-                    print("\nWrite 'e<id> to edit dialog. Write 'd<id>' to delete dialog. Write '0' to end program.")
+                    print("\nWrite 'e<id>' to edit dialog. Write 'd<id>' to delete dialog. Write '0' to end program.")
             elif choice == "0":
                 break
             else:
@@ -437,7 +442,7 @@ class ConsolePrinter:
                         print("\033[1mIncorrect date format. Please use date format specified above.\033[0m")
                 case "2":
                     params.endTime = input("From date(YYYY-MM-DD HH:MM:SS): ")
-                    params.validateStartTime()
+                    params.validateEndTime()
                     if not params.endTime:
                         print("\033[1mIncorrect date format. Please use date format specified above.\033[0m")
                 case "3":
@@ -452,8 +457,8 @@ class ConsolePrinter:
                         print("\033[1mLanguage not supported. Use --help flag for list of supported languages.\033[0m")
                 case "5":
                     if params.translate:
-                        params.translation_language = input("Transcription language: ")
-                        params.validateLanguage()
+                        params.translation_language = input("Translation language: ")
+                        params.validateTranslationLanguage()
                         if not params.translation_language:
                             print("\033[1mLanguage not supported. Use --help flag for list of supported languages.\033[0m")
                     else:

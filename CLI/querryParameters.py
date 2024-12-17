@@ -46,9 +46,10 @@ class QuerryParameters():
     def validateLanguage(self):
         for key, value in dicts.LANGUAGES.items():
             if self.language == key or self.language == value:
+                print(self.language)
                 self.language = key
                 return
-        self.langauge = None
+        self.language = None
 
 
     def validateTranslationLanguage(self):
@@ -60,7 +61,8 @@ class QuerryParameters():
     
 
     def validateLimit(self) -> str:
-        if self.limit and int(self.limit) <= 0 or int(self.limit) > 100:
+        if self.limit.isdigit() and int(self.limit) > 0 and int(self.limit) <= 100:
+            self.limit = int(self.limit)
             return
         self.limit = None
     
