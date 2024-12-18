@@ -68,22 +68,16 @@
         <br>
         <span id="transcription_result" contenteditable="true" class="result_span"></span>
       </fieldset>
-      <div id="mic_button" onclick="changeMicState(this)"><span class="material-symbols-outlined">mic</span></div>
+      <div id="mic_button"><span class="material-symbols-outlined">mic</span></div>
       <div id="recording_dots" class="hidden">
         <div class="recording_info_element"> Recording &nbsp &nbsp</div>
         <div class="recording_info_element loader"></div>
       </div>
     </center>
   </main>
+  <script src="./dist/record.js"></script>
   <script>
-    var recording = false;
-    function changeMicState(microphone) {
-      const recording_dots = document.getElementById("recording_dots");
-      recording = !recording;
-      const icon = microphone.querySelector('.material-symbols-outlined');
-      icon.innerText = recording ? 'stop_circle' : 'mic';
-      recording_dots.classList.toggle('hidden');
-    }
+
   </script>
 </body>
 
