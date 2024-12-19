@@ -11,7 +11,6 @@ service SoundService {
     rpc TranscribeLiveWeb(TranscriptionRequest) returns (SoundStreamResponse);
     rpc TranslateFile(TranslationRequest) returns (stream SoundResponse);
     rpc DiarizateFile(TranscriptionRequest) returns (SpeakerAndLineResponse);
-    rpc TranslateText(TextAndId) returns (TextMessage);
 }
 
 message TextMessage {
@@ -36,7 +35,6 @@ message TranscirptionLiveRequest {
 message SoundResponse {
     string text = 1;
     string detected_language = 2;
-    int32 id = 3;
 }
 
 message SoundStreamResponse {
@@ -50,8 +48,3 @@ message SpeakerAndLineResponse {
     string detected_language = 3;
 }
 
-message TextAndId {
-    string text = 1;
-    string text_language = 3;
-    string translation_language = 4;
-}

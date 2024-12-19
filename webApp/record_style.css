@@ -1,0 +1,116 @@
+/* .locked{
+    display: none;
+} */
+
+#show_transcript {
+    width: 75vw;
+    margin-top: 2.5vw;
+    text-align: left;
+    padding: 0 2vw;
+}
+
+#top_options {
+    align-items: center;
+}
+
+#transcript_title {
+    font-size: 120%;
+    margin-left: 1vw;
+    /* height: 0.5vh; */
+
+}
+
+#choose_record_lang {
+    border-width: 0.1vw;
+    /* font-size: 90%; */
+    font-size: 80%;
+    height: 70%;
+    padding: 0.5vw;
+    border-radius: 4px;
+}
+
+#mic_button {
+    transform: translateY(-50%) scale(1.5);
+    background-color: rgb(139, 93, 255);
+    border-radius: 50%;
+    width: 4vw;
+    height: 4vw;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    position: relative;
+}
+
+#mic_button .material-symbols-outlined {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.5vw;
+    color: white;
+}
+
+#show_transcript {
+    min-height: 50vh;
+}
+
+div.record_tip[contenteditable] {
+    display: inline-block;
+    margin-right: 1vw;
+}
+
+div.record_tip[contenteditable]:empty::before {
+    content: '"Untitled note"';
+    display: inline-block;
+    opacity: 0.7;
+}
+
+div.record_tip[contenteditable]:empty:focus::before {
+    content: '';
+}
+
+#before_recording {
+    font-style: italic;
+    opacity: 0.5;
+}
+
+#recording_dots {
+    display: flex;
+    justify-content: center;
+}
+
+.recording_info_element {
+    display: inline-block;
+    opacity: 0.8;
+}
+
+.loader {
+    width: 1.6vw;
+    aspect-ratio: 2;
+    --_g: no-repeat radial-gradient(circle closest-side, #000 90%, #0000);
+    background:
+        var(--_g) 0% 50%,
+        var(--_g) 50% 50%,
+        var(--_g) 100% 50%;
+    background-size: calc(100%/3) 50%;
+    animation: l3 1s infinite linear;
+    opacity: 0.6;
+
+}
+
+@keyframes l3 {
+    20% {
+        background-position: 0% 0%, 50% 50%, 100% 50%
+    }
+
+    40% {
+        background-position: 0% 100%, 50% 0%, 100% 50%
+    }
+
+    60% {
+        background-position: 0% 50%, 50% 100%, 100% 0%
+    }
+
+    80% {
+        background-position: 0% 50%, 50% 50%, 100% 100%
+    }
+}

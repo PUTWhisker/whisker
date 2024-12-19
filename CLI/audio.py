@@ -42,8 +42,6 @@ class AudioRecorder():
                 self.frames.append(data)
                 await asyncio.sleep(0) # Check if while in record is ready to execute (probeTime has passed)
         except KeyboardInterrupt:
-            # logging.info("Detected interruption, ending recording.") TODO: Figure out how to print it nicely
-            # print()
             stream.stop_stream()
             stream.close()
             p.terminate()
@@ -67,6 +65,7 @@ class AudioRecorder():
                 await asyncio.sleep(self.probeTime) # Await for set in constructor time
                 yield Variables.TranscirptionLiveRequest( # After probeTime seconds send 
                     sound_data=b''.join(self.frames),
+                    language=language
                 )
                 if self.save is not None: # Saving bytes if --save flag is raised
                     self.data += self.frames
@@ -80,6 +79,5 @@ class AudioRecorder():
         finally:
             yield Variables.TranscirptionLiveRequest( # Send recorded data after keyboard interruption
                     sound_data=b''.join(self.frames),
+                    language=language
                 ) 
-
-

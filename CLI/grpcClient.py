@@ -1,4 +1,5 @@
 from typing import Union
+from querryParameters import QuerryParameters
 
 import audio
 import os
@@ -149,22 +150,201 @@ class GrpcClient:
         except Exception as e:
             raise e
         
-    #TODO: Handle flag for specific retreiving (not implemented on backend yet)
-    async def getTranslation(self, JWT:str) -> Union[list, grpc.RpcError]:
+
+    async def getTranscription(self, params:QuerryParameters) -> Union[bool, grpc.RpcError]:
         try:
             stub = authentication_pb2_grpc.ClientServiceStub(
                 self.channel
             )
             metadata = (
-                ("jwt", JWT),
+                ("jwt", self.token),
             )
-            transcriptions = stub.GetTranslation(
-                authentication_pb2.Empty(),
+            params.convertDate()
+            responseIter = stub.GetTranscription(
+                authentication_pb2.QueryParamethers(
+                    start_time=params.startTime,
+                    end_time=params.endTime,
+                    limit=params.limit,
+                    language=params.language,
+                ),
                 metadata=metadata
             )
-            res = list()
-            async for transcription in transcriptions:
-                res.append(transcription)
-            return res
+            async for response in responseIter:
+                yield response
+        except Exception as e:
+            raise e
+        
+    
+    async def editTranscription(self, id:int, content:str) -> Union[bool, grpc.RpcError]:
+        try:
+            stub = authentication_pb2_grpc.ClientServiceStub(
+                self.channel
+            )
+            metadata = (
+                ("jwt", self.token),
+            )
+            response = await stub.EditTranscription(
+                authentication_pb2.NewTranscription(
+                    id=id,
+                    content=content
+                ),
+                metadata=metadata
+            )
+            return response
+        except Exception as e:
+            raise e
+        
+
+    async def deleteTranscription(self, id:int) -> Union[bool, grpc.RpcError]:
+        try:
+            stub = authentication_pb2_grpc.ClientServiceStub(
+                self.channel
+            )
+            metadata = (
+                ("jwt", self.token),
+            )
+            response = await stub.DeleteTranscription(
+                authentication_pb2.Id(
+                    id=id,
+                ),
+                metadata=metadata
+            )
+            return response
+        except Exception as e:
+            raise e
+        
+
+    async def getTranslation(self, params:QuerryParameters) -> Union[bool, grpc.RpcError]:
+        try:
+            stub = authentication_pb2_grpc.ClientServiceStub(
+                self.channel
+            )
+            metadata = (
+                ("jwt", self.token),
+            )
+            params.convertDate()
+            responseIter = stub.GetTranslation(
+                authentication_pb2.QueryParamethers(
+                    start_time=params.startTime,
+                    end_time=params.endTime,
+                    limit=params.limit,
+                    language=params.language,
+                    translation_language=params.translation_language
+                ),
+                metadata=metadata
+            )
+            async for response in responseIter:
+                yield response
+        except Exception as e:
+            raise e
+        
+
+    async def editTranslation(self, 
+                              id:int, 
+                              transcription:str,
+                              translation:str,
+                              edit_transcription:bool,
+                              edit_translation:bool ) -> Union[bool, grpc.RpcError]:
+        try:
+            stub = authentication_pb2_grpc.ClientServiceStub(
+                self.channel
+            )
+            metadata = (
+                ("jwt", self.token),
+            )
+            response = await stub.EditTranslation(
+                authentication_pb2.NewTranslation(
+                    id=id,
+                    transcription=transcription,
+                    translation=translation,
+                    edit_transcription=edit_transcription,
+                    edit_translation=edit_translation
+                ),
+                metadata=metadata
+            )
+            return response
+        except Exception as e:
+            raise e
+        
+
+    async def deleteTranslation(self, id:int) -> Union[bool, grpc.RpcError]:
+        try:
+            stub = authentication_pb2_grpc.ClientServiceStub(
+                self.channel
+            )
+            metadata = (
+                ("jwt", self.token),
+            )
+            response = await stub.DeleteTranslation(
+                authentication_pb2.Id(
+                    id=id,
+                ),
+                metadata=metadata
+            )
+            return response
+        except Exception as e:
+            raise e
+        
+
+    async def getDiarization(self, params:QuerryParameters) -> Union[bool, grpc.RpcError]:
+        try:
+            stub = authentication_pb2_grpc.ClientServiceStub(
+                self.channel
+            )
+            metadata = (
+                ("jwt", self.token),
+            )
+            params.convertDate()
+            responseIter = stub.GetDiarization(
+                authentication_pb2.QueryParamethers(
+                    start_time=params.startTime,
+                    end_time=params.endTime,
+                    limit=params.limit,
+                    language=params.language,
+                ),
+                metadata=metadata
+            )
+            async for response in responseIter:
+                yield response
+        except Exception as e:
+            raise e
+
+
+    async def editDiarization(self, id:int, speaker:list, line:list) -> Union[bool, grpc.RpcError]:
+        try:
+            stub = authentication_pb2_grpc.ClientServiceStub(
+                self.channel
+            )
+            metadata = (
+                ("jwt", self.token),
+            )
+            response = await stub.EditDiarization(
+                authentication_pb2.NewDiarization(
+                    id=id,
+                    line=line,
+                    speaker=speaker,
+                ),
+                metadata=metadata
+            )
+            return response
+        except Exception as e:
+            raise e
+        
+
+    async def deleteDiarization(self, id:int) -> Union[bool, grpc.RpcError]:
+        try:
+            stub = authentication_pb2_grpc.ClientServiceStub(
+                self.channel
+            )
+            metadata = (
+                ("jwt", self.token),
+            )
+            response = await stub.DeleteDiarization(
+                authentication_pb2.Id(
+                    id=id,
+                ),
+                metadata=metadata
+            )
+            return response
         except Exception as e:
             raise e

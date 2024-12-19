@@ -80,6 +80,17 @@ class SoundTransferClient(uri: Uri) : Closeable {
         return stub.translateFile(request)
     }
 
+
+    suspend fun translateText(textToTranslate : String, textLanguage : String, tranlationLanguage : String){
+        val request = textAndId {
+            this.text = textToTranslate
+            this.textLanguage = textLanguage
+            this.translationLanguage = tranlationLanguage
+        }
+        stub.translateText(request)
+    }
+
+
     suspend fun diarizateSpeakers(filePath: String, language: String): List<SpeakerAndLine> {
 //        val bytes = File(filePath).readBytes().toByteString()
 //        Log.d("SoundTransferClient", "File content read. Byte size: ${bytes.size()}")

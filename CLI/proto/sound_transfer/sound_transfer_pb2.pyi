@@ -36,12 +36,14 @@ class TranscirptionLiveRequest(_message.Message):
     def __init__(self, sound_data: _Optional[bytes] = ...) -> None: ...
 
 class SoundResponse(_message.Message):
-    __slots__ = ("text", "detected_language")
+    __slots__ = ("text", "detected_language", "id")
     TEXT_FIELD_NUMBER: _ClassVar[int]
     DETECTED_LANGUAGE_FIELD_NUMBER: _ClassVar[int]
+    ID_FIELD_NUMBER: _ClassVar[int]
     text: str
     detected_language: str
-    def __init__(self, text: _Optional[str] = ..., detected_language: _Optional[str] = ...) -> None: ...
+    id: int
+    def __init__(self, text: _Optional[str] = ..., detected_language: _Optional[str] = ..., id: _Optional[int] = ...) -> None: ...
 
 class SoundStreamResponse(_message.Message):
     __slots__ = ("text", "new_chunk")
@@ -60,3 +62,13 @@ class SpeakerAndLineResponse(_message.Message):
     speakerName: _containers.RepeatedScalarFieldContainer[str]
     detected_language: str
     def __init__(self, text: _Optional[_Iterable[str]] = ..., speakerName: _Optional[_Iterable[str]] = ..., detected_language: _Optional[str] = ...) -> None: ...
+
+class TextAndId(_message.Message):
+    __slots__ = ("text", "text_language", "translation_language")
+    TEXT_FIELD_NUMBER: _ClassVar[int]
+    TEXT_LANGUAGE_FIELD_NUMBER: _ClassVar[int]
+    TRANSLATION_LANGUAGE_FIELD_NUMBER: _ClassVar[int]
+    text: str
+    text_language: str
+    translation_language: str
+    def __init__(self, text: _Optional[str] = ..., text_language: _Optional[str] = ..., translation_language: _Optional[str] = ...) -> None: ...
