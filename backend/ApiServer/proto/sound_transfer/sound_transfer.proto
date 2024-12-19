@@ -52,7 +52,6 @@ message SpeakerAndLineResponse {
 
 message TextAndId {
     string text = 1;
-    int32 transcription_id = 2;
     string text_language = 3;
     string translation_language = 4;
 }

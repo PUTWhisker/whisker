@@ -64,13 +64,11 @@ class SpeakerAndLineResponse(_message.Message):
     def __init__(self, text: _Optional[_Iterable[str]] = ..., speakerName: _Optional[_Iterable[str]] = ..., detected_language: _Optional[str] = ...) -> None: ...
 
 class TextAndId(_message.Message):
-    __slots__ = ("text", "transcription_id", "text_language", "translation_language")
+    __slots__ = ("text", "text_language", "translation_language")
     TEXT_FIELD_NUMBER: _ClassVar[int]
-    TRANSCRIPTION_ID_FIELD_NUMBER: _ClassVar[int]
     TEXT_LANGUAGE_FIELD_NUMBER: _ClassVar[int]
     TRANSLATION_LANGUAGE_FIELD_NUMBER: _ClassVar[int]
     text: str
-    transcription_id: int
     text_language: str
     translation_language: str
-    def __init__(self, text: _Optional[str] = ..., transcription_id: _Optional[int] = ..., text_language: _Optional[str] = ..., translation_language: _Optional[str] = ...) -> None: ...
+    def __init__(self, text: _Optional[str] = ..., text_language: _Optional[str] = ..., translation_language: _Optional[str] = ...) -> None: ...
