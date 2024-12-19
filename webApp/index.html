@@ -1,87 +1,341 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>DEMO PAGE</title>
-    <script src="./dist/main.js"></script>
-    <script> 
-      function showTransBox(){
-        document.getElementById("show_transcript").style.display = 'block';
+
+<head>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <meta charset="UTF-8">
+  <title>DEMO PAGE</title>
+  <script src="./dist/client.js"></script>
+  <script>
+    function showTransBox() {
+      document.getElementById("show_transcript").style.display = 'block';
+    }
+
+    function showTransOptions(button) {
+      const checkbox_translate = document.getElementById("translate");
+      const checkbox_speakers = document.getElementById("role_division");
+      const langlist = document.querySelectorAll("#choose_trans_lang, #trans_lang_list .custom_dropdown_arrow");
+      const translationfield = document.getElementById("show_translation");
+      const translationarrow = document.getElementById("arrow");
+      if (button.previous) {
+        button.checked = false;
       }
 
-      function showTranslateBox(){
-        var box = document.getElementById("show_translation_checkbox");
-        var div_style = "none";
-          if(box.checked){
-            div_style = "block";
-        }
-        document.getElementById("show_translation").style.display = div_style;
-        document.getElementById("choose_trans_lang").style.display = div_style;
+      button.previous = button.checked;
+
+      if (checkbox_translate.checked) {
+        langlist.forEach((e) => e.classList.remove('hidden'));
+        translationfield.classList.remove('hidden');
+        translationarrow.classList.remove('hidden');
+      } else {
+        langlist.forEach((e) => e.classList.add('hidden'));
+        translationfield.classList.add('hidden');
+        translationarrow.classList.add('hidden');
       }
-    </script>
-    <link rel="stylesheet" href="style.css">
-    <link rel="shortcut icon" href="#">
-  </head>
-  <body>
-    <main>
-      <div id="top_menu">
-        <a href="http://127.0.0.1:5500/webApp/record.html">Switch to dictate</a>
-        <a href="http://127.0.0.1:5500/webApp/login.html">Log in</a>
-        <a href="http://127.0.0.1:5500/webApp/signup.html">Sign up</a>
-      </div>
-        <div id = "main_field">
-          <div id = "submit_container">
-              <fieldset id = "choose_file">
-                <form id="send_file">
-                  <div>
-                    <label id = "upload_msg" for="input_file">Drag and drop an audio file or</label>
-                    <br />
-                    <input type="file" name="input_file" id="input_file"><br /><br />
-                  </div>
-                </form>
-              </fieldset>
+    }
+    function handleUpload(file) {
+      const fileNameLabel = document.getElementById("input_file");
+      const sourceLangTile = document.getElementById("source_language_container");
+      const languageChooser = document.getElementById("choose_lang");
+      const closeButton = document.getElementById("delete_button");
+      console.log(`File ${file.name} was selected`);
+      sourceLangTile.classList.remove("locked");
+      languageChooser.disabled = false;
+      fileNameLabel.classList.remove("hidden");
+      var visibleName = file.name;
+      if (visibleName.length > 20)
+        visibleName = `${visibleName.substring(0, 7)}...${visibleName.substring(visibleName.length - 8)}`
+      fileNameLabel.innerHTML = `${visibleName}`;
+      closeButton.classList.remove("hidden");
+    }
+    function dropHandle(event) {
+      event.preventDefault();
+      if (event.dataTransfer.items.length == 1) {
+        const file = event.dataTransfer.items[0];
+        if (file.kind == "file") {
+          const actuallyFile = file.getAsFile();
+          handleUpload(actuallyFile);
+        }
+      }
+    }
+
+    function deleteFile() {
+      const uploadButton = document.getElementById("upload");
+      const fileNameLabel = document.getElementById("input_file");
+      const closeButton = document.getElementById("delete_button");
+      uploadButton.value = '';
+      fileNameLabel.innerHTML = 'Browse <span class="material-symbols-outlined">folder_open</span>';
+      closeButton.classList.add("hidden")
+    }
+  </script>
+  <!-- text & file I/O-->
+  <!-- API handler -->
+  <script src="text_file_io.js"></script>
+  <script>
+    // function placeholderFetchTranscript() {
+    //   return new Promise((resolve) => {
+    //     setTimeout(() => {
+    //       resolve("");
+    //     }, 2000);
+    //   });
+    // }
+    // function placeholderFetchTranslation() {
+    //   return new Promise((resolve) => {
+    //     setTimeout(() => {
+    //       resolve("");
+    //     }, 2200);
+    //   });
+    // }
+    // function startTranscription() {
+    //   const translationCheckBox = document.getElementById("translate");
+    //   const transcriptionResult = document.getElementById("transcription_result");
+    //   const transciptionButtons = document.getElementById("show_transcript").querySelectorAll(".result_option_button");
+    //   const translationButtons = document.getElementById("show_translation").querySelectorAll(".result_option_button");
+    //   transcriptionResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
+    //   transciptionButtons.forEach((e) => e.disabled = true);
+    //   placeholderFetchTranscript().then((transcript) => {
+    //     transcriptionResult.innerHTML = transcript;
+    //     transciptionButtons.forEach((e) => e.disabled = false);
+    //   });
+    //   if (translationCheckBox.checked) {
+    //     const translationResult = document.getElementById("translation_result");
+    //     translationResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
+    //     translationButtons.forEach((e) => e.disabled = true);
+    //     placeholderFetchTranslation().then((translation) => {
+    //       translationResult.innerHTML = translation;
+    //       translationButtons.forEach((e) => e.disabled = false);
+    //     });
+    //   }
+    // }
+  </script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="shortcut icon" href="#">
+</head>
+
+<body">
+  <main>
+    <div id="top_menu">
+      <p>Whisker</p>
+      <a href="http://127.0.0.1:5500/webApp/record.html" class="icon_button">
+        Dictate <span class="material-symbols-outlined">mic</span>
+      </a>
+      <a href="http://127.0.0.1:5500/webApp/history.html" class="icon_button locked">
+        History <span class="material-symbols-outlined">lock</span>
+      </a>
+      <a href="http://127.0.0.1:5500/webApp/history.html" class="icon_button locked">
+        Swagger <span class="material-symbols-outlined">lock</span>
+      </a>
+      <a href="http://127.0.0.1:5500/webApp/about.html" class="icon_button">
+        About <span class="material-symbols-outlined">help</span>
+      </a>
+      <div id="blank_space"></div>
+      <a href="http://127.0.0.1:5500/webApp/login.html" class="icon_button">
+        Log in&nbsp;<span class="material-symbols-outlined">login</span>
+      </a>
+      <a href="http://127.0.0.1:5500/webApp/signup.html" class="icon_button">
+        Sign up&nbsp;<span class="material-symbols-outlined">person_add</span>
+      </a>
+    </div>
+    <div id="settings_fields">
+      <div id="submit_file_container" class="options_div">
+        <div class="help-icon">
+          <span class="material-symbols-outlined">help</span>
+          <div class="help-text">
+            Drag and drop or browse an audio file to transcribe.
+            Viable extensions: .mp3, .wav.
+            Maximum file size: 50Mb.
           </div>
-          <div id="main_buttons">
-            <select id="choose_lang"> 
-              <option disabled selected>Choose language</option>
+        </div>
+        <div class="fields_in_options">
+          <div class="field_container">
+            <p id="upload_msg" class="step_label">Drag and drop an audio file or</p>
+          </div>
+          <div class="field_container">
+            <input type="file" id="upload" accept=".mp3, .wav, .ogg, .m4a, .mp4" hidden />
+            <label for="upload" id="input_file" class="icon_button">Browse
+              <span class="material-symbols-outlined">folder_open</span>
+            </label>
+            <div class="custom_delete_button hidden" id="delete_button" onclick="deleteFile()">
+              <span class="material-symbols-outlined">close</span>
+            </div>
+          </div>
+          <div id="file_name" class="step_label hidden"></div>
+        </div>
+        <div class="steps">
+          <div>1</div>
+        </div>
+      </div>
+      <div id="source_language_container" class="options_div locked">
+        <div class="help-icon">
+          <span class="material-symbols-outlined">help</span>
+          <div class="help-text">
+            Select a language of your audio file.
+            If no language is specified, AI model will try to detect it,
+            but the quality of the transcription might worsen.
+          </div>
+        </div>
+        <div class="fields_in_options">
+          <div class="field_container">
+            <p id="choose_lang_msg" class="step_label">Choose the source language of your file</p>
+          </div>
+          <div class="field_container">
+            <select id="choose_lang" disabled>
+              <option disabled selected>Select...</option>
+              <option>Detect</option>
               <option>Polish</option>
               <option>English</option>
               <option>German</option>
             </select>
-            <div id="translation_options">
-              <label>
-                <input type="checkbox" id="show_translation_checkbox" onclick="showTranslateBox()"/>
-                <span class="custom_check">Show translation</span>
-              </label>
-              <select id="choose_trans_lang"> 
-                <option disabled selected>Translate to:</option>
-                <option>Polish</option>
-                <option>English</option>
-                <option>German</option>
-              </select>
+            <div class="custom_dropdown_arrow">
+              <span class="material-symbols-outlined">keyboard_arrow_down</span>
             </div>
-            <button type="submit" value="Submit file" id="submit_file">Transcribe!</button>
           </div>
         </div>
-        <div>
-          <fieldset id = "show_transcript">
-            <legend>Transcript</legend>
-            <form id="receive_transcript">
-              <!-- <button id="copy_button">Copy</button> -->
-              <p id="transcriptedText"></p>
-            </form>
-          </fieldset>
+        <div class="steps">
+          <div>2</div>
         </div>
-        <br />
-        <div>
-          <fieldset id = "show_translation">
-            <legend>Translation</legend>
-            <form id="receive_translation">
-              <!-- <button id="copy_button">Copy</button> -->
-              <p id="translatedText"></p>
-            </form>
-          </fieldset>
+      </div>
+      <div id="translation_options_container" class="options_div locked">
+        <div class="help-icon">
+          <span class="material-symbols-outlined">help</span>
+          <div class="help-text">
+            Select the language to which you wish to translate
+            original audio file.
+            Multiple speakers mode will result in transcript being split between
+            speakers who speak in the audio file.
+            You cannot translate and diarizate speakers at the same time.
+            Choosing no option will result in plain audio transcript.
+          </div>
         </div>
-    </main>
+        <div class="fields_in_options">
+          <div class="field_container" id="optional_checkboxes">
+            <div id="optional_settings" class="step_label">
+              <div>
+                <input type="radio" name="optional" id="role_division" onclick="showTransOptions(this)" disabled />
+                <label for="role_division">Multiple speakers</label>
+              </div>
+              <div>
+                <input type="radio" name="optional" id="translate" onclick="showTransOptions(this)" disabled />
+                <label for="translate">Translate</label>
+              </div>
+            </div>
+          </div>
+          <div class="field_container" id="trans_lang_list">
+            <select id="choose_trans_lang" class="hidden" disabled>
+              <option disabled selected>Select...</option>
+              <option>Polish</option>
+              <option>English</option>
+              <option>German</option>
+            </select>
+            <div class="custom_dropdown_arrow hidden">
+              <span class="material-symbols-outlined">keyboard_arrow_down</span>
+            </div>
+          </div>
+        </div>
+        <div class="steps">
+          <div>3</div>
+        </div>
+      </div>
+      <div id="fourth_tile" class="options_div locked">
+        <div class="help-icon">
+          <span class="material-symbols-outlined">help</span>
+          <div class="help-text">
+            Generate the results.
+          </div>
+        </div>
+        <div class="fields_in_options">
+          <div class="field_container"></div>
+          <div class="field_container">
+            <button id="start" class="icon_button">
+              Generate
+              <span class="material-symbols-outlined">start</span>
+            </button>
+          </div>
+        </div>
+        <div class="steps">
+          <div>4</div>
+        </div>
+      </div>
+    </div>
+    <div id="results_fields">
+      <fieldset id="show_transcript" class="result_windows">
+        <legend class="result_legend">Transcript</legend>
+        <button onclick="copyToClipboard(document.getElementById('transcription_result').innerText)"
+          class="result_option_button copy_button">
+          <span class="material-symbols-outlined">content_copy</span>
+        </button>
+        <button onclick="downloadAsFile(document.getElementById('transcription_result').innerText, 'transcript.txt')"
+          class="result_option_button download_button">
+          <span class="material-symbols-outlined">download</span>
+        </button>
+        &nbsp;
+        <span id="transcription_result" contenteditable="true" class="result_span"></span>
+      </fieldset>
+      <div class="hidden" id="arrow">
+        <span class="material-symbols-outlined">sync_alt</span>
+      </div>
+      <fieldset id="show_translation" class="result_windows hidden">
+        <legend class="result_legend">Translation</legend>
+        <button onclick="copyToClipboard(document.getElementById('translation_result').innerText)"
+          class="result_option_button copy_button">
+          <span class="material-symbols-outlined">content_copy</span>
+        </button>
+        <button onclick="downloadAsFile(document.getElementById('translation_result').innerText, 'translation.txt')"
+          class="result_option_button download_button">
+          <span class="material-symbols-outlined">download</span>
+        </button>
+        <span id="translation_result" class="result_span">&nbsp;</span>
+      </fieldset>
+    </div>
+  </main>
+  <script>
+    const uploadButton = document.getElementById("upload");
+    const languageChooser = document.getElementById("choose_lang");
+    const optionsTile = document.getElementById("translation_options_container");
+    const translationCheckbox = document.getElementById("translate");
+    const rolesCheckbox = document.getElementById("role_division");
+    const translationList = document.getElementById("choose_trans_lang");
+    const translate_check = document.getElementById("translate");
+    const roles_check = document.getElementById("role_division");
+    const fourthTile = document.getElementById("fourth_tile");
+    const generateButton = document.getElementById("start");
+
+    document.body.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropHandle(e);
+    });
+    document.body.addEventListener("dragdrop", (e) => {
+      e.preventDefault();
+      dropHandle(e);
+    });
+    document.body.addEventListener("dragenter", (e) => {
+      e.preventDefault();
+    });
+    document.body.addEventListener("dragleave", (e) => {
+      e.preventDefault();
+    });
+    document.body.addEventListener("dragover", (e) => {
+      e.preventDefault();
+    });
+    uploadButton.addEventListener("change", (e) => {
+      if (e.target.files.length == 1) {
+        handleUpload(e.target.files[0]);
+      }
+    });
+    languageChooser.addEventListener("change", () => {
+      if (languageChooser.selectedIndex != 0) {
+        optionsTile.classList.remove("locked");
+        translationCheckbox.disabled = false;
+        rolesCheckbox.disabled = false;
+        translationList.disabled = false;
+        translate_check.disabled = false;
+        roles_check.disabled = false;
+        fourthTile.classList.remove("locked");
+        generateButton.disabled = false;
+      }
+    });
+  </script>
   </body>
+
 </html>
