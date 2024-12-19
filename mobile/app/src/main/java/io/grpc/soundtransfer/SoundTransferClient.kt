@@ -36,6 +36,8 @@ class SoundTransferClient(uri: Uri) : Closeable {
     }
     private val stub = SoundServiceGrpcKt.SoundServiceCoroutineStub(channel)
 
+
+    //zmienic funkcje tak zeby zwracala wszystko
     suspend fun transcribeFile(filePath: String, language : String): String? {
         try {
             val metadata = Metadata()

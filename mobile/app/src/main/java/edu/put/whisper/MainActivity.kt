@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
     private var isRecordingStopped: Boolean = false
     private var currentFileName: String? = null
     private var tempFilePath: String? = null
-    private lateinit var loadingGif: ImageView
+    //private lateinit var loadingGif: ImageView
 
     // Timer variables
     private lateinit var tvTimer: TextView
@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         btnOk = findViewById(R.id.btnOk)
         btnTranscript = findViewById(R.id.btnTranscript)
         btnBack = findViewById(R.id.btnBack)
-        loadingGif = findViewById(R.id.loadingGif)
+        //loadingGif = findViewById(R.id.loadingGif)
 
         spinnerLanguage = findViewById(R.id.spinner_language)
         languages = resources.getStringArray(R.array.languages)
