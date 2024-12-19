@@ -33,7 +33,8 @@
             android:name=".StartActivity"
             android:exported="true"
             android:label="@string/title_activity_start"
-            android:theme="@style/Theme.Voicememos">
+            android:theme="@style/Theme.Voicememos"
+            android:windowSoftInputMode="stateAlwaysVisible">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -1,10 +1,12 @@
 package edu.put.whisper
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -101,6 +103,32 @@ class StartActivity : AppCompatActivity() {
         bottomSheetBehavior.peekHeight = 0
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
 
+        loginInput.setOnKeyListener { v, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN) {
+                passwordInput.isEnabled = true
+                passwordInput.requestFocus()
+                passwordInput.postDelayed({
+                    passwordInput.requestFocus()
+                    val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.showSoftInput(passwordInput, InputMethodManager.SHOW_IMPLICIT)
+                }, 50)
+                true
+            } else {
+                false
+            }
+        }
+
+        passwordInput.setOnKeyListener { v, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN) {
+                btnSubmit.performClick()
+                true
+            } else {
+                false
+            }
+        }
+
+
+
 
         btnRegister.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -126,8 +154,8 @@ class StartActivity : AppCompatActivity() {
             passwordInput.text.clear()
             repeatPasswordInput.text.clear()
             repeatPasswordInput.visibility = View.GONE
-            val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-            inputMethodManager.hideSoftInputFromWindow(passwordInput.windowToken, 0)
+            hideKeyboard()
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
 
         }
 
@@ -189,11 +217,11 @@ class StartActivity : AppCompatActivity() {
                             utilities.setVisibility(View.VISIBLE, btnLogout, tvHello)
                             val icHistoryImageView: ImageView = findViewById(R.id.ic_history)
                             val icArrowImageView: ImageView = findViewById(R.id.ic_arrow)
-                            icHistoryImageView.backgroundTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.primary)
-                            icHistoryImageView.imageTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.primaryLight)
+                            icHistoryImageView.backgroundTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.primaryDark)
+                            icHistoryImageView.imageTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.white)
                             findViewById<TextView>(R.id.historyText).text = "History"
-                            findViewById<TextView>(R.id.historyText).setTextColor(ContextCompat.getColor(this@StartActivity, R.color.primary))
-                            icArrowImageView.imageTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.primary)
+                            findViewById<TextView>(R.id.historyText).setTextColor(ContextCompat.getColor(this@StartActivity, R.color.primaryDark))
+                            icArrowImageView.imageTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.primaryDark)
 
 
                         } else {
