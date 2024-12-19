@@ -96,30 +96,3 @@ message TranslationText {
     string content = 2;
     string language = 3;
 }
-
-message NewTranscription {
-    int32 id = 1;
-    string content = 2;
-}
-
-message NewTranslation {
-    int32 id = 1;
-    string transcription = 2;
-    string translation = 3;
-    bool edit_transcription = 4;
-    bool edit_translation = 5;
-}
-
-message NewDiarization {
-    int32 id = 1;
-    repeated string  line = 2;
-    repeated string speaker = 3;
-}
-
-message QueryParamethers {
-    google.protobuf.Timestamp start_time = 1;
-    google.protobuf.Timestamp end_time = 2;
-    int32 limit = 3;
-    string language = 4;
-    string translation_language = 5; //used only by translation
-}
