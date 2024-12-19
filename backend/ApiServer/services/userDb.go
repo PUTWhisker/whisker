@@ -25,7 +25,7 @@ type UserDbModel interface {
 	isUserInDatabase(string) (bool, error)
 	addUserToDatabase(string, string) error
 
-	saveTranscription(text string, username string, is_translation bool, language string) error
+	saveTranscription(text string, username string, is_translation bool, language string) (int, error)
 	getUserTranscriptionHistory(ctx context.Context, user_id string, query *pb.QueryParamethers) (pgx.Rows, error)
 	editTranscription(ctx context.Context, id int, user_id string, new_content string) error
 	deleteTranscription(ctx context.Context, id int, user_id string) error
@@ -33,6 +33,8 @@ type UserDbModel interface {
 	saveTranslation(text string, username string, language string, translated_text string, translation_language string) error
 	getUserTranslationHistory(ctx context.Context, user_id string, query *pb.QueryParamethers) (pgx.Rows, error)
 	editTranslation(edit_transcription bool, edit_translation bool, transcription_id int, new_transcription string, new_translation string, user_id string) error
+
+	insertOnlyTranslation(ctx context.Context, in *pb.TranslationText) error
 
 	saveDiarization(text []string, speaker []string, username string, language string) error
 	getUserDiarizationHistory(ctx context.Context, userId string, queryParameters *pb.QueryParamethers) (pgx.Rows, error)
@@ -50,13 +52,15 @@ func NewUserDb(pool *pgxpool.Pool) *UserDb {
 	return p
 }
 
-func (db UserDb) saveTranscription(text string, user_id string, is_translation bool, language string) error {
-	fmt.Println("🔴 Here", text, user_id, is_translation, language)
-	_, err := db.pool.Exec(context.Background(), `
+func (db UserDb) saveTranscription(text string, user_id string, is_translation bool, language string) (int, error) {
+	var transcription_id int
+	err := db.pool.QueryRow(context.Background(), `
     INSERT INTO transcription(app_user_id, content, is_translation, lang) 
     VALUES ($1, $2, $3, $4);
-	`, user_id, text, is_translation, language)
-	return err
+	RETURNING id;
+	`, user_id, text, true, language).Scan(&transcription_id)
+
+	return transcription_id, err
 }
 
 func buildQuery(initialQuery string, query *pb.QueryParamethers, mainTableName string) string {
@@ -129,6 +133,25 @@ func (db UserDb) saveTranslation(text string, user_id string, language string, t
 		return (err)
 	}
 	return nil
+}
+
+func (db UserDb) insertOnlyTranslation(ctx context.Context, in *pb.TranslationText) error {
+	_, err := db.pool.Exec(ctx, `
+	INSERT INTO translation (
+    	transcription_id,
+    	lang,
+    	content
+  	)
+	VALUES (
+    	$1,
+    	$2,
+    	$3
+  	)ON CONFLICT (transcription_id)
+	DO UPDATE SET
+    	lang = EXCLUDED.lang,
+    	content = EXCLUDED.content;
+	`, in.TranscriptionId, in.Language, in.Content)
+	return err
 }
 
 func (db UserDb) editTranslation(edit_transcription bool, edit_translation bool, transcription_id int, new_transcription string, new_translation string, user_id string) error {

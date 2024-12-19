@@ -59,13 +59,14 @@ func (s *SoundServer) TranscribeFile(ctx context.Context, in *pb.TranscriptionRe
 		return res, err
 	}
 	username, _ := GetUserNameFromMetadata(md)
+	id := 0
 	if username != "" && s.Db != nil {
-		err = s.Db.saveTranscription(res.Text, username, false, in.SourceLanguage)
+		id, err = s.Db.saveTranscription(res.Text, username, false, in.SourceLanguage)
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
-
+	res.Id = int32(id)
 	return res, nil
 }
 
@@ -190,4 +191,8 @@ func (s *SoundServer) TranscribeLive(stream pb.SoundService_TranscribeLiveServer
 		default:
 		}
 	}
+}
+
+func (s *SoundServer) TranslateText(ctx context.Context, in *pb.TextAndId) (*pb.TextMessage, error) {
+	return WhisperServer.TranslateText(ctx, in)
 }

@@ -116,3 +116,13 @@ class QueryParamethers(_message.Message):
     language: str
     translation_language: str
     def __init__(self, start_time: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., end_time: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., limit: _Optional[int] = ..., language: _Optional[str] = ..., translation_language: _Optional[str] = ...) -> None: ...
+
+class TranslationText(_message.Message):
+    __slots__ = ("transcription_id", "content", "language")
+    TRANSCRIPTION_ID_FIELD_NUMBER: _ClassVar[int]
+    CONTENT_FIELD_NUMBER: _ClassVar[int]
+    LANGUAGE_FIELD_NUMBER: _ClassVar[int]
+    transcription_id: int
+    content: str
+    language: str
+    def __init__(self, transcription_id: _Optional[int] = ..., content: _Optional[str] = ..., language: _Optional[str] = ...) -> None: ...
