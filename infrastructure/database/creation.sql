@@ -20,6 +20,7 @@ CREATE TABLE transcription (
     is_translation BOOLEAN NOT NULL,
     lang TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    title VARCHAR(100)
 );
 
 CREATE TABLE translation (
@@ -33,6 +34,7 @@ CREATE TABLE diarization (
     app_user_id INT REFERENCES app_user(id),
     lang VARCHAR(2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    title VARCHAR(100)
 );
 
 CREATE TABLE speaker_line(

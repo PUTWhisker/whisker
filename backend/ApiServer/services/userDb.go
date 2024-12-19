@@ -25,16 +25,16 @@ type UserDbModel interface {
 	isUserInDatabase(string) (bool, error)
 	addUserToDatabase(string, string) error
 
-	saveTranscription(text string, username string, is_translation bool, language string) error
+	saveTranscription(text string, username string, is_translation bool, language string, title string) (int, error)
 	getUserTranscriptionHistory(ctx context.Context, user_id string, query *pb.QueryParamethers) (pgx.Rows, error)
 	editTranscription(ctx context.Context, id int, user_id string, new_content string) error
 	deleteTranscription(ctx context.Context, id int, user_id string) error
 
-	saveTranslation(text string, username string, language string, translated_text string, translation_language string) error
+	saveTranslation(text string, username string, language string, translated_text string, translation_language string, title string) error
 	getUserTranslationHistory(ctx context.Context, user_id string, query *pb.QueryParamethers) (pgx.Rows, error)
 	editTranslation(edit_transcription bool, edit_translation bool, transcription_id int, new_transcription string, new_translation string, user_id string) error
 
-	saveDiarization(text []string, speaker []string, username string, language string) error
+	saveDiarization(text []string, speaker []string, username string, language string, title string) error
 	getUserDiarizationHistory(ctx context.Context, userId string, queryParameters *pb.QueryParamethers) (pgx.Rows, error)
 	editDiarization(ctx context.Context, new_content []string, new_speaker []string, id int, userId string) error
 	deleteDiarization(ctx context.Context, id int, user_id string) error
@@ -50,13 +50,15 @@ func NewUserDb(pool *pgxpool.Pool) *UserDb {
 	return p
 }
 
-func (db UserDb) saveTranscription(text string, user_id string, is_translation bool, language string) error {
-	fmt.Println("🔴 Here", text, user_id, is_translation, language)
-	_, err := db.pool.Exec(context.Background(), `
-    INSERT INTO transcription(app_user_id, content, is_translation, lang) 
-    VALUES ($1, $2, $3, $4);
-	`, user_id, text, is_translation, language)
-	return err
+func (db UserDb) saveTranscription(text string, user_id string, is_translation bool, language string, title string) (int, error) {
+	var transcription_id int
+	err := db.pool.QueryRow(context.Background(), `
+    INSERT INTO transcription(app_user_id, content, is_translation, lang, title) 
+    VALUES ($1, $2, $3, $4, $5);
+	RETURNING id;
+	`, user_id, text, true, language, title).Scan(&transcription_id)
+
+	return transcription_id, err
 }
 
 func buildQuery(initialQuery string, query *pb.QueryParamethers, mainTableName string) string {
@@ -111,13 +113,13 @@ func (db UserDb) deleteTranscription(ctx context.Context, id int, user_id string
 	return err
 }
 
-func (db UserDb) saveTranslation(text string, user_id string, language string, translated_text string, translation_language string) error {
+func (db UserDb) saveTranslation(text string, user_id string, language string, translated_text string, translation_language string, title string) error {
 	transcription_id := 0
 	err := db.pool.QueryRow(context.Background(), `
     INSERT INTO transcription(app_user_id, content, is_translation, lang) 
-    VALUES ($1, $2, $3, $4)
+    VALUES ($1, $2, $3, $4, $5)
 	RETURNING id;
-	`, user_id, text, true, language).Scan(&transcription_id)
+	`, user_id, text, true, language, title).Scan(&transcription_id)
 	if err != nil {
 		return (err)
 	}
@@ -165,13 +167,13 @@ func (db UserDb) getUserTranslationHistory(ctx context.Context, user_id string, 
 	return db.pool.Query(ctx, queryText, user_id)
 }
 
-func (db UserDb) saveDiarization(text []string, speaker []string, user_id string, language string) error {
+func (db UserDb) saveDiarization(text []string, speaker []string, user_id string, language string, title string) error {
 	diarization_id := 0
 	err := db.pool.QueryRow(context.Background(), `
-    INSERT INTO diarization(app_user_id, lang) 
-    VALUES ($1, $2)
+    INSERT INTO diarization(app_user_id, lang, title) 
+    VALUES ($1, $2, $3)
 	RETURNING id;
-	`, user_id, language).Scan(&diarization_id)
+	`, user_id, language, title).Scan(&diarization_id)
 	if err != nil {
 		return err
 	}

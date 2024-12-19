@@ -12,22 +12,26 @@ class TextMessage(_message.Message):
     def __init__(self, text: _Optional[str] = ...) -> None: ...
 
 class TranscriptionRequest(_message.Message):
-    __slots__ = ("sound_data", "source_language")
+    __slots__ = ("sound_data", "source_language", "title")
     SOUND_DATA_FIELD_NUMBER: _ClassVar[int]
     SOURCE_LANGUAGE_FIELD_NUMBER: _ClassVar[int]
+    TITLE_FIELD_NUMBER: _ClassVar[int]
     sound_data: bytes
     source_language: str
-    def __init__(self, sound_data: _Optional[bytes] = ..., source_language: _Optional[str] = ...) -> None: ...
+    title: str
+    def __init__(self, sound_data: _Optional[bytes] = ..., source_language: _Optional[str] = ..., title: _Optional[str] = ...) -> None: ...
 
 class TranslationRequest(_message.Message):
-    __slots__ = ("sound_data", "source_language", "translation_language")
+    __slots__ = ("sound_data", "source_language", "translation_language", "title")
     SOUND_DATA_FIELD_NUMBER: _ClassVar[int]
     SOURCE_LANGUAGE_FIELD_NUMBER: _ClassVar[int]
     TRANSLATION_LANGUAGE_FIELD_NUMBER: _ClassVar[int]
+    TITLE_FIELD_NUMBER: _ClassVar[int]
     sound_data: bytes
     source_language: str
     translation_language: str
-    def __init__(self, sound_data: _Optional[bytes] = ..., source_language: _Optional[str] = ..., translation_language: _Optional[str] = ...) -> None: ...
+    title: str
+    def __init__(self, sound_data: _Optional[bytes] = ..., source_language: _Optional[str] = ..., translation_language: _Optional[str] = ..., title: _Optional[str] = ...) -> None: ...
 
 class TranscirptionLiveRequest(_message.Message):
     __slots__ = ("sound_data",)
