@@ -142,7 +142,7 @@ func (db UserDb) editTranslation(edit_transcription bool, edit_translation bool,
 	}
 	if edit_translation {
 		_, err := db.pool.Exec(context.Background(), `
-		UPDATE translation set content = $1 where transcription_id = $2 and app_user_id = $3;
+		UPDATE translation set content = $1 where transcription_id = $2;
 		`, new_translation, transcription_id, user_id)
 		return err
 	}

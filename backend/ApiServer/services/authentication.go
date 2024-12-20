@@ -176,12 +176,13 @@ func (s *AuthenticationServer) GetTranscription(in *pb.QueryParamethers, stream 
 		var time_added time.Time
 		var id int32
 		var language string
-		err = rows.Scan(&id, &transcirption_text, &time_added, &language)
+		var title string
+		err = rows.Scan(&id, &transcirption_text, &time_added, &language, &title)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err := stream.Send(&pb.TranscriptionHistory{Transcription: transcirption_text, CreatedAt: timestamppb.New(time_added), Id: id, Language: language})
+		err := stream.Send(&pb.TranscriptionHistory{Transcription: transcirption_text, CreatedAt: timestamppb.New(time_added), Id: id, Language: language, Title: title})
 		if err != nil {
 			return err
 		}
@@ -215,12 +216,13 @@ func (s *AuthenticationServer) GetTranslation(in *pb.QueryParamethers, stream pb
 		var id int32
 		var translation_language string
 		var transcription_language string
-		err = rows.Scan(&id, &transcirption_text, &translation_text, &time_added, &transcription_language, &translation_language)
+		var title string
+		err = rows.Scan(&id, &transcirption_text, &translation_text, &time_added, &transcription_language, &translation_language, title)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err := stream.Send(&pb.TranslationHistory{Transcription: transcirption_text, Translation: translation_text, CreatedAt: timestamppb.New(time_added), Id: id, TranscriptionLangauge: transcription_language, TranslationLangauge: translation_language})
+		err := stream.Send(&pb.TranslationHistory{Transcription: transcirption_text, Translation: translation_text, CreatedAt: timestamppb.New(time_added), Id: id, TranscriptionLangauge: transcription_language, TranslationLangauge: translation_language, Title: title})
 		if err != nil {
 			return err
 		}
@@ -260,12 +262,13 @@ func (s *AuthenticationServer) GetDiarization(in *pb.QueryParamethers, stream pb
 	var line string
 	var createdAt time.Time
 	var language string
+	var title string
 
 	speakers := []string{}
 	lines := []string{}
 
 	rows.Next()
-	err = rows.Scan(&diarizationId, &speaker, &line, &createdAt, &language)
+	err = rows.Scan(&diarizationId, &speaker, &line, &createdAt, &language, &title)
 	if err != nil {
 		return err
 	}
@@ -274,12 +277,12 @@ func (s *AuthenticationServer) GetDiarization(in *pb.QueryParamethers, stream pb
 	oldId = diarizationId
 	oldCreatedAt = createdAt
 	for rows.Next() {
-		err = rows.Scan(&diarizationId, &speaker, &line, &createdAt, &language)
+		err = rows.Scan(&diarizationId, &speaker, &line, &createdAt, &language, &title)
 		if err != nil {
 			return err
 		}
 		if oldId != diarizationId {
-			err = stream.Send(&pb.DiarizationHistory{DiarizationId: oldId, Speaker: speakers, Line: lines, CreatedAt: timestamppb.New(oldCreatedAt), Language: language})
+			err = stream.Send(&pb.DiarizationHistory{DiarizationId: oldId, Speaker: speakers, Line: lines, CreatedAt: timestamppb.New(oldCreatedAt), Language: language, Title: title})
 			if err != nil {
 				return err
 			}
