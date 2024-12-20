@@ -26,6 +26,10 @@ select {
     display: none !important;
 }
 
+.smaller_text {
+    font-size: 75%;
+}
+
 #send_recording {
     display: flex;
     flex-flow: row nowrap;
@@ -80,6 +84,10 @@ select {
 
 #top_menu a:hover {
     background-color: rgb(106, 66, 194);
+}
+
+.selected {
+    background-color: rgb(106, 66, 194) !important;
 }
 
 #blank_space {
