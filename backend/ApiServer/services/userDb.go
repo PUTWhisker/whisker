@@ -90,7 +90,7 @@ func (db UserDb) getUserTranscriptionHistory(ctx context.Context, user_id string
 
 func (db UserDb) editTranscription(ctx context.Context, id int, user_id string, new_content string) error {
 	result, err := db.pool.Exec(ctx, `
-    UPDATE transcription set content = $1 where id = $2 and app_user_id = $3;
+    UPDATE transcription set content = $1 where id = $2;
 	`, new_content, id, user_id)
 	nrows := result.RowsAffected()
 	if nrows < 1 {
