@@ -34,6 +34,7 @@ _cleanupCoroutines = list()  # Needed for asyncio graceful shutdown
 _clientData = dict()
 _CLEANUP_PERIOD = 120
 
+
 def _errorMessages(e: Exception, func: callable):
     if isinstance(e, FileNotFoundError):
         errorCode = grpc.StatusCode.INTERNAL
@@ -47,11 +48,9 @@ def _errorMessages(e: Exception, func: callable):
     return errorCode, errorMessage
 
 
-def run_transcribe(file_path, data:TranscriptionData):
+def run_transcribe(file_path, data: TranscriptionData):
     model = faster_whisper_model.FasterWhisperHandler(os.getenv("FASTER_WHISPER_MODEL"))
-    res = model.transcribe(
-        str(file_path), data
-    )
+    res = model.transcribe(str(file_path), data)
     return res
 
 
@@ -63,6 +62,7 @@ async def cleanupWebSessions():
             if curTime - value[1] > _CLEANUP_PERIOD:
                 logging.info(f"Client cleanup initiated for id: {value[0].sessionId}")
                 _clientData.pop(index)
+
 
 class SoundService(Services.SoundServiceServicer):
     def __init__(self):
@@ -80,7 +80,6 @@ class SoundService(Services.SoundServiceServicer):
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
-
     def _errorUnaryHandler(func: callable):
         async def wrapper(*args, **kwargs):
             try:
@@ -93,8 +92,8 @@ class SoundService(Services.SoundServiceServicer):
                 logging.exception(f"{errorCode}: {errorMessage}")
                 await context.abort(errorCode, errorMessage)
                 return
+
         return wrapper
-    
 
     def _errorStreamHandler(func: callable):
         async def wrapper(*args, **kwargs):
@@ -112,23 +111,27 @@ class SoundService(Services.SoundServiceServicer):
                 logging.exception(f"{errorCode}: {errorMessage}")
                 await context.abort(errorCode, errorMessage)
                 return
+
         return wrapper
-    
-    
+
     @_errorUnaryHandler
     async def TestConnection(self, request, context):
         return Variables.TextMessage(text=request.text)
-    
-    #TODO: return detected language
+
+    # TODO: return detected language
     @_errorUnaryHandler
     async def DiarizateFile(self, request, context):
-        transcriptionData = TranscriptionData(audio=request.sound_data, diarizate=True, language=request.source_language)
+        transcriptionData = TranscriptionData(
+            audio=request.sound_data, diarizate=True, language=request.source_language
+        )
         file_path = transcriptionData.saveFile(save_as_wav=False)
         out = []
         try:
-            with concurrent.futures.ProcessPoolExecutor() as executor:
+            with concurrent.futures.ThreadPoolExecutor() as executor:
                 futures = {
-                    "transcribe": executor.submit(run_transcribe, file_path, transcriptionData),
+                    "transcribe": executor.submit(
+                        self.fastModel.transcribe, file_path, transcriptionData
+                    ),
                     "diarize": executor.submit(
                         diarizate.diarizate_speakers, str(file_path.resolve())
                     ),
@@ -148,9 +151,8 @@ class SoundService(Services.SoundServiceServicer):
             transcription.append(elem["text"])
             speaker.append(elem["speaker"])
         return Variables.SpeakerAndLineResponse(
-                text=transcription, speakerName=speaker, detected_language='Not_implemented'
-            )
-
+            text=transcription, speakerName=speaker, detected_language="Not_implemented"
+        )
 
     @_errorUnaryHandler
     async def TranscribeFile(self, request, context):
@@ -166,32 +168,31 @@ class SoundService(Services.SoundServiceServicer):
             ):  # To ensure tempFile gets deleted even when error occurs
                 transcriptionData.filePath.unlink()
             raise e
-        return Variables.SoundResponse(text=result,
-                                       detected_language=transcriptionData.language)
-    
+        return Variables.SoundResponse(
+            text=result, detected_language=transcriptionData.language
+        )
 
     @_errorStreamHandler
     async def TranslateFile(self, request, context):
         logging.info("Received audio file for translation")
-        transcriptionData = TranscriptionData(language=request.source_language, translate=request.translation_language)
+        transcriptionData = TranscriptionData(
+            language=request.source_language, translate=request.translation_language
+        )
         if transcriptionData.translate is None:
-            raise # TODO: Here raise error when not specified to what language text should be translated (Transcription is good cause whisper has autodetect)
+            raise  # TODO: Here raise error when not specified to what language text should be translated (Transcription is good cause whisper has autodetect)
         transcription, transcriptionData = await self.fastModel.handleFile(
             request.sound_data, transcriptionData, context
         )
         yield Variables.SoundResponse(
-                text=transcription,
-                detected_language=transcriptionData.language
-            )
+            text=transcription, detected_language=transcriptionData.language
+        )
         translation = self.translator.translate(
             transcription, transcriptionData.language, transcriptionData.translate
         )[0]
-        yield Variables.SoundResponse(
-                text=translation
-            )
-        
-    #TODO: add language to metadata (probably), return detected language (metadata or more likely new field in proto message)
-    @_errorStreamHandler 
+        yield Variables.SoundResponse(text=translation)
+
+    # TODO: add language to metadata (probably), return detected language (metadata or more likely new field in proto message)
+    @_errorStreamHandler
     async def TranscribeLive(self, requestIter, context):
         logging.info("Received live transcription request.")
         transcriptionData = TranscriptionData()
@@ -214,9 +215,8 @@ class SoundService(Services.SoundServiceServicer):
                 raise e
             yield Variables.SoundStreamResponse(
                 text=transcriptionData.transcription[transcriptionData.curSegment],
-                new_chunk=transcriptionData.isSilence
+                new_chunk=transcriptionData.isSilence,
             )
-
 
     @_errorUnaryHandler
     async def TranscribeLiveWeb(self, request, context):
@@ -225,17 +225,18 @@ class SoundService(Services.SoundServiceServicer):
         transcriptionData.processMetadata(context)
         if transcriptionData.sessionId is None:
             transcriptionData.sessionId = uuid.uuid4()
-            _clientData[str(transcriptionData.sessionId)] = [transcriptionData, time.time()]
-            return Variables.SoundStreamResponse(
-                text = str(transcriptionData.sessionId)
-            )
+            _clientData[str(transcriptionData.sessionId)] = [
+                transcriptionData,
+                time.time(),
+            ]
+            return Variables.SoundStreamResponse(text=str(transcriptionData.sessionId))
         sessionId = transcriptionData.sessionId
         transcriptionData = _clientData[sessionId][0]
         transcriptionData.language = request.source_language
         try:
             transcriptionData = await self.fastModel.handleRecord(
-                        request.sound_data, transcriptionData, context, True
-                    )
+                request.sound_data, transcriptionData, context, True
+            )
             logging.info(transcriptionData.transcription)
             _clientData[transcriptionData.sessionId] = [transcriptionData, time.time()]
         except Exception as e:
@@ -246,7 +247,7 @@ class SoundService(Services.SoundServiceServicer):
             raise e
         return Variables.SoundStreamResponse(
             text=transcriptionData.transcription[transcriptionData.curSegment],
-            new_chunk = False
+            new_chunk=False,
         )
 
 

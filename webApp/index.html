@@ -250,7 +250,7 @@
         <div class="fields_in_options">
           <div class="field_container"></div>
           <div class="field_container">
-            <button id="start" class="icon_button" onclick="startTranscription()">
+            <button id="start" class="icon_button">
               Generate
               <span class="material-symbols-outlined">start</span>
             </button>
@@ -265,11 +265,11 @@
       <fieldset id="show_transcript" class="result_windows">
         <legend class="result_legend">Transcript</legend>
         <button onclick="copyToClipboard(document.getElementById('transcription_result').innerText)"
-          class="result_option_button copy_button" disabled>
+          class="result_option_button copy_button">
           <span class="material-symbols-outlined">content_copy</span>
         </button>
         <button onclick="downloadAsFile(document.getElementById('transcription_result').innerText, 'transcript.txt')"
-          class="result_option_button download_button" disabled>
+          class="result_option_button download_button">
           <span class="material-symbols-outlined">download</span>
         </button>
         &nbsp;
@@ -281,11 +281,11 @@
       <fieldset id="show_translation" class="result_windows hidden">
         <legend class="result_legend">Translation</legend>
         <button onclick="copyToClipboard(document.getElementById('translation_result').innerText)"
-          class="result_option_button copy_button" disabled>
+          class="result_option_button copy_button">
           <span class="material-symbols-outlined">content_copy</span>
         </button>
         <button onclick="downloadAsFile(document.getElementById('translation_result').innerText, 'translation.txt')"
-          class="result_option_button download_button" disabled>
+          class="result_option_button download_button">
           <span class="material-symbols-outlined">download</span>
         </button>
         <span id="translation_result" class="result_span">&nbsp;</span>

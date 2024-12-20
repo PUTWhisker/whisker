@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile
     environment:
      - HUGGING_FACE_API_KEY="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"
+    ports:
+     - 7070:7070
 
   golang-server:
     build:

@@ -1,0 +1,1 @@
+select COUNT(username) from app_user where username='abba'

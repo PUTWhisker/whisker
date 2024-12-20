@@ -5,7 +5,7 @@ import os
 
 pipeline = Pipeline.from_pretrained(
     "pyannote/speaker-diarization-3.1",
-    use_auth_token=os.environ.get("HUGGING_FACE_API_KEY"),
+    use_auth_token="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",
 )
 
 
