@@ -7,53 +7,10 @@
     <script src="text_file_io.js"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="history_style.css">
-    <script>
-        const flags = {
-            'pl_pl': '🇵🇱',
-            'en_uk': '🇬🇧',
-            'es_es': '🇪🇸'
-
-        };
-        const sampleData = {
-            'history': [
-                {
-                    'date': '24.12.2024',
-                    'file_size': '25kB',
-                    'transcription_result': 'Z podanej ilości składników otrzymasz całą kaczkę pieczoną z farszem z jabłek i żurawiny. Będą to cztery duże lub sześć mniejszych porcji.',
-                    'translation_result': 'The given amount of ingredients will give you a whole duck baked with apple and cranberry stuffing. These will be four large or six smaller portions.',
-                    'selected_options': {
-                        'original_language': 'pl_pl',
-                        'translate_language': 'en_uk',
-                        'multiple_speakers': false
-                    }
-                },
-                {
-                    'date': '04.12.2024',
-                    'file_size': '6kB',
-                    'transcription_result': 'The meat should reach room temperature.',
-                    'selected_options': {
-                        'original_language': 'en_uk',
-                        'multiple_speakers': true
-                    }
-                }
-            ]
-        };
-
-        function getTranscribeHistory() {
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve(JSON.stringify(sampleData));
-                }, 10);
-            });
-        }
-    </script>
-    <style>
-
-    </style>
 </head>
 
 <body>
-    <main>
+    <header>
         <div id="top_menu">
             <p>Whisker+</p>
             <a href="http://127.0.0.1:5500/webApp/index.html" class="icon_button">
@@ -62,6 +19,9 @@
             <a href="http://127.0.0.1:5500/webApp/record.html" class="icon_button">
                 Dictate <span class="material-symbols-outlined">mic</span>
             </a>
+            <a href="#" class="icon_button selected">
+                History <span class="material-symbols-outlined">lock</span>
+            </a>
             <a href="http://127.0.0.1:5500/webApp/swagger.html" class="icon_button locked">
                 Swagger <span class="material-symbols-outlined">lock</span>
             </a>
@@ -69,129 +29,34 @@
                 About <span class="material-symbols-outlined">help</span>
             </a>
             <div id="blank_space"></div>
-            <!-- <a href="http://127.0.0.1:5500/webApp/login.html" class="icon_button">
-                Log in&nbsp;<span class="material-symbols-outlined">login</span>
-            </a>
-            <a href="http://127.0.0.1:5500/webApp/signup.html" class="icon_button">
-                Sign up&nbsp;<span class="material-symbols-outlined">person_add</span>
-            </a> -->
         </div>
-        <div id="main_container"></div>
+        <div class="header selected" id="navigation">
+            <div class="tab_button selected" onclick="openTab(this, 'transcription')">
+                <div>Translations</div>
+            </div>
+            <div class="tab_button" onclick="openTab(this, 'translation')">
+                <div>Transcriptions<br><span class="smaller_text">Single Speaker</span></div>
+            </div>
+            <div class="tab_button" onclick="openTab(this, 'diarization')">
+                <div>Transcriptions<br><span class="smaller_text">Multiple Speakers</span></div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div id="page_view">
+            <div id="filter_options" class="main_content">
+                <div>
+
+                </div>
+            </div>
+            <div id="main_container" class="main_content">
+                <div id="transcription_history" class="tab"></div>
+                <div id="translation_history" class="hidden tab"></div>
+                <div id="diarization_history" class="hidden tab"></div>
+            </div>
+        </div>
     </main>
-    <script>
-        function createElement(type, id, classes) {
-            const element = document.createElement(type);
-            if (id) element.id = id;
-            if (classes) element.classList.add(...classes);
-            return element;
-        }
-
-        function createView(event) {
-
-            const view = createElement('div', null, ['event_view']);
-
-            const dateView = createElement('div', null, ['event_date_view']);
-            view.appendChild(dateView);
-            dateView.innerText = event.date;
-
-            const audioFileView = createElement('div', null, ['event_audio_view']);
-            view.appendChild(audioFileView);
-            {
-                const audioFileDownload = createElement('div', null, ['event_audio_download']);
-                audioFileView.appendChild(audioFileDownload);
-                {
-                    const audioIcon = createElement('button', null, ['event_audio_icon']);
-                    audioFileDownload.appendChild(audioIcon);
-                    audioIcon.innerHTML = '<span class="material-symbols-outlined">brand_awareness</span>';
-                    audioIcon.onclick = () => {
-                        const message = new SpeechSynthesisUtterance();
-                        message.text = event.transcription_result;
-                        const speechSynthesis = window.speechSynthesis;
-                        speechSynthesis.speak(message);
-                    };
-
-                    // const downloadIcon = createElement('button', null, ['event_audio_download_icon']);
-                    // audioFileDownload.appendChild(downloadIcon);
-                    // downloadIcon.innerHTML = '<span class="material-symbols-outlined">download</span>';
-                    // downloadIcon.onclick = () => {
-                    //     const a = document.createElement('a');
-                    //     a.href = event.file_audio;
-                    //     a.download = 'audio.mp3';
-                    //     a.click();
-                    // };
-
-                }
-                // const audioFileSize = createElement('div', null, ['event_audio_size']);
-                // audioFileView.appendChild(audioFileSize);
-                // audioFileSize.innerText = `size: ${event.file_size}`;
-            }
-
-            const previewsView = createElement('div', null, ['event_previews_view']);
-            view.appendChild(previewsView);
-            {
-                const modeView = createElement('div', null, ['event_mode']);
-                previewsView.appendChild(modeView);
-                if (event.translation_result) modeView.innerText = 'mode: translation';
-                else modeView.innerText = `mode: ${event.selected_options.multiple_speakers ? 'multiple speakers' : 'single speaker'}`;
-
-                const transcriptionView = createElement('div', null, ['event_text_row']);
-                previewsView.appendChild(transcriptionView);
-                {
-                    const transcriptionflag = createElement('div', null, ['text_flag']);
-                    transcriptionView.appendChild(transcriptionflag);
-                    transcriptionflag.innerText = flags[event.selected_options.original_language];
-
-                    const transcriptionViewText = createElement('div', null, ['preview_text']);
-                    transcriptionView.appendChild(transcriptionViewText);
-                    transcriptionViewText.innerText = event.transcription_result;
-
-                    const transcriptionCopyButton = createElement('button', null, ['option_button']);
-                    transcriptionView.appendChild(transcriptionCopyButton);
-                    transcriptionCopyButton.innerHTML = '<span class="material-symbols-outlined">content_copy</span>';
-                    transcriptionCopyButton.onclick = (_) => copyToClipboard(event.transcription_result);
-
-                    const transcriptionDownloadButton = createElement('button', null, ['option_button']);
-                    transcriptionView.appendChild(transcriptionDownloadButton);
-                    transcriptionDownloadButton.innerHTML = '<span class="material-symbols-outlined">download</span>';
-                    transcriptionDownloadButton.onclick = (_) => downloadAsFile(event.transcription_result, 'transcription.txt');
-                }
-
-                if (event.translation_result) {
-                    const translationView = createElement('div', null, ['event_text_row']);
-                    previewsView.appendChild(translationView);
-                    {
-                        const translationflag = createElement('div', null, ['text_flag']);
-                        translationView.appendChild(translationflag);
-                        translationflag.innerText = flags[event.selected_options.translate_language];
-
-                        const translationViewText = createElement('div', null, ['preview_text']);
-                        translationView.appendChild(translationViewText);
-                        translationViewText.innerText = event.translation_result;
-
-                        const translationCopyButton = createElement('button', null, ['option_button']);
-                        translationView.appendChild(translationCopyButton);
-                        translationCopyButton.innerHTML = '<span class="material-symbols-outlined">content_copy</span>';
-                        translationCopyButton.onclick = (_) => copyToClipboard(event.translation_result);
-
-                        const translationDownloadButton = createElement('button', null, ['option_button']);
-                        translationView.appendChild(translationDownloadButton);
-                        translationDownloadButton.innerHTML = '<span class="material-symbols-outlined">download</span>';
-                        translationDownloadButton.onclick = (_) => downloadAsFile(event.translation_result, 'translation.txt');
-                    }
-                }
-            }
-
-            return view;
-        }
-
-        getTranscribeHistory().then((historyJSON) => {
-            const history = JSON.parse(historyJSON).history;
-            history.forEach(element => {
-                document.getElementById("main_container").appendChild(createView(element));
-            });
-        });
-
-    </script>
+    <script src="src/history_essentials.js"></script>
 </body>
 
 </html>

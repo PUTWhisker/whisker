@@ -66,7 +66,7 @@
       const closeButton = document.getElementById("delete_button");
       uploadButton.value = '';
       fileNameLabel.innerHTML = 'Browse <span class="material-symbols-outlined">folder_open</span>';
-      closeButton.classList.add("hidden")
+      closeButton.classList.add("hidden");
     }
   </script>
   <!-- text & file I/O-->
@@ -117,6 +117,9 @@
   <main>
     <div id="top_menu">
       <p>Whisker</p>
+      <a href="#" class="icon_button selected">
+        Transcribe <span class="material-symbols-outlined">edit_document</span>
+      </a>
       <a href="http://127.0.0.1:5500/webApp/record.html" class="icon_button">
         Dictate <span class="material-symbols-outlined">mic</span>
       </a>
