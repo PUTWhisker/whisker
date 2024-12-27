@@ -89,3 +89,7 @@ header {
 .preview_text {
     flex: 1;
 }
+
+.delete-button-container {
+    margin-left: 1vw;
+}

@@ -282,7 +282,11 @@ select {
     padding: 0.3vw;
     top: 0;
     right: 0;
-    /* opacity: 0.5; */
+    z-index: 1;
+}
+
+.help-icon .material-symbols-outlined {
+    opacity: 0.5;
 }
 
 .help-text {

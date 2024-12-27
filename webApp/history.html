@@ -7,9 +7,55 @@
     <script src="text_file_io.js"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="history_style.css">
+    <script src='https://mozilla.github.io/nunjucks/files/nunjucks.min.js'></script>
+    <script src="src/history_essentials.js"></script>
 </head>
 
 <body>
+    <script>
+        const nj = `
+        <div class="event_view">
+            <div class="event_date_view">{{ event.date }}</div>
+            <div class="event_title">{{ event.title }}</div>
+            <div class="event_previews_view">
+                <div class="event_text_row">
+                    <div class="text_flag">{{ flags[event.original_language] }}</div>
+                    <div class="preview_text">{{ clipString(event.transcription_result) }}</div>
+                    <button class="option_button" onclick="() => speak(event, false);">
+                        <span class="material-symbols-outlined">brand_awareness</span>
+                    </button>
+                    <button class="option_button" onclick="(_) => copyToClipboard(event.transcription_result);">
+                        <span class="material-symbols-outlined">content_copy</span>
+                    </button>
+                    <button class="option_button" onclick="(_) => downloadAsFile(event.transcription_result, 'transcription.txt');">
+                        <span class="material-symbols-outlined">download</span>
+                    </button>
+                </div>
+                {% if event.translation_result is defined %}
+                    <div class="event_text_row">
+                        <div class="text_flag">{{ flags[event.translate_language] }}</div>
+                        <div class="preview_text">{{ clipString(event.translation_result) }}</div>
+                        <button class="option_button" onclick="speak(event, true);">
+                            <span class="material-symbols-outlined">brand_awareness</span>
+                        </button>
+                        <button class="option_button" onclick="copyToClipboard(event.translation_result);>
+                            <span class="material-symbols-outlined">content_copy</span>
+                        </button>
+                        <button class="option_button" onclick="downloadAsFile(event.translation_result, 'translation.txt');">
+                            <span class="material-symbols-outlined">download</span>
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="delete-button-container">
+                <button class="option_button" onclick="alert('here be delete');">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
+            </div>
+        </div>
+        `;
+        const njTemplate = nunjucks.compile(nj);
+    </script>
     <header>
         <div id="top_menu">
             <p>Whisker+</p>
@@ -46,7 +92,6 @@
         <div id="page_view">
             <div id="filter_options" class="main_content">
                 <div>
-
                 </div>
             </div>
             <div id="main_container" class="main_content">
@@ -56,7 +101,6 @@
             </div>
         </div>
     </main>
-    <script src="src/history_essentials.js"></script>
 </body>
 
 </html>

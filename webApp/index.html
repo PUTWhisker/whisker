@@ -34,6 +34,7 @@
         translationarrow.classList.add('hidden');
       }
     }
+
     function handleUpload(file) {
       const fileNameLabel = document.getElementById("input_file");
       const sourceLangTile = document.getElementById("source_language_container");
@@ -64,9 +65,32 @@
       const uploadButton = document.getElementById("upload");
       const fileNameLabel = document.getElementById("input_file");
       const closeButton = document.getElementById("delete_button");
+      const sourceLangTile = document.getElementById("source_language_container");
+      const languageChooser = document.getElementById("choose_lang");
+      const optionsTile = document.getElementById("translation_options_container");
+      const translationCheckbox = document.getElementById("translate");
+      const rolesCheckbox = document.getElementById("role_division");
+      const translationList = document.getElementById("choose_trans_lang");
+      const translate_check = document.getElementById("translate");
+      const roles_check = document.getElementById("role_division");
+      const fourthTile = document.getElementById("fourth_tile");
+      const generateButton = document.getElementById("start");
+
       uploadButton.value = '';
       fileNameLabel.innerHTML = 'Browse <span class="material-symbols-outlined">folder_open</span>';
       closeButton.classList.add("hidden");
+
+      sourceLangTile.classList.add("locked");
+      languageChooser.disabled = true;
+
+      optionsTile.classList.add("locked");
+      translationCheckbox.disabled = true;
+      rolesCheckbox.disabled = true;
+      translationList.disabled = true;
+      translate_check.disabled = true;
+      roles_check.disabled = true;
+      fourthTile.classList.add("locked");
+      generateButton.disabled = true;
     }
   </script>
   <!-- text & file I/O-->
@@ -147,7 +171,7 @@
           <div class="help-text">
             Drag and drop or browse an audio file to transcribe.
             Viable extensions: .mp3, .wav.
-            Maximum file size: 50Mb.
+            Maximum file size: 50MB.
           </div>
         </div>
         <div class="fields_in_options">
