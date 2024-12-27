@@ -165,7 +165,7 @@ func sendTrailer(stream grpc.ServerStream) {
 func (s *AuthenticationServer) GetTranscription(in *pb.QueryParamethers, stream pb.ClientService_GetTranscriptionServer) error {
 	sendHeader(stream)
 	defer sendTrailer(stream)
-	rows, err := s.Db.getUserTranscriptionHistory(stream.Context(), stream.Context().Value("user_id").(string), in)
+	rows, err := s.Db.getTranscriptions(stream.Context(), stream.Context().Value("user_id").(string), in)
 	if err != nil {
 		log.Fatal(err)
 		return err
@@ -203,7 +203,7 @@ func (s *AuthenticationServer) DeleteTranscription(ctx context.Context, in *pb.I
 func (s *AuthenticationServer) GetTranslation(in *pb.QueryParamethers, stream pb.ClientService_GetTranslationServer) error {
 	sendHeader(stream)
 	defer sendTrailer(stream)
-	rows, err := s.Db.getUserTranslationHistory(stream.Context(), stream.Context().Value("user_id").(string), in)
+	rows, err := s.Db.getTranslations(stream.Context(), stream.Context().Value("user_id").(string), in)
 	if err != nil {
 		log.Fatal(err)
 		return err
@@ -249,7 +249,7 @@ func (s *AuthenticationServer) DeleteTranslation(ctx context.Context, in *pb.Id)
 func (s *AuthenticationServer) GetDiarization(in *pb.QueryParamethers, stream pb.ClientService_GetDiarizationServer) error {
 	sendHeader(stream)
 	defer sendTrailer(stream)
-	rows, err := s.Db.getUserDiarizationHistory(stream.Context(), stream.Context().Value("user_id").(string), in)
+	rows, err := s.Db.getDiarizations(stream.Context(), stream.Context().Value("user_id").(string), in)
 	if err != nil {
 		log.Fatal(err)
 		return err
@@ -309,4 +309,74 @@ func (s *AuthenticationServer) EditDiarization(ctx context.Context, in *pb.NewDi
 func (s *AuthenticationServer) DeleteDiarization(ctx context.Context, in *pb.Id) (*emptypb.Empty, error) {
 	err := s.Db.deleteDiarization(ctx, int(in.Id), ctx.Value("user_id").(string))
 	return &emptypb.Empty{}, err
+}
+
+func (s *AuthenticationServer) GetTranscriptionAndDiarization(in *pb.QueryParamethers, stream pb.ClientService_GetTranscriptionAndDiarizationServer) error {
+	rows, err := s.Db.getDiarizationsAndTranscriptions(stream.Context(), stream.Context().Value("user_id").(string), in)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	speakers := []string{}
+	lines := []string{}
+	var rowType string
+	var id int
+	var title string
+	var lang string
+	var createdAt time.Time
+	var content string
+	var speaker string
+	counter := 0
+	for rows.Next() {
+		counter++
+		err = rows.Scan(&rowType, &id, &title, &lang, &createdAt, &content, &speaker)
+		if err != nil {
+			return err
+		}
+		if rowType == "transcription" {
+			if len(speakers) != 0 {
+				stream.Send(&pb.Combined{
+					Transcription: nil,
+					Diarization: &pb.DiarizationHistory{
+						DiarizationId: int32(id),
+						Speaker:       speakers,
+						Line:          lines,
+						CreatedAt:     timestamppb.New(createdAt),
+						Language:      lang,
+						Title:         title,
+					},
+				})
+				speakers = []string{}
+				lines = []string{}
+			}
+			stream.Send(&pb.Combined{
+				Diarization: nil,
+				Transcription: &pb.TranscriptionHistory{
+					Transcription: content,
+					CreatedAt:     timestamppb.New(createdAt),
+					Id:            int32(id),
+					Language:      lang,
+					Title:         title,
+				},
+			})
+		} else {
+			speakers = append(speakers, speaker)
+			lines = append(lines, content)
+		}
+	}
+	if len(speakers) != 0 {
+		stream.Send(&pb.Combined{
+			Transcription: nil,
+			Diarization: &pb.DiarizationHistory{
+				DiarizationId: int32(id),
+				Speaker:       speakers,
+				Line:          lines,
+				CreatedAt:     timestamppb.New(createdAt),
+				Language:      lang,
+				Title:         title,
+			},
+		})
+	}
+	fmt.Println(counter)
+	return nil
 }

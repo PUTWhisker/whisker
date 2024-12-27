@@ -122,3 +122,11 @@ class QueryParamethers(_message.Message):
     language: str
     translation_language: str
     def __init__(self, start_time: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., end_time: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., limit: _Optional[int] = ..., language: _Optional[str] = ..., translation_language: _Optional[str] = ...) -> None: ...
+
+class Combined(_message.Message):
+    __slots__ = ("diarization", "transcription")
+    DIARIZATION_FIELD_NUMBER: _ClassVar[int]
+    TRANSCRIPTION_FIELD_NUMBER: _ClassVar[int]
+    diarization: DiarizationHistory
+    transcription: TranscriptionHistory
+    def __init__(self, diarization: _Optional[_Union[DiarizationHistory, _Mapping]] = ..., transcription: _Optional[_Union[TranscriptionHistory, _Mapping]] = ...) -> None: ...

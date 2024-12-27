@@ -716,6 +716,61 @@ func (x *QueryParamethers) GetTranslationLanguage() string {
 	return ""
 }
 
+type Combined struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Diarization   *DiarizationHistory   `protobuf:"bytes,1,opt,name=diarization,proto3" json:"diarization,omitempty"`
+	Transcription *TranscriptionHistory `protobuf:"bytes,2,opt,name=transcription,proto3" json:"transcription,omitempty"`
+}
+
+func (x *Combined) Reset() {
+	*x = Combined{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Combined) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Combined) ProtoMessage() {}
+
+func (x *Combined) ProtoReflect() protoreflect.Message {
+	mi := &file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Combined.ProtoReflect.Descriptor instead.
+func (*Combined) Descriptor() ([]byte, []int) {
+	return file_backend_ApiServer_proto_authentication_authentication_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *Combined) GetDiarization() *DiarizationHistory {
+	if x != nil {
+		return x.Diarization
+	}
+	return nil
+}
+
+func (x *Combined) GetTranscription() *TranscriptionHistory {
+	if x != nil {
+		return x.Transcription
+	}
+	return nil
+}
+
 var File_backend_ApiServer_proto_authentication_authentication_proto protoreflect.FileDescriptor
 
 var file_backend_ApiServer_proto_authentication_authentication_proto_rawDesc = []byte{
@@ -816,7 +871,15 @@ var file_backend_ApiServer_proto_authentication_authentication_proto_rawDesc = [
 	0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x12, 0x31, 0x0a, 0x14, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x6c,
 	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x18, 0x05,
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x13, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x6c, 0x61, 0x74, 0x69, 0x6f,
-	0x6e, 0x4c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x32, 0x86, 0x05, 0x0a, 0x0d, 0x43, 0x6c,
+	0x6e, 0x4c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x22, 0x7e, 0x0a, 0x08, 0x43, 0x6f, 0x6d,
+	0x62, 0x69, 0x6e, 0x65, 0x64, 0x12, 0x35, 0x0a, 0x0b, 0x64, 0x69, 0x61, 0x72, 0x69, 0x7a, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x13, 0x2e, 0x44, 0x69, 0x61,
+	0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x48, 0x69, 0x73, 0x74, 0x6f, 0x72, 0x79, 0x52,
+	0x0b, 0x64, 0x69, 0x61, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x3b, 0x0a, 0x0d,
+	0x74, 0x72, 0x61, 0x6e, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x15, 0x2e, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74,
+	0x69, 0x6f, 0x6e, 0x48, 0x69, 0x73, 0x74, 0x6f, 0x72, 0x79, 0x52, 0x0d, 0x74, 0x72, 0x61, 0x6e,
+	0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x32, 0xca, 0x05, 0x0a, 0x0d, 0x43, 0x6c,
 	0x69, 0x65, 0x6e, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x27, 0x0a, 0x05, 0x4c,
 	0x6f, 0x67, 0x69, 0x6e, 0x12, 0x0c, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x43, 0x72, 0x65, 0x64, 0x69,
 	0x74, 0x73, 0x1a, 0x0e, 0x2e, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
@@ -857,12 +920,16 @@ var file_backend_ApiServer_proto_authentication_authentication_proto_rawDesc = [
 	0x0a, 0x11, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x44, 0x69, 0x61, 0x72, 0x69, 0x7a, 0x61, 0x74,
 	0x69, 0x6f, 0x6e, 0x12, 0x03, 0x2e, 0x49, 0x64, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
 	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
-	0x22, 0x00, 0x42, 0x4a, 0x0a, 0x16, 0x69, 0x6f, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x61, 0x75,
-	0x74, 0x68, 0x65, 0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x13, 0x41, 0x75,
-	0x74, 0x68, 0x65, 0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x72, 0x6f, 0x74,
-	0x6f, 0x50, 0x01, 0x5a, 0x19, 0x69, 0x6e, 0x7a, 0x79, 0x6e, 0x69, 0x65, 0x72, 0x6b, 0x61, 0x2f,
-	0x61, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x62, 0x06,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x22, 0x00, 0x12, 0x42, 0x0a, 0x1e, 0x47, 0x65, 0x74, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x63, 0x72,
+	0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x41, 0x6e, 0x64, 0x44, 0x69, 0x61, 0x72, 0x69, 0x7a, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x12, 0x11, 0x2e, 0x51, 0x75, 0x65, 0x72, 0x79, 0x50, 0x61, 0x72, 0x61,
+	0x6d, 0x65, 0x74, 0x68, 0x65, 0x72, 0x73, 0x1a, 0x09, 0x2e, 0x43, 0x6f, 0x6d, 0x62, 0x69, 0x6e,
+	0x65, 0x64, 0x22, 0x00, 0x30, 0x01, 0x42, 0x4a, 0x0a, 0x16, 0x69, 0x6f, 0x2e, 0x67, 0x72, 0x70,
+	0x63, 0x2e, 0x61, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x42, 0x13, 0x41, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x19, 0x69, 0x6e, 0x7a, 0x79, 0x6e, 0x69, 0x65,
+	0x72, 0x6b, 0x61, 0x2f, 0x61, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -877,7 +944,7 @@ func file_backend_ApiServer_proto_authentication_authentication_proto_rawDescGZI
 	return file_backend_ApiServer_proto_authentication_authentication_proto_rawDescData
 }
 
-var file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_backend_ApiServer_proto_authentication_authentication_proto_goTypes = []interface{}{
 	(*TranscriptionHistory)(nil),  // 0: TranscriptionHistory
 	(*TranslationHistory)(nil),    // 1: TranslationHistory
@@ -889,42 +956,47 @@ var file_backend_ApiServer_proto_authentication_authentication_proto_goTypes = [
 	(*NewTranslation)(nil),        // 7: NewTranslation
 	(*NewDiarization)(nil),        // 8: NewDiarization
 	(*QueryParamethers)(nil),      // 9: QueryParamethers
-	(*timestamppb.Timestamp)(nil), // 10: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),         // 11: google.protobuf.Empty
+	(*Combined)(nil),              // 10: Combined
+	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),         // 12: google.protobuf.Empty
 }
 var file_backend_ApiServer_proto_authentication_authentication_proto_depIdxs = []int32{
-	10, // 0: TranscriptionHistory.created_at:type_name -> google.protobuf.Timestamp
-	10, // 1: TranslationHistory.created_at:type_name -> google.protobuf.Timestamp
-	10, // 2: DiarizationHistory.created_at:type_name -> google.protobuf.Timestamp
-	10, // 3: QueryParamethers.start_time:type_name -> google.protobuf.Timestamp
-	10, // 4: QueryParamethers.end_time:type_name -> google.protobuf.Timestamp
-	3,  // 5: ClientService.Login:input_type -> UserCredits
-	3,  // 6: ClientService.Register:input_type -> UserCredits
-	9,  // 7: ClientService.GetTranscription:input_type -> QueryParamethers
-	6,  // 8: ClientService.EditTranscription:input_type -> NewTranscription
-	5,  // 9: ClientService.DeleteTranscription:input_type -> Id
-	9,  // 10: ClientService.GetTranslation:input_type -> QueryParamethers
-	7,  // 11: ClientService.EditTranslation:input_type -> NewTranslation
-	5,  // 12: ClientService.DeleteTranslation:input_type -> Id
-	9,  // 13: ClientService.GetDiarization:input_type -> QueryParamethers
-	8,  // 14: ClientService.EditDiarization:input_type -> NewDiarization
-	5,  // 15: ClientService.DeleteDiarization:input_type -> Id
-	4,  // 16: ClientService.Login:output_type -> LoginResponse
-	11, // 17: ClientService.Register:output_type -> google.protobuf.Empty
-	0,  // 18: ClientService.GetTranscription:output_type -> TranscriptionHistory
-	11, // 19: ClientService.EditTranscription:output_type -> google.protobuf.Empty
-	11, // 20: ClientService.DeleteTranscription:output_type -> google.protobuf.Empty
-	1,  // 21: ClientService.GetTranslation:output_type -> TranslationHistory
-	11, // 22: ClientService.EditTranslation:output_type -> google.protobuf.Empty
-	11, // 23: ClientService.DeleteTranslation:output_type -> google.protobuf.Empty
-	2,  // 24: ClientService.GetDiarization:output_type -> DiarizationHistory
-	11, // 25: ClientService.EditDiarization:output_type -> google.protobuf.Empty
-	11, // 26: ClientService.DeleteDiarization:output_type -> google.protobuf.Empty
-	16, // [16:27] is the sub-list for method output_type
-	5,  // [5:16] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	11, // 0: TranscriptionHistory.created_at:type_name -> google.protobuf.Timestamp
+	11, // 1: TranslationHistory.created_at:type_name -> google.protobuf.Timestamp
+	11, // 2: DiarizationHistory.created_at:type_name -> google.protobuf.Timestamp
+	11, // 3: QueryParamethers.start_time:type_name -> google.protobuf.Timestamp
+	11, // 4: QueryParamethers.end_time:type_name -> google.protobuf.Timestamp
+	2,  // 5: Combined.diarization:type_name -> DiarizationHistory
+	0,  // 6: Combined.transcription:type_name -> TranscriptionHistory
+	3,  // 7: ClientService.Login:input_type -> UserCredits
+	3,  // 8: ClientService.Register:input_type -> UserCredits
+	9,  // 9: ClientService.GetTranscription:input_type -> QueryParamethers
+	6,  // 10: ClientService.EditTranscription:input_type -> NewTranscription
+	5,  // 11: ClientService.DeleteTranscription:input_type -> Id
+	9,  // 12: ClientService.GetTranslation:input_type -> QueryParamethers
+	7,  // 13: ClientService.EditTranslation:input_type -> NewTranslation
+	5,  // 14: ClientService.DeleteTranslation:input_type -> Id
+	9,  // 15: ClientService.GetDiarization:input_type -> QueryParamethers
+	8,  // 16: ClientService.EditDiarization:input_type -> NewDiarization
+	5,  // 17: ClientService.DeleteDiarization:input_type -> Id
+	9,  // 18: ClientService.GetTranscriptionAndDiarization:input_type -> QueryParamethers
+	4,  // 19: ClientService.Login:output_type -> LoginResponse
+	12, // 20: ClientService.Register:output_type -> google.protobuf.Empty
+	0,  // 21: ClientService.GetTranscription:output_type -> TranscriptionHistory
+	12, // 22: ClientService.EditTranscription:output_type -> google.protobuf.Empty
+	12, // 23: ClientService.DeleteTranscription:output_type -> google.protobuf.Empty
+	1,  // 24: ClientService.GetTranslation:output_type -> TranslationHistory
+	12, // 25: ClientService.EditTranslation:output_type -> google.protobuf.Empty
+	12, // 26: ClientService.DeleteTranslation:output_type -> google.protobuf.Empty
+	2,  // 27: ClientService.GetDiarization:output_type -> DiarizationHistory
+	12, // 28: ClientService.EditDiarization:output_type -> google.protobuf.Empty
+	12, // 29: ClientService.DeleteDiarization:output_type -> google.protobuf.Empty
+	10, // 30: ClientService.GetTranscriptionAndDiarization:output_type -> Combined
+	19, // [19:31] is the sub-list for method output_type
+	7,  // [7:19] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_backend_ApiServer_proto_authentication_authentication_proto_init() }
@@ -1053,6 +1125,18 @@ func file_backend_ApiServer_proto_authentication_authentication_proto_init() {
 				return nil
 			}
 		}
+		file_backend_ApiServer_proto_authentication_authentication_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Combined); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -1060,7 +1144,7 @@ func file_backend_ApiServer_proto_authentication_authentication_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_backend_ApiServer_proto_authentication_authentication_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
