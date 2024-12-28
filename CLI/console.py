@@ -280,7 +280,7 @@ class ConsolePrinter:
             return history
         
         print("Choose filters for diarization retrieving")
-        params = await self._setParameters(QuerryParameters(True))
+        params = await self._setParameters(QuerryParameters(False))
         print("Response structure: \033[1m[id | creation_time | language]\033[0m\nspeaker: speaker_line")
         history = await diarizationHistoryRequest(params)
         print("\nWrite 'e<id> to edit dialog. Write 'd<id>' to delete dialog. Write '0' to end program.")
