@@ -21,6 +21,9 @@ service ClientService {
     rpc GetDiarization(QueryParamethers) returns (stream DiarizationHistory) {};
     rpc EditDiarization(NewDiarization) returns (google.protobuf.Empty) {};
     rpc DeleteDiarization(Id) returns (google.protobuf.Empty) {}
+
+
+    rpc GetTranscriptionAndDiarization(QueryParamethers) returns (stream Combined){};
 }
 
 message TranscriptionHistory {
@@ -89,4 +92,10 @@ message QueryParamethers {
     int32 limit = 3;
     string language = 4;
     string translation_language = 5; //used only by translation
+}
+
+
+message Combined {
+    DiarizationHistory diarization = 1;
+    TranscriptionHistory transcription = 2;
 }

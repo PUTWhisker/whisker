@@ -20,12 +20,14 @@ message TextMessage {
 message TranscriptionRequest {
     bytes sound_data = 1;
     string source_language = 2; 
+    string title = 3;
 }
 
 message TranslationRequest {
     bytes sound_data = 1;
     string source_language = 2;
     string translation_language = 3;  
+    string title = 4;
 }
 
 message TranscirptionLiveRequest {
