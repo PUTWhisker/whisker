@@ -167,7 +167,6 @@ func (s *AuthenticationServer) GetTranscription(in *pb.QueryParamethers, stream 
 	defer sendTrailer(stream)
 	rows, err := s.Db.getTranscriptions(stream.Context(), stream.Context().Value("user_id").(string), in)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	defer rows.Close()
@@ -179,7 +178,7 @@ func (s *AuthenticationServer) GetTranscription(in *pb.QueryParamethers, stream 
 		var title string
 		err = rows.Scan(&id, &transcirption_text, &time_added, &language, &title)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		err := stream.Send(&pb.TranscriptionHistory{Transcription: transcirption_text, CreatedAt: timestamppb.New(time_added), Id: id, Language: language, Title: title})
@@ -205,7 +204,6 @@ func (s *AuthenticationServer) GetTranslation(in *pb.QueryParamethers, stream pb
 	defer sendTrailer(stream)
 	rows, err := s.Db.getTranslations(stream.Context(), stream.Context().Value("user_id").(string), in)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	defer rows.Close()
@@ -217,9 +215,9 @@ func (s *AuthenticationServer) GetTranslation(in *pb.QueryParamethers, stream pb
 		var translation_language string
 		var transcription_language string
 		var title string
-		err = rows.Scan(&id, &transcirption_text, &translation_text, &time_added, &transcription_language, &translation_language, title)
+		err = rows.Scan(&id, &transcirption_text, &translation_text, &time_added, &transcription_language, &translation_language, &title)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		err := stream.Send(&pb.TranslationHistory{Transcription: transcirption_text, Translation: translation_text, CreatedAt: timestamppb.New(time_added), Id: id, TranscriptionLangauge: transcription_language, TranslationLangauge: translation_language, Title: title})
@@ -251,7 +249,6 @@ func (s *AuthenticationServer) GetDiarization(in *pb.QueryParamethers, stream pb
 	defer sendTrailer(stream)
 	rows, err := s.Db.getDiarizations(stream.Context(), stream.Context().Value("user_id").(string), in)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	defer rows.Close()

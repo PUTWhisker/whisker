@@ -85,7 +85,7 @@ func buildQuery(initialQuery string, query *pb.QueryParamethers, mainTableName s
 }
 
 func (db UserDb) getTranscriptions(ctx context.Context, user_id string, query *pb.QueryParamethers) (pgx.Rows, error) {
-	queryText := `SELECT id, content, created_at, lang FROM transcription WHERE app_user_id=$1`
+	queryText := `SELECT id, content, created_at, lang, title FROM transcription WHERE app_user_id=$1`
 	queryText = buildQuery(queryText, query, "transcription")
 	return db.pool.Query(ctx, queryText, user_id)
 }
@@ -118,7 +118,7 @@ func (db UserDb) deleteTranscription(ctx context.Context, id int, user_id string
 func (db UserDb) saveTranslation(text string, user_id string, language string, translated_text string, translation_language string, title string) error {
 	transcription_id := 0
 	err := db.pool.QueryRow(context.Background(), `
-    INSERT INTO transcription(app_user_id, content, is_translation, lang) 
+    INSERT INTO transcription(app_user_id, content, is_translation, lang, title) 
     VALUES ($1, $2, $3, $4, $5)
 	RETURNING id;
 	`, user_id, text, true, language, title).Scan(&transcription_id)
@@ -159,7 +159,8 @@ func (db UserDb) getTranslations(ctx context.Context, user_id string, query *pb.
 		translation.content AS translation_content,
 		transcription.created_at,
 		transcription.lang AS transcription_language,
-		translation.lang AS translation_language
+		translation.lang AS translation_language,
+		transcription.title AS title
 	FROM transcription
 	JOIN translation 
 		ON transcription.id = translation.transcription_id 
