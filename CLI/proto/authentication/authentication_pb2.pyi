@@ -130,3 +130,17 @@ class Combined(_message.Message):
     diarization: DiarizationHistory
     transcription: TranscriptionHistory
     def __init__(self, diarization: _Optional[_Union[DiarizationHistory, _Mapping]] = ..., transcription: _Optional[_Union[TranscriptionHistory, _Mapping]] = ...) -> None: ...
+
+class RefreshTokenRequest(_message.Message):
+    __slots__ = ("refresh_token",)
+    REFRESH_TOKEN_FIELD_NUMBER: _ClassVar[int]
+    refresh_token: str
+    def __init__(self, refresh_token: _Optional[str] = ...) -> None: ...
+
+class RefreshTokenResponse(_message.Message):
+    __slots__ = ("refresh_token", "access_token")
+    REFRESH_TOKEN_FIELD_NUMBER: _ClassVar[int]
+    ACCESS_TOKEN_FIELD_NUMBER: _ClassVar[int]
+    refresh_token: str
+    access_token: str
+    def __init__(self, refresh_token: _Optional[str] = ..., access_token: _Optional[str] = ...) -> None: ...

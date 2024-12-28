@@ -45,6 +45,11 @@ class ClientServiceStub(object):
                 request_serializer=authentication__pb2.UserCredits.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
+        self.RefreshToken = channel.unary_unary(
+                '/ClientService/RefreshToken',
+                request_serializer=authentication__pb2.RefreshTokenRequest.SerializeToString,
+                response_deserializer=authentication__pb2.RefreshTokenResponse.FromString,
+                _registered_method=True)
         self.GetTranscription = channel.unary_stream(
                 '/ClientService/GetTranscription',
                 request_serializer=authentication__pb2.QueryParamethers.SerializeToString,
@@ -107,6 +112,12 @@ class ClientServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def Register(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RefreshToken(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -184,6 +195,11 @@ def add_ClientServiceServicer_to_server(servicer, server):
                     servicer.Register,
                     request_deserializer=authentication__pb2.UserCredits.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+            'RefreshToken': grpc.unary_unary_rpc_method_handler(
+                    servicer.RefreshToken,
+                    request_deserializer=authentication__pb2.RefreshTokenRequest.FromString,
+                    response_serializer=authentication__pb2.RefreshTokenResponse.SerializeToString,
             ),
             'GetTranscription': grpc.unary_stream_rpc_method_handler(
                     servicer.GetTranscription,
@@ -290,6 +306,33 @@ class ClientService(object):
             '/ClientService/Register',
             authentication__pb2.UserCredits.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RefreshToken(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ClientService/RefreshToken',
+            authentication__pb2.RefreshTokenRequest.SerializeToString,
+            authentication__pb2.RefreshTokenResponse.FromString,
             options,
             channel_credentials,
             insecure,

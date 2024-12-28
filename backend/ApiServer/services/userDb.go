@@ -40,6 +40,9 @@ type UserDbModel interface {
 	deleteDiarization(ctx context.Context, id int, user_id string) error
 
 	getDiarizationsAndTranscriptions(ctx context.Context, user_id string, query *pb.QueryParamethers) (pgx.Rows, error)
+
+	addRefreshToken(ctx context.Context, userId int, token string) error
+	compareRefreshToken(ctx context.Context, userId string, refresh_token string) (bool, error)
 }
 
 type UserDb struct {
@@ -98,7 +101,6 @@ func (db UserDb) editTranscription(ctx context.Context, id int, user_id string, 
 	if nrows < 1 {
 		return noRowsAffected
 	}
-
 	return err
 }
 
@@ -332,4 +334,27 @@ func (db UserDb) getDiarizationsAndTranscriptions(ctx context.Context, user_id s
 	queryText = buildQuery(queryText, query, "transcription")
 	queryText = queryText[0:len(queryText)-1] + " ORDER BY created_at, row_id ASC;"
 	return db.pool.Query(ctx, queryText, user_id)
+}
+
+func (db UserDb) addRefreshToken(ctx context.Context, userId int, token string) error {
+	_, err := db.pool.Exec(ctx, `
+	INSERT INTO refresh_token (app_user_id, token_hash)
+	VALUES (
+		$1,
+		$2
+	  )ON CONFLICT (app_user_id) 
+	DO UPDATE SET token_hash = EXCLUDED.token_hash
+		;`, userId, token)
+	return err
+}
+
+func (db UserDb) compareRefreshToken(ctx context.Context, userId string, refresh_token string) (bool, error) {
+	var token_from_db string
+	err := db.pool.QueryRow(
+		ctx,
+		`
+	SELECT token_hash from refresh_token WHERE app_user_id = $1`,
+		userId).Scan(token_from_db)
+
+	return token_from_db == refresh_token, err
 }

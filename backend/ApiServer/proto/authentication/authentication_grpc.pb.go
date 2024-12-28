@@ -25,6 +25,7 @@ const _ = grpc.SupportPackageIsVersion7
 type ClientServiceClient interface {
 	Login(ctx context.Context, in *UserCredits, opts ...grpc.CallOption) (*LoginResponse, error)
 	Register(ctx context.Context, in *UserCredits, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
 	GetTranscription(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (ClientService_GetTranscriptionClient, error)
 	EditTranscription(ctx context.Context, in *NewTranscription, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DeleteTranscription(ctx context.Context, in *Id, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -57,6 +58,15 @@ func (c *clientServiceClient) Login(ctx context.Context, in *UserCredits, opts .
 func (c *clientServiceClient) Register(ctx context.Context, in *UserCredits, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/ClientService/Register", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *clientServiceClient) RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error) {
+	out := new(RefreshTokenResponse)
+	err := c.cc.Invoke(ctx, "/ClientService/RefreshToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -251,6 +261,7 @@ func (x *clientServiceGetTranscriptionAndDiarizationClient) Recv() (*Combined, e
 type ClientServiceServer interface {
 	Login(context.Context, *UserCredits) (*LoginResponse, error)
 	Register(context.Context, *UserCredits) (*emptypb.Empty, error)
+	RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error)
 	GetTranscription(*QueryParamethers, ClientService_GetTranscriptionServer) error
 	EditTranscription(context.Context, *NewTranscription) (*emptypb.Empty, error)
 	DeleteTranscription(context.Context, *Id) (*emptypb.Empty, error)
@@ -273,6 +284,9 @@ func (UnimplementedClientServiceServer) Login(context.Context, *UserCredits) (*L
 }
 func (UnimplementedClientServiceServer) Register(context.Context, *UserCredits) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+}
+func (UnimplementedClientServiceServer) RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RefreshToken not implemented")
 }
 func (UnimplementedClientServiceServer) GetTranscription(*QueryParamethers, ClientService_GetTranscriptionServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetTranscription not implemented")
@@ -349,6 +363,24 @@ func _ClientService_Register_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ClientServiceServer).Register(ctx, req.(*UserCredits))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ClientService_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefreshTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClientServiceServer).RefreshToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ClientService/RefreshToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClientServiceServer).RefreshToken(ctx, req.(*RefreshTokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -559,6 +591,10 @@ var ClientService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Register",
 			Handler:    _ClientService_Register_Handler,
+		},
+		{
+			MethodName: "RefreshToken",
+			Handler:    _ClientService_RefreshToken_Handler,
 		},
 		{
 			MethodName: "EditTranscription",

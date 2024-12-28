@@ -377,3 +377,15 @@ func (s *AuthenticationServer) GetTranscriptionAndDiarization(in *pb.QueryParame
 	fmt.Println(counter)
 	return nil
 }
+
+func (s *AuthenticationServer) RefreshToken(ctx context.Context, in *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
+	valid, err := s.Db.compareRefreshToken(ctx, ctx.Value("user_id").(string), in.RefreshToken)
+	if err != nil {
+		return nil, err
+	}
+	if valid {
+		s.Db.addRefreshToken(ctx, ctx.Value("user_id").(string), in.RefreshToken)
+	}
+
+	return nil, nil
+}
