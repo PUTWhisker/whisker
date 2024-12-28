@@ -264,15 +264,17 @@ func (s *AuthenticationServer) GetDiarization(in *pb.QueryParamethers, stream pb
 	speakers := []string{}
 	lines := []string{}
 
-	rows.Next()
-	err = rows.Scan(&diarizationId, &speaker, &line, &createdAt, &language, &title)
-	if err != nil {
-		return err
+	if rows.Next() {
+		err = rows.Scan(&diarizationId, &speaker, &line, &createdAt, &language, &title)
+		if err != nil {
+			return err
+		}
+		speakers = append(speakers, speaker)
+		lines = append(lines, line)
+		oldId = diarizationId
+		oldCreatedAt = createdAt
 	}
-	speakers = append(speakers, speaker)
-	lines = append(lines, line)
-	oldId = diarizationId
-	oldCreatedAt = createdAt
+
 	for rows.Next() {
 		err = rows.Scan(&diarizationId, &speaker, &line, &createdAt, &language, &title)
 		if err != nil {
