@@ -8,6 +8,9 @@
   <title>DEMO PAGE</title>
   <script src="./dist/client.js"></script>
   <script>
+    localStorage.setItem('whisker-last-page', 'index.html');
+  </script>
+  <script>
     function showTransBox() {
       document.getElementById("show_transcript").style.display = 'block';
     }
@@ -144,23 +147,23 @@
       <a href="#" class="icon_button selected">
         Transcribe <span class="material-symbols-outlined">edit_document</span>
       </a>
-      <a href="http://127.0.0.1:5500/webApp/record.html" class="icon_button">
+      <a href="/webApp/record.html" class="icon_button">
         Dictate <span class="material-symbols-outlined">mic</span>
       </a>
-      <a href="http://127.0.0.1:5500/webApp/history.html" class="icon_button locked">
+      <a href="/webApp/history.html" class="icon_button locked">
         History <span class="material-symbols-outlined">lock</span>
       </a>
-      <a href="http://127.0.0.1:5500/webApp/swagger.html" class="icon_button locked">
+      <a href="/webApp/swagger.html" class="icon_button locked">
         Swagger <span class="material-symbols-outlined">lock</span>
       </a>
-      <a href="http://127.0.0.1:5500/webApp/about.html" class="icon_button">
+      <a href="/webApp/about.html" class="icon_button">
         About <span class="material-symbols-outlined">help</span>
       </a>
       <div id="blank_space"></div>
-      <a href="http://127.0.0.1:5500/webApp/login.html" class="icon_button">
+      <a href="/webApp/login.html" class="icon_button">
         Log in&nbsp;<span class="material-symbols-outlined">login</span>
       </a>
-      <a href="http://127.0.0.1:5500/webApp/signup.html" class="icon_button">
+      <a href="/webApp/signup.html" class="icon_button">
         Sign up&nbsp;<span class="material-symbols-outlined">person_add</span>
       </a>
     </div>

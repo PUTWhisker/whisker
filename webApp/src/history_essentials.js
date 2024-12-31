@@ -129,7 +129,7 @@ function clipString(str) {
 //             const audioIcon = createElement('button', null, ['option_button']);
 //             transcriptionView.appendChild(audioIcon);
 //             audioIcon.innerHTML = '<span class="material-symbols-outlined">brand_awareness</span>';
-//             audioIcon.onclick = () => spook(event, false);
+//             audioIcon.onclick = () => speak(event, false);
 
 //             const transcriptionCopyButton = createElement('button', null, ['option_button']);
 //             transcriptionView.appendChild(transcriptionCopyButton);
@@ -157,7 +157,7 @@ function clipString(str) {
 //                 const audioIcon = createElement('button', null, ['option_button']);
 //                 translationView.appendChild(audioIcon);
 //                 audioIcon.innerHTML = '<span class="material-symbols-outlined">brand_awareness</span>';
-//                 audioIcon.onclick = () => spook(event, true);
+//                 audioIcon.onclick = () => speak(event, true);
 
 //                 const translationCopyButton = createElement('button', null, ['option_button']);
 //                 translationView.appendChild(translationCopyButton);

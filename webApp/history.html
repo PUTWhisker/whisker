@@ -12,35 +12,52 @@
 
 <body>
     <script>
+        function clipString(str) {
+            const limit = 128;
+            if (str.length > limit) return `${str.substring(0, limit - 3)}...`
+            else return str;
+        }
+        function expandText(text) {
+            text.classList.toggle("expanded");
+            text.innerText = text.classList.contains("expanded") ? text.getAttribute("data-text") : clipString(text.getAttribute("data-text"));
+        }
         const nj = `
         <div class="event_view">
-            <div class="event_date_view">{{ event.date }}</div>
-            <div class="event_title">{{ event.title }}</div>
+            <div class="event_date_view">{{ timestampToDate(event.getCreatedAt()) }}</div>
+            <div class="event_title">Titles not fully supported yet (I guess)</div>
             <div class="event_previews_view">
                 <div class="event_text_row">
-                    <div class="text_flag">{{ flags[event.original_language] }}</div>
-                    <div class="preview_text">{{ clipString(event.transcription_result) }}</div>
-                    <button class="option_button" onclick="() => speak(event, false);">
+                    {% if event.getTranscriptionLanguage is defined %}
+                        <div class="text_flag">{{ event.getTranscriptionLanguage() }}</div>
+                    {% else %}
+                        <div class="text_flag">?</div>   <!-- GETLANGAUGE??? GETSOURCELANGUAGE??? PREGANTE??? CO TU ZA FUNKCJA MA BYĆ DO JEMZYKA -->
+                    {% endif %}
+                    <div class="preview_text" data-text="{{ event.getTranscription() }}" onclick="expandText(this);">
+                        {{ clipString(event.getTranscription()) }}
+                    </div>
+                    <button class="option_button" onclick="() => speak('{{ event.getTranscription() }}', 'en-us');">   <!-- GETLANGAUGE??? GETSOURCELANGUAGE??? PREGANTE??? CO TU ZA FUNKCJA MA BYĆ DO JEMZYKA -->
                         <span class="material-symbols-outlined">brand_awareness</span>
                     </button>
-                    <button class="option_button" onclick="(_) => copyToClipboard(event.transcription_result);">
+                    <button class="option_button" onclick="(_) => copyToClipboard('{{ event.getTranscription() }}');">
                         <span class="material-symbols-outlined">content_copy</span>
                     </button>
-                    <button class="option_button" onclick="(_) => downloadAsFile(event.transcription_result, 'transcription.txt');">
+                    <button class="option_button" onclick="(_) => downloadAsFile('{{ event.getTranscription() }}', 'transcription.txt');">
                         <span class="material-symbols-outlined">download</span>
                     </button>
                 </div>
-                {% if event.translation_result is defined %}
+                {% if mode == "translation" %}
                     <div class="event_text_row">
-                        <div class="text_flag">{{ flags[event.translate_language] }}</div>
-                        <div class="preview_text">{{ clipString(event.translation_result) }}</div>
-                        <button class="option_button" onclick="speak(event, true);">
+                        <div class="text_flag">{{ event.getTranslationLangauge() }}</div>
+                        <div class="preview_text" data-text="{{ event.getTranslation() }}" onclick="expandText(this);">
+                            {{ clipString(event.getTranslation()) }}
+                        </div>
+                        <button class="option_button" onclick="speak('{{ event.getTranslation() }}', 'en-us');">   <!-- GETLANGAUGE??? GETSOURCELANGUAGE??? PREGANTE??? CO TU ZA FUNKCJA MA BYĆ DO JEMZYKA -->
                             <span class="material-symbols-outlined">brand_awareness</span>
                         </button>
-                        <button class="option_button" onclick="copyToClipboard(event.translation_result);>
+                        <button class="option_button" onclick="(_) => copyToClipboard('{{ event.getTranslation() }}');">
                             <span class="material-symbols-outlined">content_copy</span>
                         </button>
-                        <button class="option_button" onclick="downloadAsFile(event.translation_result, 'translation.txt');">
+                        <button class="option_button" onclick="downloadAsFile('{{ event.getTranslation() }}', 'translation.txt');">
                             <span class="material-symbols-outlined">download</span>
                         </button>
                     </div>
@@ -54,36 +71,36 @@
         </div>
         `;
         const njTemplate = nunjucks.compile(nj);
+        const emptyHistory = `
+        <div style="display:inline-block;" class="centered-message">nothing to show yet</div>
+        `;
     </script>
     <header>
         <div id="top_menu">
             <p>Whisker+</p>
-            <a href="http://127.0.0.1:5500/webApp/index.html" class="icon_button">
+            <a href="/webApp/index.html" class="icon_button">
                 Transcribe <span class="material-symbols-outlined">edit_document</span>
             </a>
-            <a href="http://127.0.0.1:5500/webApp/record.html" class="icon_button">
+            <a href="/webApp/record.html" class="icon_button">
                 Dictate <span class="material-symbols-outlined">mic</span>
             </a>
             <a href="#" class="icon_button selected">
                 History <span class="material-symbols-outlined">lock</span>
             </a>
-            <a href="http://127.0.0.1:5500/webApp/swagger.html" class="icon_button locked">
+            <a href="/webApp/swagger.html" class="icon_button locked">
                 Swagger <span class="material-symbols-outlined">lock</span>
             </a>
-            <a href="http://127.0.0.1:5500/webApp/about.html" class="icon_button">
+            <a href="/webApp/about.html" class="icon_button">
                 About <span class="material-symbols-outlined">help</span>
             </a>
             <div id="blank_space"></div>
         </div>
         <div class="header selected" id="navigation">
-            <div class="tab_button selected" onclick="openTab(this, 'transcription')">
+            <div class="tab_button selected" onclick="openTab(this, 'translation')">
                 <div>Translations</div>
             </div>
-            <div class="tab_button" onclick="openTab(this, 'translation')">
-                <div>Transcriptions<br><span class="smaller_text">Single Speaker</span></div>
-            </div>
-            <div class="tab_button" onclick="openTab(this, 'diarization')">
-                <div>Transcriptions<br><span class="smaller_text">Multiple Speakers</span></div>
+            <div class="tab_button" onclick="openTab(this, 'transcription')">
+                <div>Transcriptions</div>
             </div>
         </div>
     </header>
@@ -94,8 +111,8 @@
                 </div>
             </div>
             <div id="main_container" class="main_content">
-                <div id="transcription_history" class="tab"></div>
-                <div id="translation_history" class="hidden tab"></div>
+                <div id="translation_history" class="tab"></div>
+                <div id="transcription_history" class="hidden tab"></div>
                 <div id="diarization_history" class="hidden tab"></div>
             </div>
         </div>

@@ -11,25 +11,28 @@ window.onload = function () {
 async function processFile() {
     document.getElementById("transcription_result").textContent = ""
     document.getElementById("translation_result").textContent = ""
+    console.log("Trying to execute translation");
     let source_language = document.getElementById("choose_lang").value
     if (source_language == "Choose language") {
         source_language = ""
     }
     let uploadedFile = document.getElementById("upload")
     if (!validate(uploadedFile)) {
-        return
+        return;
     }
     try {
-        const transcriptionResult = document.getElementById("transcription_result");
-        transcriptionResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
         if (document.getElementById("translate").checked) {
-            console.log("Trying to execute translation")
-            const translationResult = document.getElementById("translation_result");
-            translationResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
             let translate_language = document.getElementById("choose_trans_lang").value
             if (translate_language == "Choose language") {
                 translate_language = ""
+            } else if (source_language === translate_language) {
+                alert("Source and target language must not be the same");
+                return;
             }
+            const transcriptionResult = document.getElementById("transcription_result");
+            transcriptionResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
+            const translationResult = document.getElementById("translation_result");
+            translationResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
             let answer = sendFileTranslation(uploadedFile.files[0], source_language, translate_language)
             let receivedTranscription = false
             for await (const res of answer) {
