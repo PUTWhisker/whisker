@@ -27,8 +27,10 @@
             <div class="event_title">Titles not fully supported yet (I guess)</div>
             <div class="event_previews_view">
                 <div class="event_text_row">
-                    {% if event.getTranscriptionLanguage is defined %}
-                        <div class="text_flag">{{ event.getTranscriptionLanguage() }}</div>
+                    {% if event.getTranscriptionLangauge is defined %}
+                        <div class="text_flag">{{ event.getTranscriptionLangauge() }}</div>
+                    {% elseif event.getLanguage is defined %}
+                        <div class="text_flag">{{ event.getLanguage() }}</div>
                     {% else %}
                         <div class="text_flag">?</div>   <!-- GETLANGAUGE??? GETSOURCELANGUAGE??? PREGANTE??? CO TU ZA FUNKCJA MA BYĆ DO JEMZYKA -->
                     {% endif %}
