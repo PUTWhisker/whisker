@@ -20,7 +20,7 @@ window.onload = async function () {
     connectionTest()
     let translationHistory = await getTranslationHistory();
     let transcriptionHistory = await getTranscriptionHistory();
-    // let diarizationHistory = await getDiarizationHistory(); // TODO ZRUPCIE TO ŻEBY DZIAŁAŁO
+    let diarizationHistory = await getDiarizationHistory(); // TODO ZRUPCIE TO ŻEBY DZIAŁAŁO
     if (translationHistory.length > 0) {
         translationHistory.forEach(element => {
             const html = njTemplate.render(
@@ -38,12 +38,19 @@ window.onload = async function () {
             );
             document.getElementById("transcription_history").innerHTML += html;
         });
-        // diarizationHistory.forEach(element => {
-        //     const html = njTemplate.render({ event: element, flags: flags, clipString: clipString, timestampToDate: timestampToDate });
-        //     document.getElementById("transcription_history").innerHTML += html;
-        // });
     } else {
         document.getElementById("transcription_history").innerHTML = emptyHistory;
+    }
+    console.log(diarizationHistory)
+    if (diarizationHistory.length > 0) {
+        diarizationHistory.forEach(element => {
+            const html = njTemplate.render(
+                { event: element, flags: "diarization", clipString: clipString, timestampToDate: timestampToDate }
+            );
+            document.getElementById("diarization_history").innerHTML += html;
+        });
+    } else {
+        document.getElementById("diarization_history").innerHTML = emptyHistory;
     }
 }
 
@@ -111,9 +118,11 @@ async function getDiarizationHistory() {
     end_time.fromDate(new Date());
     let limit = 2;
     let dialogs = await getDiarization(start_time, end_time, limit);
+    const responseList = []
     for await (const dialog of dialogs) {
-        console.log(dialog.getSpeaker() + "  " + dialog.getLine());
+        responseList.push(dialog)
     }
+    return new Promise((resolve) => resolve(responseList));
 }
 
 async function editDiarizationEvent() {

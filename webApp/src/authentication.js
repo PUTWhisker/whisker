@@ -145,7 +145,7 @@ export async function *getTranslation(start_time, end_time, limit) {
     const stream = authenticationClient.getTranslation(request, metadata)
     const responseQueue = []
     let resolveQueue = null
-    let streamEnded = false;
+    let streamEnded = false
 
     stream.on('data', (response) => {
         responseQueue.push(response)
@@ -225,8 +225,8 @@ export function deleteTranslation(id) {
 
 export async function *getDiarization(start_time, end_time, limit) {
     let request = new QueryParamethers()
-    request.setStartTime(start_time)
-    request.setEndTime(end_time)
+    // request.setStartTime(start_time)
+    // request.setEndTime(end_time)
     request.setLimit(limit)
     let metadata = {}
     let token = getCookie("acs")
@@ -236,6 +236,8 @@ export async function *getDiarization(start_time, end_time, limit) {
     const stream = authenticationClient.getDiarization(request, metadata)
     const responseQueue = []
     let resolveQueue = null
+    let streamEnded = false
+
     stream.on('data', (response) => {
         responseQueue.push(response)
         if (resolveQueue) {
@@ -245,6 +247,7 @@ export async function *getDiarization(start_time, end_time, limit) {
     })
     stream.on('end', () => {
         console.log('Received everything, stream ended.')
+        streamEnded = true
         if (resolveQueue) {
             resolveQueue()
             resolveQueue = null
@@ -252,13 +255,14 @@ export async function *getDiarization(start_time, end_time, limit) {
     })
     stream.on('error', (err) => {
         console.error(`There was an error: ${err.code}: ${err.message}`)
+        streamEnded = true
         if (resolveQueue) {
             resolveQueue()
             resolveQueue = null
         }
     })
 
-    while (responseQueue.length > 0 || !stream.finished) {
+    while (responseQueue.length > 0 || !streamEnded) {
         if (responseQueue.length > 0) {
             yield responseQueue.shift()
         } else {

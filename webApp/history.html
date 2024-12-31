@@ -25,7 +25,7 @@
         <div class="event_view">
             <div class="event_date_view">{{ timestampToDate(event.getCreatedAt()) }}</div>
             <div class="event_title">Titles not fully supported yet (I guess)</div>
-            <div class="event_previews_view">
+            <div class="event_previews_view">Transcriptions
                 <div class="event_text_row">
                     {% if event.getTranscriptionLangauge is defined %}
                         <div class="text_flag">{{ event.getTranscriptionLangauge() }}</div>
@@ -103,6 +103,9 @@
             </div>
             <div class="tab_button" onclick="openTab(this, 'transcription')">
                 <div>Transcriptions</div>
+            </div>
+            <div class="tab_button" onclick="openTab(this, 'diarization')">
+                <div>Diarization</div>
             </div>
         </div>
     </header>
