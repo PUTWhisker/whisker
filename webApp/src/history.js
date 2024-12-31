@@ -24,7 +24,7 @@ window.onload = async function () {
     if (translationHistory.length > 0) {
         translationHistory.forEach(element => {
             const html = njTemplate.render(
-                { event: element, mode: "translation", clipString: clipString, escapeQuotes: escapeQuotes, timestampToDate: timestampToDate }
+                { event: element, mode: "translation", clipString: clipString, timestampToDate: timestampToDate } // escapeQuotes: escapeQuotes,
             );
             document.getElementById("translation_history").innerHTML += html;
         });
@@ -34,7 +34,7 @@ window.onload = async function () {
     if (transcriptionHistory.length > 0 /*|| diarizationHistory.length > 0*/) {
         transcriptionHistory.forEach(element => {
             const html = njTemplate.render(
-                { event: element, mode: "transcription", clipString: clipString, escapeQuotes: escapeQuotes, timestampToDate: timestampToDate }
+                { event: element, mode: "transcription", clipString: clipString, timestampToDate: timestampToDate } // escapeQuotes: escapeQuotes,
             );
             document.getElementById("transcription_history").innerHTML += html;
         });
