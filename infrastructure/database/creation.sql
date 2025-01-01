@@ -15,7 +15,8 @@ CREATE TABLE app_user (
 
 CREATE TABLE refresh_token (
     app_user_id INT UNIQUE REFERENCES app_user(id) ON DELETE CASCADE,
-    token_hash VARCHAR(100) NOT NULL
+    token_hash BYTEA NOT NULL,
+    expires_at TIMESTAMP NOT NULL
 )
 
 CREATE TABLE transcription (

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"time"
 
 	pb "inzynierka/server/proto/authentication"
 
@@ -41,8 +42,8 @@ type UserDbModel interface {
 
 	getDiarizationsAndTranscriptions(ctx context.Context, user_id string, query *pb.QueryParamethers) (pgx.Rows, error)
 
-	addRefreshToken(ctx context.Context, userId int, token string) error
-	compareRefreshToken(ctx context.Context, userId string, refresh_token string) (bool, error)
+	addRefreshToken(ctx context.Context, userId string, token string) error
+	getDataFromRefreshToken(ctx context.Context, refresh_token string) (string, time.Time, error)
 }
 
 type UserDb struct {
@@ -336,25 +337,27 @@ func (db UserDb) getDiarizationsAndTranscriptions(ctx context.Context, user_id s
 	return db.pool.Query(ctx, queryText, user_id)
 }
 
-func (db UserDb) addRefreshToken(ctx context.Context, userId int, token string) error {
+func (db UserDb) addRefreshToken(ctx context.Context, userId string, token string) error {
 	_, err := db.pool.Exec(ctx, `
-	INSERT INTO refresh_token (app_user_id, token_hash)
+	INSERT INTO refresh_token (app_user_id, token_hash, expires_at)
 	VALUES (
 		$1,
-		$2
+		$2,
+		$3
 	  )ON CONFLICT (app_user_id) 
-	DO UPDATE SET token_hash = EXCLUDED.token_hash
-		;`, userId, token)
+	DO UPDATE SET token_hash = EXCLUDED.token_hash,
+	expires_at = EXCLUDED.expires_at;`, userId, token, time.Now().AddDate(0, 0, 30))
 	return err
 }
 
-func (db UserDb) compareRefreshToken(ctx context.Context, userId string, refresh_token string) (bool, error) {
-	var token_from_db string
+func (db UserDb) getDataFromRefreshToken(ctx context.Context, refresh_token string) (string, time.Time, error) {
+	var userId string
+	var expiresAt time.Time
 	err := db.pool.QueryRow(
 		ctx,
 		`
-	SELECT token_hash from refresh_token WHERE app_user_id = $1`,
-		userId).Scan(token_from_db)
+	SELECT app_user_id, expires_at from refresh_token WHERE token_hash = $1`,
+		refresh_token).Scan(&userId, &expiresAt)
 
-	return token_from_db == refresh_token, err
+	return userId, expiresAt, err
 }

@@ -64,12 +64,12 @@ class UserCredits(_message.Message):
     def __init__(self, username: _Optional[str] = ..., password: _Optional[str] = ...) -> None: ...
 
 class LoginResponse(_message.Message):
-    __slots__ = ("JWT", "successful")
+    __slots__ = ("JWT", "refresh_token")
     JWT_FIELD_NUMBER: _ClassVar[int]
-    SUCCESSFUL_FIELD_NUMBER: _ClassVar[int]
+    REFRESH_TOKEN_FIELD_NUMBER: _ClassVar[int]
     JWT: str
-    successful: bool
-    def __init__(self, JWT: _Optional[str] = ..., successful: bool = ...) -> None: ...
+    refresh_token: str
+    def __init__(self, JWT: _Optional[str] = ..., refresh_token: _Optional[str] = ...) -> None: ...
 
 class Id(_message.Message):
     __slots__ = ("id",)

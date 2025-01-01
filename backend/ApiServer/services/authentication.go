@@ -3,7 +3,9 @@ package services
 import (
 	"context"
 	"crypto/ecdsa"
+	"crypto/rand"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"fmt"
 	pb "inzynierka/server/proto/authentication"
@@ -41,8 +43,9 @@ type JWTGenerator struct {
 }
 
 var (
-	timestampFormat   = time.StampNano
-	errUserRegistered = status.Errorf(codes.AlreadyExists, "User already exist")
+	timestampFormat     = time.StampNano
+	errUserRegistered   = status.Errorf(codes.AlreadyExists, "User already exist")
+	errWrongCredentials = status.Errorf(codes.PermissionDenied, "Password or login incorrect")
 )
 
 func (g *JWTGenerator) generate(database_id string) (string, error) {
@@ -56,7 +59,7 @@ func (g *JWTGenerator) generate(database_id string) (string, error) {
 	claims := UserClaims{
 		database_id,
 		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute)),
 			Issuer:    "krzysztof",
 		},
 	}
@@ -122,13 +125,15 @@ func (s *AuthenticationServer) checkUserCredentials(username string, password st
 }
 
 func (s *AuthenticationServer) Login(ctx context.Context, in *pb.UserCredits) (*pb.LoginResponse, error) {
-	database_id, is_login_succesfull := s.checkUserCredentials(in.Username, in.Password)
-	if is_login_succesfull {
-		token, _ := s.JwtGenerator.generate(database_id)
-		return &pb.LoginResponse{Successful: true, JWT: token}, nil
+	userId, isLoginSuccesfull := s.checkUserCredentials(in.Username, in.Password)
+	if isLoginSuccesfull {
+		token, _ := s.JwtGenerator.generate(userId)
+		newRefreshToken, _ := generateOpaqueToken()
+		s.Db.addRefreshToken(ctx, userId, newRefreshToken)
+		return &pb.LoginResponse{JWT: token, RefreshToken: newRefreshToken}, nil
 
 	}
-	return &pb.LoginResponse{Successful: false, JWT: ""}, nil
+	return nil, errWrongCredentials
 }
 
 func HashPassword(password string) (string, error) {
@@ -377,15 +382,35 @@ func (s *AuthenticationServer) GetTranscriptionAndDiarization(in *pb.QueryParame
 	fmt.Println(counter)
 	return nil
 }
+func generateOpaqueToken() (string, error) {
+	bytes := make([]byte, 32) // 256 bits
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(bytes), nil
+}
 
 func (s *AuthenticationServer) RefreshToken(ctx context.Context, in *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
-	valid, err := s.Db.compareRefreshToken(ctx, ctx.Value("user_id").(string), in.RefreshToken)
+	userId, expiresAt, err := s.Db.getDataFromRefreshToken(ctx, in.RefreshToken)
 	if err != nil {
 		return nil, err
 	}
-	if valid {
-		s.Db.addRefreshToken(ctx, ctx.Value("user_id").(string), in.RefreshToken)
+	fmt.Println(expiresAt)
+	if time.Now().After(expiresAt) {
+		return nil, fmt.Errorf("refresh token expired")
+	}
+	var newRefreshToken string
+	var newAccessToken string
+	newRefreshToken, err = generateOpaqueToken()
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, nil
+	s.Db.addRefreshToken(ctx, userId, newRefreshToken)
+
+	newAccessToken, err = s.JwtGenerator.generate(userId)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.RefreshTokenResponse{RefreshToken: newRefreshToken, AccessToken: newAccessToken}, nil
 }

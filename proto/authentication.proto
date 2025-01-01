@@ -61,7 +61,7 @@ message UserCredits {
 
 message LoginResponse {
     string JWT = 1;
-    bool successful = 2;
+    string refresh_token = 2;
 }
 
 message Id {
