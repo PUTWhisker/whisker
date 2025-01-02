@@ -21,4 +21,5 @@ subprojects {
 
 tasks.create("assemble").dependsOn(":server:installDist")
 
+//rootProject.extra["serverUrl"] = "http://10.0.2.2:50051/"
 rootProject.extra["serverUrl"] = "http://100.80.80.156:50051/"

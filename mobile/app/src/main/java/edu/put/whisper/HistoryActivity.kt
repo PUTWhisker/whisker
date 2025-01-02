@@ -1,8 +1,10 @@
 package edu.put.whisper
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,7 +29,7 @@ class HistoryActivity : AppCompatActivity() {
         rvTranscriptions = findViewById(R.id.rvTranscriptions)
         rvTranscriptions.layoutManager = LinearLayoutManager(this)
 
-        authClient = AuthenticationClient(Uri.parse("http://100.80.80.156:50051/"))
+        authClient = AuthenticationClient(Uri.parse(getResources().getString(R.string.server_url)), this)
 
         loadTranscriptions()
     }
