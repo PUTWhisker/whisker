@@ -56,7 +56,7 @@ func (db UserDb) saveTranscription(text string, user_id string, is_translation b
 	var transcription_id int
 	err := db.pool.QueryRow(context.Background(), `
     INSERT INTO transcription(app_user_id, content, is_translation, lang, title) 
-    VALUES ($1, $2, $3, $4, $5);
+    VALUES ($1, $2, $3, $4, $5)
 	RETURNING id;
 	`, user_id, text, true, language, title).Scan(&transcription_id)
 
