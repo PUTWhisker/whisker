@@ -149,6 +149,16 @@ class AuthenticationClient(uri: Uri) : Closeable {
         }
         stub.editTranslation(request, metadata)
     }
+    suspend fun addOrEditTranslation(id : Int, content: String, lang: String){
+        val metadata = createMetadata()
+        val request = translationText {
+            this.transcriptionId = id
+            this.content = content
+            this.language = lang
+        }
+        stub.saveOnlyTranslation(request, metadata)
+    }
+
 
     suspend fun deleteTranslation(id : Int) {
         val metadata = createMetadata()
