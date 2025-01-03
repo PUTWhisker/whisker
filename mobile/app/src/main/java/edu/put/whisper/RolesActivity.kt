@@ -32,6 +32,8 @@ class RolesActivity : AppCompatActivity() {
             onBackPressed()
         }
 
+        // PRZETESTUJ Z CZYSTYM PLIKIEM
+
       //  tvDiarizedTranscription = findViewById(R.id.tvDiarizedTranscription)
 
         val serverUrl = getString(R.string.server_url)

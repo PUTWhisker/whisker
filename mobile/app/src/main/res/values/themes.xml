@@ -42,10 +42,37 @@
         <item name="boxCornerRadiusBottomEnd">36dp</item>
         <item name="endIconMode">clear_text</item>
         <item name="startIconDrawable">@drawable/ic_search</item>
-
-
     </style>
 
+<!--    STYLE DLA CARDVIEW-->
+    <style name="CardViewStyle" parent="Widget.MaterialComponents.CardView">
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">6dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+        <item name="android:background">@color/primary</item>
+    </style>
+
+    <style name="ImageViewStyle">
+        <item name="android:layout_width">65dp</item>
+        <item name="android:layout_height">65dp</item>
+        <item name="android:padding">20dp</item>
+        <item name="android:background">@drawable/circle_icon_background</item>
+        <item name="android:tint">@color/white</item>
+    </style>
+
+    <style name="TextViewStyle">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/primaryDark</item>
+    </style>
+
+    <style name="ImageViewArrowStyle">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
+        <item name="android:src">@drawable/ic_arrow</item>
+        <item name="android:tint">@color/primaryDark</item>
+    </style>
 
     <style name="ToolbarTitleStyle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textSize">18sp</item>

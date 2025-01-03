@@ -9,6 +9,7 @@ import android.media.MediaRecorder
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
@@ -44,6 +45,7 @@ class MainActivity : AppCompatActivity() {
     private var isRecordingStopped: Boolean = false
     private var currentFileName: String? = null
     private var tempFilePath: String? = null
+    //private lateinit var loadingGif: ImageView
 
     // Timer variables
     private lateinit var tvTimer: TextView
@@ -87,6 +89,7 @@ class MainActivity : AppCompatActivity() {
         btnOk = findViewById(R.id.btnOk)
         btnTranscript = findViewById(R.id.btnTranscript)
         btnBack = findViewById(R.id.btnBack)
+        //loadingGif = findViewById(R.id.loadingGif)
 
         spinnerLanguage = findViewById(R.id.spinner_language)
         languages = resources.getStringArray(R.array.languages)
@@ -104,8 +107,6 @@ class MainActivity : AppCompatActivity() {
         toolbar.setNavigationOnClickListener {
             onBackPressed()
         }
-
-
 
         if (utilities.isMicrophonePresent()) {
             getMicrophonePermission()
@@ -405,6 +406,7 @@ class MainActivity : AppCompatActivity() {
 
     private val timerRunnable: Runnable = object : Runnable {
         override fun run() {
+            Log.d("Timer", "Timer tick")
             val currentTime = System.currentTimeMillis()
             val millis = elapsedTime + (currentTime - startTime)
             val minutes = (millis / 60000).toInt() % 60

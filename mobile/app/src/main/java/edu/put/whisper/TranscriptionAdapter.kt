@@ -12,7 +12,8 @@ import java.util.*
 
 class TranscriptionAdapter(
     private val transcriptions: MutableList<TranscriptionElement>,
-    private val onItemClick: (TranscriptionElement) -> Unit
+    private val onItemClick: (TranscriptionElement) -> Unit,
+    private val onSelectionChanged: () -> Unit
 ) : RecyclerView.Adapter<TranscriptionAdapter.TranscriptionViewHolder>() {
 
     private val selectedItems = mutableSetOf<Int>() //lista do trzymania stanu zaznaczenia
@@ -65,10 +66,17 @@ class TranscriptionAdapter(
             selectedItems.add(position)
         }
         notifyItemChanged(position) // powiadamiamy adapter ze element zmienil stan
+        onSelectionChanged()
     }
 
     // zwraca liste zaznaczonych transkrypcji
     fun getSelectedItems(): List<TranscriptionElement> {
         return selectedItems.map { transcriptions[it] }
+    }
+
+    fun removeItems(itemsToRemove: List<TranscriptionElement>) {
+        transcriptions.removeAll(itemsToRemove)
+        selectedItems.clear()
+        notifyDataSetChanged()
     }
 }
