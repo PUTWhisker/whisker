@@ -9,6 +9,7 @@ import android.media.MediaRecorder
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
@@ -405,6 +406,7 @@ class MainActivity : AppCompatActivity() {
 
     private val timerRunnable: Runnable = object : Runnable {
         override fun run() {
+            Log.d("Timer", "Timer tick")
             val currentTime = System.currentTimeMillis()
             val millis = elapsedTime + (currentTime - startTime)
             val minutes = (millis / 60000).toInt() % 60
