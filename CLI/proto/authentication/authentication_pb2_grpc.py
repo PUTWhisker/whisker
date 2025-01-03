@@ -95,6 +95,11 @@ class ClientServiceStub(object):
                 request_serializer=authentication__pb2.Id.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
+        self.GetTranscriptionAndDiarization = channel.unary_stream(
+                '/ClientService/GetTranscriptionAndDiarization',
+                request_serializer=authentication__pb2.QueryParamethers.SerializeToString,
+                response_deserializer=authentication__pb2.Combined.FromString,
+                _registered_method=True)
 
 
 class ClientServiceServicer(object):
@@ -172,6 +177,12 @@ class ClientServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetTranscriptionAndDiarization(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ClientServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -234,6 +245,11 @@ def add_ClientServiceServicer_to_server(servicer, server):
                     servicer.DeleteDiarization,
                     request_deserializer=authentication__pb2.Id.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+            'GetTranscriptionAndDiarization': grpc.unary_stream_rpc_method_handler(
+                    servicer.GetTranscriptionAndDiarization,
+                    request_deserializer=authentication__pb2.QueryParamethers.FromString,
+                    response_serializer=authentication__pb2.Combined.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -560,6 +576,33 @@ class ClientService(object):
             '/ClientService/DeleteDiarization',
             authentication__pb2.Id.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetTranscriptionAndDiarization(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/ClientService/GetTranscriptionAndDiarization',
+            authentication__pb2.QueryParamethers.SerializeToString,
+            authentication__pb2.Combined.FromString,
             options,
             channel_credentials,
             insecure,

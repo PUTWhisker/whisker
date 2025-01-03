@@ -61,7 +61,7 @@ func (s *SoundServer) TranscribeFile(ctx context.Context, in *pb.TranscriptionRe
 	username, _ := GetUserNameFromMetadata(md)
 	id := 0
 	if username != "" && s.Db != nil {
-		id, err = s.Db.saveTranscription(res.Text, username, false, in.SourceLanguage)
+		_, err = s.Db.saveTranscription(res.Text, username, false, in.SourceLanguage, in.Title)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -89,7 +89,7 @@ func (s *SoundServer) DiarizateFile(ctx context.Context, in *pb.TranscriptionReq
 	}
 
 	if username != "" && s.Db != nil {
-		s.Db.saveDiarization(res.Text, res.SpeakerName, username, in.SourceLanguage)
+		s.Db.saveDiarization(res.Text, res.SpeakerName, username, in.SourceLanguage, in.Title)
 	}
 
 	return res, nil
@@ -116,7 +116,7 @@ func (s *SoundServer) TranslateFile(in *pb.TranslationRequest, stream pb.SoundSe
 	stream.Send(translation)
 	userId, _ := GetUserNameFromMetadata(md)
 	if userId != "" && s.Db != nil {
-		s.Db.saveTranslation(transcription.Text, userId, in.SourceLanguage, translation.Text, in.TranslationLanguage)
+		s.Db.saveTranslation(transcription.Text, userId, in.SourceLanguage, translation.Text, in.TranslationLanguage, in.Title)
 	}
 	return nil
 }

@@ -8,46 +8,52 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Map
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class TranscriptionHistory(_message.Message):
-    __slots__ = ("transcription", "created_at", "id", "language")
+    __slots__ = ("transcription", "created_at", "id", "language", "title")
     TRANSCRIPTION_FIELD_NUMBER: _ClassVar[int]
     CREATED_AT_FIELD_NUMBER: _ClassVar[int]
     ID_FIELD_NUMBER: _ClassVar[int]
     LANGUAGE_FIELD_NUMBER: _ClassVar[int]
+    TITLE_FIELD_NUMBER: _ClassVar[int]
     transcription: str
     created_at: _timestamp_pb2.Timestamp
     id: int
     language: str
-    def __init__(self, transcription: _Optional[str] = ..., created_at: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., id: _Optional[int] = ..., language: _Optional[str] = ...) -> None: ...
+    title: str
+    def __init__(self, transcription: _Optional[str] = ..., created_at: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., id: _Optional[int] = ..., language: _Optional[str] = ..., title: _Optional[str] = ...) -> None: ...
 
 class TranslationHistory(_message.Message):
-    __slots__ = ("id", "transcription", "translation", "created_at", "transcription_langauge", "translation_langauge")
+    __slots__ = ("id", "transcription", "translation", "created_at", "transcription_langauge", "translation_langauge", "title")
     ID_FIELD_NUMBER: _ClassVar[int]
     TRANSCRIPTION_FIELD_NUMBER: _ClassVar[int]
     TRANSLATION_FIELD_NUMBER: _ClassVar[int]
     CREATED_AT_FIELD_NUMBER: _ClassVar[int]
     TRANSCRIPTION_LANGAUGE_FIELD_NUMBER: _ClassVar[int]
     TRANSLATION_LANGAUGE_FIELD_NUMBER: _ClassVar[int]
+    TITLE_FIELD_NUMBER: _ClassVar[int]
     id: int
     transcription: str
     translation: str
     created_at: _timestamp_pb2.Timestamp
     transcription_langauge: str
     translation_langauge: str
-    def __init__(self, id: _Optional[int] = ..., transcription: _Optional[str] = ..., translation: _Optional[str] = ..., created_at: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., transcription_langauge: _Optional[str] = ..., translation_langauge: _Optional[str] = ...) -> None: ...
+    title: str
+    def __init__(self, id: _Optional[int] = ..., transcription: _Optional[str] = ..., translation: _Optional[str] = ..., created_at: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., transcription_langauge: _Optional[str] = ..., translation_langauge: _Optional[str] = ..., title: _Optional[str] = ...) -> None: ...
 
 class DiarizationHistory(_message.Message):
-    __slots__ = ("diarization_id", "speaker", "line", "created_at", "language")
+    __slots__ = ("diarization_id", "speaker", "line", "created_at", "language", "title")
     DIARIZATION_ID_FIELD_NUMBER: _ClassVar[int]
     SPEAKER_FIELD_NUMBER: _ClassVar[int]
     LINE_FIELD_NUMBER: _ClassVar[int]
     CREATED_AT_FIELD_NUMBER: _ClassVar[int]
     LANGUAGE_FIELD_NUMBER: _ClassVar[int]
+    TITLE_FIELD_NUMBER: _ClassVar[int]
     diarization_id: int
     speaker: _containers.RepeatedScalarFieldContainer[str]
     line: _containers.RepeatedScalarFieldContainer[str]
     created_at: _timestamp_pb2.Timestamp
     language: str
-    def __init__(self, diarization_id: _Optional[int] = ..., speaker: _Optional[_Iterable[str]] = ..., line: _Optional[_Iterable[str]] = ..., created_at: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., language: _Optional[str] = ...) -> None: ...
+    title: str
+    def __init__(self, diarization_id: _Optional[int] = ..., speaker: _Optional[_Iterable[str]] = ..., line: _Optional[_Iterable[str]] = ..., created_at: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., language: _Optional[str] = ..., title: _Optional[str] = ...) -> None: ...
 
 class UserCredits(_message.Message):
     __slots__ = ("username", "password")
@@ -126,3 +132,11 @@ class TranslationText(_message.Message):
     content: str
     language: str
     def __init__(self, transcription_id: _Optional[int] = ..., content: _Optional[str] = ..., language: _Optional[str] = ...) -> None: ...
+
+class Combined(_message.Message):
+    __slots__ = ("diarization", "transcription")
+    DIARIZATION_FIELD_NUMBER: _ClassVar[int]
+    TRANSCRIPTION_FIELD_NUMBER: _ClassVar[int]
+    diarization: DiarizationHistory
+    transcription: TranscriptionHistory
+    def __init__(self, diarization: _Optional[_Union[DiarizationHistory, _Mapping]] = ..., transcription: _Optional[_Union[TranscriptionHistory, _Mapping]] = ...) -> None: ...

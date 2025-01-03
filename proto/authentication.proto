@@ -24,6 +24,9 @@ service ClientService {
     rpc GetDiarization(QueryParamethers) returns (stream DiarizationHistory) {};
     rpc EditDiarization(NewDiarization) returns (google.protobuf.Empty) {};
     rpc DeleteDiarization(Id) returns (google.protobuf.Empty) {}
+
+
+    rpc GetTranscriptionAndDiarization(QueryParamethers) returns (stream Combined){};
 }
 
 message TranscriptionHistory {
@@ -31,6 +34,7 @@ message TranscriptionHistory {
     google.protobuf.Timestamp created_at = 2;
     int32 id = 3;
     string language = 4;
+    string title = 5;
 }
 
 message TranslationHistory {
@@ -40,6 +44,7 @@ message TranslationHistory {
     google.protobuf.Timestamp created_at = 4;
     string transcription_langauge = 5;
     string translation_langauge = 6;
+    string title = 7;
 }
 
 message DiarizationHistory {
@@ -48,6 +53,7 @@ message DiarizationHistory {
     repeated string line = 4;
     google.protobuf.Timestamp created_at = 5;
     string language = 6;
+    string title = 7;
 }
 
 message UserCredits {
@@ -95,4 +101,9 @@ message TranslationText {
     int32 transcription_id = 1;
     string content = 2;
     string language = 3;
+}
+
+message Combined {
+    DiarizationHistory diarization = 1;
+    TranscriptionHistory transcription = 2;
 }
