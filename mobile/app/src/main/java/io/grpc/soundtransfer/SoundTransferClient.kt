@@ -38,8 +38,7 @@ class SoundTransferClient(uri: Uri) : Closeable {
 
 
     //zmienic funkcje tak zeby zwracala wszystko
-    suspend fun transcribeFile(filePath: String, language : String): String? {
-        try {
+    suspend fun transcribeFile(filePath: String, language : String): SoundResponse {
             val metadata = Metadata()
             val key = Metadata.Key.of("JWT", Metadata.ASCII_STRING_MARSHALLER)
             if (jWT != "") {
@@ -47,13 +46,8 @@ class SoundTransferClient(uri: Uri) : Closeable {
             }
             val bytes = File(filePath).readBytes().toByteString()
             val request = transcriptionRequest { this.soundData = bytes; this.sourceLanguage = language}
-            val response = stub.transcribeFile(request, metadata)
-            return response.text
-        } catch (e: Exception) {
-            Log.d("DEBUG", "jestem w kaczu")
-            e.printStackTrace()
-        }
-        return null
+            return stub.transcribeFile(request, metadata)
+
     }
 
     // zamiast stringa obiekt ktory zwraca bula :3 i stringa
@@ -72,6 +66,7 @@ class SoundTransferClient(uri: Uri) : Closeable {
         }
     }
 
+    //file path zawiera plik dźwiękowy
     fun translate(filePath: String, sourceLanguage : String, translationLanguage: String): Flow<SoundResponse> {
         val bytes = File(filePath).readBytes().toByteString()
         val request = translationRequest {
@@ -83,13 +78,13 @@ class SoundTransferClient(uri: Uri) : Closeable {
     }
 
 
-    suspend fun translateText(textToTranslate : String, textLanguage : String, tranlationLanguage : String){
+    suspend fun translateText(textToTranslate : String, textLanguage : String, tranlationLanguage : String): TextMessage{
         val request = textAndId {
             this.text = textToTranslate
             this.textLanguage = textLanguage
             this.translationLanguage = tranlationLanguage
         }
-        stub.translateText(request)
+        return stub.translateText(request)
     }
 
 

@@ -69,17 +69,8 @@ class TranslateActivity : AppCompatActivity() {
                 CoroutineScope(Dispatchers.Main).launch {
                     try {
                         val tempFile = createTempFile(originalText)
-                        val flow = client.translate(tempFile.absolutePath, sourceLanguage, targetLanguage)
-
-                        var translatedText = ""
-                        flow.collect { response ->
-                            translatedText += response.text
-                        }
-
-
-                        editTextTranslated.setText(translatedText)
-
-
+                        val respone = client.translateText(originalText, sourceLanguage, targetLanguage)
+                        editTextTranslated.setText(respone.text)
                         tempFile.delete()
                     } catch (e: Exception) {
                         e.printStackTrace()
