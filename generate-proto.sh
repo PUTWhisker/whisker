@@ -1,6 +1,6 @@
 #! /bin/bash
 
-python -m venv venv
+python3 -m venv venv
 
 # For correct venv activation
 if [ "$(uname)" == "Darwin" ]; then

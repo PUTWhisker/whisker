@@ -6,7 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	pb "inzynierka/server/proto/authentication"
+	pb "inzynierka/server/proto/authentication" // TODO bruh tu jest ścieżka lokalna, do poprawki przed szóstym?
 	"log"
 	"os"
 	"time"
@@ -42,7 +42,7 @@ type JWTGenerator struct {
 
 var (
 	timestampFormat   = time.StampNano
-	errUserRegistered = status.Errorf(codes.AlreadyExists, "User already exist")
+	errUserRegistered = status.Errorf(codes.AlreadyExists, "User already exists")
 )
 
 func (g *JWTGenerator) generate(database_id string) (string, error) {

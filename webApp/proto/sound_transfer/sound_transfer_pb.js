@@ -207,7 +207,7 @@ proto.TextMessage.prototype.toObject = function(opt_includeInstance) {
  */
 proto.TextMessage.toObject = function(includeInstance, msg) {
   var f, obj = {
-    text: jspb.Message.getFieldWithDefault(msg, 1, "")
+text: jspb.Message.getFieldWithDefault(msg, 1, "")
   };
 
   if (includeInstance) {
@@ -337,8 +337,9 @@ proto.TranscriptionRequest.prototype.toObject = function(opt_includeInstance) {
  */
 proto.TranscriptionRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-    soundData: msg.getSoundData_asB64(),
-    sourceLanguage: jspb.Message.getFieldWithDefault(msg, 2, "")
+soundData: msg.getSoundData_asB64(),
+sourceLanguage: jspb.Message.getFieldWithDefault(msg, 2, ""),
+title: jspb.Message.getFieldWithDefault(msg, 3, "")
   };
 
   if (includeInstance) {
@@ -383,6 +384,10 @@ proto.TranscriptionRequest.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {string} */ (reader.readString());
       msg.setSourceLanguage(value);
       break;
+    case 3:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setTitle(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -423,6 +428,13 @@ proto.TranscriptionRequest.serializeBinaryToWriter = function(message, writer) {
   if (f.length > 0) {
     writer.writeString(
       2,
+      f
+    );
+  }
+  f = message.getTitle();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
       f
     );
   }
@@ -489,6 +501,24 @@ proto.TranscriptionRequest.prototype.setSourceLanguage = function(value) {
 };
 
 
+/**
+ * optional string title = 3;
+ * @return {string}
+ */
+proto.TranscriptionRequest.prototype.getTitle = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.TranscriptionRequest} returns this
+ */
+proto.TranscriptionRequest.prototype.setTitle = function(value) {
+  return jspb.Message.setProto3StringField(this, 3, value);
+};
+
+
 
 
 
@@ -521,9 +551,10 @@ proto.TranslationRequest.prototype.toObject = function(opt_includeInstance) {
  */
 proto.TranslationRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-    soundData: msg.getSoundData_asB64(),
-    sourceLanguage: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    translationLanguage: jspb.Message.getFieldWithDefault(msg, 3, "")
+soundData: msg.getSoundData_asB64(),
+sourceLanguage: jspb.Message.getFieldWithDefault(msg, 2, ""),
+translationLanguage: jspb.Message.getFieldWithDefault(msg, 3, ""),
+title: jspb.Message.getFieldWithDefault(msg, 4, "")
   };
 
   if (includeInstance) {
@@ -572,6 +603,10 @@ proto.TranslationRequest.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {string} */ (reader.readString());
       msg.setTranslationLanguage(value);
       break;
+    case 4:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setTitle(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -619,6 +654,13 @@ proto.TranslationRequest.serializeBinaryToWriter = function(message, writer) {
   if (f.length > 0) {
     writer.writeString(
       3,
+      f
+    );
+  }
+  f = message.getTitle();
+  if (f.length > 0) {
+    writer.writeString(
+      4,
       f
     );
   }
@@ -703,6 +745,24 @@ proto.TranslationRequest.prototype.setTranslationLanguage = function(value) {
 };
 
 
+/**
+ * optional string title = 4;
+ * @return {string}
+ */
+proto.TranslationRequest.prototype.getTitle = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.TranslationRequest} returns this
+ */
+proto.TranslationRequest.prototype.setTitle = function(value) {
+  return jspb.Message.setProto3StringField(this, 4, value);
+};
+
+
 
 
 
@@ -735,7 +795,7 @@ proto.TranscirptionLiveRequest.prototype.toObject = function(opt_includeInstance
  */
 proto.TranscirptionLiveRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-    soundData: msg.getSoundData_asB64()
+soundData: msg.getSoundData_asB64()
   };
 
   if (includeInstance) {
@@ -889,8 +949,8 @@ proto.SoundResponse.prototype.toObject = function(opt_includeInstance) {
  */
 proto.SoundResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-    text: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    detectedLanguage: jspb.Message.getFieldWithDefault(msg, 2, "")
+text: jspb.Message.getFieldWithDefault(msg, 1, ""),
+detectedLanguage: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
   if (includeInstance) {
@@ -1049,8 +1109,8 @@ proto.SoundStreamResponse.prototype.toObject = function(opt_includeInstance) {
  */
 proto.SoundStreamResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-    text: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    newChunk: jspb.Message.getBooleanFieldWithDefault(msg, 2, false)
+text: jspb.Message.getFieldWithDefault(msg, 1, ""),
+newChunk: jspb.Message.getBooleanFieldWithDefault(msg, 2, false)
   };
 
   if (includeInstance) {
@@ -1216,9 +1276,9 @@ proto.SpeakerAndLineResponse.prototype.toObject = function(opt_includeInstance) 
  */
 proto.SpeakerAndLineResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-    textList: (f = jspb.Message.getRepeatedField(msg, 1)) == null ? undefined : f,
-    speakernameList: (f = jspb.Message.getRepeatedField(msg, 2)) == null ? undefined : f,
-    detectedLanguage: jspb.Message.getFieldWithDefault(msg, 3, "")
+textList: (f = jspb.Message.getRepeatedField(msg, 1)) == null ? undefined : f,
+speakernameList: (f = jspb.Message.getRepeatedField(msg, 2)) == null ? undefined : f,
+detectedLanguage: jspb.Message.getFieldWithDefault(msg, 3, "")
   };
 
   if (includeInstance) {

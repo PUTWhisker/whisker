@@ -26,6 +26,10 @@ select {
     display: none !important;
 }
 
+.smaller_text {
+    font-size: 75%;
+}
+
 #send_recording {
     display: flex;
     flex-flow: row nowrap;
@@ -80,6 +84,21 @@ select {
 
 #top_menu a:hover {
     background-color: rgb(106, 66, 194);
+}
+
+.selected {
+    background-color: rgb(106, 66, 194) !important;
+}
+
+.centered-message {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5em;
+    opacity: 0.4;
+    margin-top: 5dvh;
+    text-align: center;
 }
 
 #blank_space {
@@ -274,7 +293,11 @@ select {
     padding: 0.3vw;
     top: 0;
     right: 0;
-    /* opacity: 0.5; */
+    z-index: 1;
+}
+
+.help-icon .material-symbols-outlined {
+    opacity: 0.5;
 }
 
 .help-text {
