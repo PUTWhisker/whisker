@@ -7,34 +7,42 @@
     android:layout_height="match_parent"
     tools:context=".LiveTranscriptionActivity">
 
-    <TextView
-        android:id="@+id/tvTranscriptionsLive"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/primaryDark"
+        android:theme="?attr/actionBarTheme"
+        android:elevation="4dp"
+        app:title="Live transcription"
+        app:titleTextColor="@color/primaryLight"
+        app:navigationIcon="@drawable/ic_arrow_toolbar"
+        app:titleTextAppearance="@style/ToolbarTitleStyle"
+        app:tint = "@color/primaryLight"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <android.widget.ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="24dp"
-        android:gravity="top|start"
-        android:text="live transcription here"
-        android:textSize="18sp"
-        android:lineSpacingExtra="5dp"
-        android:maxLines="20"
-        android:scrollbars="vertical"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/btnBack"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <ImageButton
-        android:id="@+id/btnBack"
-        android:layout_width="@dimen/btn_size"
-        android:layout_height="@dimen/btn_size"
-        android:src="@drawable/ic_back"
-        app:tint="@color/primaryLight"
-        android:backgroundTint="@color/primaryDark"
-        android:background="@drawable/ic_ripple"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="24dp" />
+        app:layout_constraintEnd_toEndOf="parent">
 
+        <TextView
+            android:id="@+id/tvTranscriptionsLive"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="top|start"
+            android:text="Live transcription here"
+            android:textSize="18sp"
+            android:lineSpacingExtra="5dp"
+            android:maxLines="20"
+            android:scrollbars="vertical" />
+    </android.widget.ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

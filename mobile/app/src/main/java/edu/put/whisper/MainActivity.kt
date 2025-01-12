@@ -9,6 +9,7 @@ import android.media.MediaRecorder
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
@@ -38,13 +39,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnDelete: ImageButton
     private lateinit var btnList: ImageButton
     private lateinit var btnRecord: ImageButton
-    private lateinit var btnCopy: ImageButton
     private lateinit var btnBack: ImageButton
     private lateinit var tvTranscript: TextView
     private lateinit var utilities: Utilities
     private var isRecordingStopped: Boolean = false
     private var currentFileName: String? = null
     private var tempFilePath: String? = null
+    //private lateinit var loadingGif: ImageView
 
     // Timer variables
     private lateinit var tvTimer: TextView
@@ -61,6 +62,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var filenameInput: EditText
 
     private lateinit var db : AppDatabase
+
+    private lateinit var spinnerLanguage: Spinner
+    private lateinit var languages: Array<String>
+    private lateinit var languagesFull: Array<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,10 +88,25 @@ class MainActivity : AppCompatActivity() {
         btnCancel = findViewById(R.id.btnCancel)
         btnOk = findViewById(R.id.btnOk)
         btnTranscript = findViewById(R.id.btnTranscript)
-        btnCopy = findViewById(R.id.btnCopy)
-        tvTranscript = findViewById(R.id.tvTranscript)
         btnBack = findViewById(R.id.btnBack)
+        //loadingGif = findViewById(R.id.loadingGif)
 
+        spinnerLanguage = findViewById(R.id.spinner_language)
+        languages = resources.getStringArray(R.array.languages)
+        languagesFull = resources.getStringArray(R.array.languages_full)
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, languagesFull)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerLanguage.adapter = adapter
+        spinnerLanguage.setSelection(languages.indexOf("en")) // default language
+
+        val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
 
         if (utilities.isMicrophonePresent()) {
             getMicrophonePermission()
@@ -195,11 +215,14 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             val filePath = tempFilePath ?: return@launch
-            utilities.uploadRecording(filePath, "en") { output ->
+            val selectedLanguage = languages[spinnerLanguage.selectedItemPosition]
+            utilities.uploadRecording(filePath, selectedLanguage) { output ->
                 runOnUiThread {
                     if (output != null) {
                         val intent = Intent(this@MainActivity, TranscriptionDetailActivity::class.java).apply {
                             putExtra("EXTRA_TRANSCRIPTION_TEXT", output)
+                            putExtra("EXTRA_FILE_PATH", filePath)
+                            putExtra("EXTRA_LANGUAGE", selectedLanguage)
                             putExtra("EXTRA_TRANSCRIPTION_DATE", SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()))
                         }
                         startActivity(intent)
@@ -383,6 +406,7 @@ class MainActivity : AppCompatActivity() {
 
     private val timerRunnable: Runnable = object : Runnable {
         override fun run() {
+            Log.d("Timer", "Timer tick")
             val currentTime = System.currentTimeMillis()
             val millis = elapsedTime + (currentTime - startTime)
             val minutes = (millis / 60000).toInt() % 60

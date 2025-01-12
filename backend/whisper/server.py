@@ -250,6 +250,13 @@ class SoundService(Services.SoundServiceServicer):
             new_chunk=False,
         )
 
+    @_errorUnaryHandler
+    async def TranslateText(self, request, context):
+        translation = self.translator.translate(
+            request.text, request.text_language, request.translation_language
+        )[0]
+        return Variables.TextMessage(text=translation)
+
 
 async def server():
     load_dotenv()
