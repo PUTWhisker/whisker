@@ -64,6 +64,11 @@ class SoundServiceStub(object):
                 request_serializer=sound__transfer__pb2.TranscriptionRequest.SerializeToString,
                 response_deserializer=sound__transfer__pb2.SpeakerAndLineResponse.FromString,
                 _registered_method=True)
+        self.TranslateText = channel.unary_unary(
+                '/SoundService/TranslateText',
+                request_serializer=sound__transfer__pb2.TextAndId.SerializeToString,
+                response_deserializer=sound__transfer__pb2.TextMessage.FromString,
+                _registered_method=True)
 
 
 class SoundServiceServicer(object):
@@ -105,6 +110,12 @@ class SoundServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def TranslateText(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_SoundServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -137,6 +148,11 @@ def add_SoundServiceServicer_to_server(servicer, server):
                     servicer.DiarizateFile,
                     request_deserializer=sound__transfer__pb2.TranscriptionRequest.FromString,
                     response_serializer=sound__transfer__pb2.SpeakerAndLineResponse.SerializeToString,
+            ),
+            'TranslateText': grpc.unary_unary_rpc_method_handler(
+                    servicer.TranslateText,
+                    request_deserializer=sound__transfer__pb2.TextAndId.FromString,
+                    response_serializer=sound__transfer__pb2.TextMessage.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -301,6 +317,33 @@ class SoundService(object):
             '/SoundService/DiarizateFile',
             sound__transfer__pb2.TranscriptionRequest.SerializeToString,
             sound__transfer__pb2.SpeakerAndLineResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def TranslateText(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/SoundService/TranslateText',
+            sound__transfer__pb2.TextAndId.SerializeToString,
+            sound__transfer__pb2.TextMessage.FromString,
             options,
             channel_credentials,
             insecure,

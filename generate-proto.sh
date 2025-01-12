@@ -33,6 +33,10 @@ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=p
 protoc sound_transfer.proto --js_out=import_style=commonjs:webApp/proto/sound_transfer --grpc-web_out=import_style=commonjs,mode=grpcwebtext:webApp/proto/sound_transfer --proto_path=./proto
 protoc authentication.proto --js_out=import_style=commonjs:webApp/proto/authentication --grpc-web_out=import_style=commonjs,mode=grpcwebtext:webApp/proto/authentication --proto_path=./proto
 
+# Mobile 
+cp ./proto/sound_transfer.proto ./mobile/protos/src/main/proto/io/grpc/soundtransfer/sound_transfer.proto
+cp ./proto/authentication.proto ./mobile/protos/src/main/proto/io/grpc/authentication/authentication.proto
+
 #TODO: Add Mobile's protoc (And maybe protoc installing if possible) and fix js protoc
 
 rm -r venv

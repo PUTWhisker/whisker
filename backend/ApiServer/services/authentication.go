@@ -244,6 +244,10 @@ func (s *AuthenticationServer) DeleteTranslation(ctx context.Context, in *pb.Id)
 	return &emptypb.Empty{}, err
 }
 
+func (s *AuthenticationServer) SaveOnlyTranslation(ctx context.Context, in *pb.TranslationText) (*emptypb.Empty, error) {
+	return &emptypb.Empty{}, s.Db.insertOnlyTranslation(ctx, in)
+}
+
 func (s *AuthenticationServer) GetDiarization(in *pb.QueryParamethers, stream pb.ClientService_GetDiarizationServer) error {
 	sendHeader(stream)
 	defer sendTrailer(stream)

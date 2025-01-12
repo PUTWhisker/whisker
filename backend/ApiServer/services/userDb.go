@@ -27,6 +27,7 @@ type UserDbModel interface {
 
 	saveTranscription(text string, username string, is_translation bool, language string, title string) (int, error)
 	getTranscriptions(ctx context.Context, user_id string, query *pb.QueryParamethers) (pgx.Rows, error)
+
 	editTranscription(ctx context.Context, id int, user_id string, new_content string) error
 	deleteTranscription(ctx context.Context, id int, user_id string) error
 
@@ -34,8 +35,10 @@ type UserDbModel interface {
 	getTranslations(ctx context.Context, user_id string, query *pb.QueryParamethers) (pgx.Rows, error)
 	editTranslation(edit_transcription bool, edit_translation bool, transcription_id int, new_transcription string, new_translation string, user_id string) error
 
+	insertOnlyTranslation(ctx context.Context, in *pb.TranslationText) error
 	saveDiarization(text []string, speaker []string, username string, language string, title string) error
 	getDiarizations(ctx context.Context, userId string, queryParameters *pb.QueryParamethers) (pgx.Rows, error)
+
 	editDiarization(ctx context.Context, new_content []string, new_speaker []string, id int, userId string) error
 	deleteDiarization(ctx context.Context, id int, user_id string) error
 
@@ -133,6 +136,25 @@ func (db UserDb) saveTranslation(text string, user_id string, language string, t
 		return (err)
 	}
 	return nil
+}
+
+func (db UserDb) insertOnlyTranslation(ctx context.Context, in *pb.TranslationText) error {
+	_, err := db.pool.Exec(ctx, `
+	INSERT INTO translation (
+    	transcription_id,
+    	lang,
+    	content
+  	)
+	VALUES (
+    	$1,
+    	$2,
+    	$3
+  	)ON CONFLICT (transcription_id)
+	DO UPDATE SET
+    	lang = EXCLUDED.lang,
+    	content = EXCLUDED.content;
+	`, in.TranscriptionId, in.Language, in.Content)
+	return err
 }
 
 func (db UserDb) editTranslation(edit_transcription bool, edit_translation bool, transcription_id int, new_transcription string, new_translation string, user_id string) error {
