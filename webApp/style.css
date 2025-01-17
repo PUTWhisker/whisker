@@ -61,6 +61,14 @@ select {
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
 }
 
+
+#mew {
+    margin: 0 0.5em;
+    padding-top: 0.1em;
+    height: 1em;
+    transform: scale(2);
+}
+
 #top_menu .locked {
     opacity: 0.5;
 }
@@ -72,7 +80,8 @@ select {
 }
 
 #top_menu a,
-#top_menu p {
+#top_menu p,
+#mew_banner {
     /* float: left; */
     color: white;
     background-color: rgb(86, 58, 156);
