@@ -8,7 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
-	pb "inzynierka/server/proto/authentication"
+	pb "inzynierka/server/proto/authentication" // TODO bruh tu jest ścieżka lokalna, do poprawki przed szóstym?
 	"log"
 	"os"
 	"time"
@@ -249,6 +249,10 @@ func (s *AuthenticationServer) DeleteTranslation(ctx context.Context, in *pb.Id)
 	return &emptypb.Empty{}, err
 }
 
+func (s *AuthenticationServer) SaveOnlyTranslation(ctx context.Context, in *pb.TranslationText) (*emptypb.Empty, error) {
+	return &emptypb.Empty{}, s.Db.insertOnlyTranslation(ctx, in)
+}
+
 func (s *AuthenticationServer) GetDiarization(in *pb.QueryParamethers, stream pb.ClientService_GetDiarizationServer) error {
 	sendHeader(stream)
 	defer sendTrailer(stream)
@@ -269,15 +273,17 @@ func (s *AuthenticationServer) GetDiarization(in *pb.QueryParamethers, stream pb
 	speakers := []string{}
 	lines := []string{}
 
-	rows.Next()
-	err = rows.Scan(&diarizationId, &speaker, &line, &createdAt, &language, &title)
-	if err != nil {
-		return err
+	if rows.Next() {
+		err = rows.Scan(&diarizationId, &speaker, &line, &createdAt, &language, &title)
+		if err != nil {
+			return err
+		}
+		speakers = append(speakers, speaker)
+		lines = append(lines, line)
+		oldId = diarizationId
+		oldCreatedAt = createdAt
 	}
-	speakers = append(speakers, speaker)
-	lines = append(lines, line)
-	oldId = diarizationId
-	oldCreatedAt = createdAt
+
 	for rows.Next() {
 		err = rows.Scan(&diarizationId, &speaker, &line, &createdAt, &language, &title)
 		if err != nil {

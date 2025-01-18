@@ -9,9 +9,16 @@ import jWT
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import org.intellij.lang.annotations.Language
 import java.io.Closeable
 import java.io.File
+
+
+class SpeakerAndLine(val speaker : String, val line: String){}
+
+
 
 class SoundTransferClient(uri: Uri) : Closeable {
     private val audiStreamManager: AudioStreamManager = AudioStreamManager()
@@ -27,11 +34,11 @@ class SoundTransferClient(uri: Uri) : Closeable {
 
         builder.executor(Dispatchers.IO.asExecutor()).build()
     }
-    private val transferer = SoundServiceGrpcKt.SoundServiceCoroutineStub(channel)
     private val stub = SoundServiceGrpcKt.SoundServiceCoroutineStub(channel)
 
-    suspend fun transcribeFile(filePath: String, language : String): String? {
-        try {
+
+    //zmienic funkcje tak zeby zwracala wszystko
+    suspend fun transcribeFile(filePath: String, language : String): SoundResponse {
             val metadata = Metadata()
             val key = Metadata.Key.of("JWT", Metadata.ASCII_STRING_MARSHALLER)
             if (jWT != "") {
@@ -39,17 +46,12 @@ class SoundTransferClient(uri: Uri) : Closeable {
             }
             val bytes = File(filePath).readBytes().toByteString()
             val request = transcriptionRequest { this.soundData = bytes; this.sourceLanguage = language}
-            val response = transferer.transcribeFile(request, metadata)
-            Log.i("DEBUG", "transcribefile: ${response.text}")
-            return response.text
-        } catch (e: Exception) {
-            Log.d("DEBUG", "jestem w kaczu")
-            e.printStackTrace()
-        }
-        return null
+            return stub.transcribeFile(request, metadata)
+
     }
 
-    fun transcribeLive() {
+    // zamiast stringa obiekt ktory zwraca bula :3 i stringa
+    fun transcribeLive(callback: (String) -> Unit) {
         val metadata = Metadata()
         val key = Metadata.Key.of("language", Metadata.ASCII_STRING_MARSHALLER)
         metadata.put(key, "pl")
@@ -59,8 +61,60 @@ class SoundTransferClient(uri: Uri) : Closeable {
             val requests = audiStreamManager.record()
             stub.transcribeLive(requests, metadata).collect { response ->
                 Log.i("stream", "Got message: \"${response.text}\"")
+                callback(response.text)
             }
         }
+    }
+
+    //file path zawiera plik dźwiękowy
+    fun translate(filePath: String, sourceLanguage : String, translationLanguage: String): Flow<SoundResponse> {
+        val bytes = File(filePath).readBytes().toByteString()
+        val request = translationRequest {
+            this.soundData = bytes
+            this.sourceLanguage = sourceLanguage
+            this.translationLanguage = translationLanguage
+        }
+        return stub.translateFile(request)
+    }
+
+
+    suspend fun translateText(textToTranslate : String, textLanguage : String, tranlationLanguage : String): TextMessage{
+        val request = textAndId {
+            this.text = textToTranslate
+            this.textLanguage = textLanguage
+            this.translationLanguage = tranlationLanguage
+        }
+        return stub.translateText(request)
+    }
+
+
+    suspend fun diarizateSpeakers(filePath: String, language: String): List<SpeakerAndLine> {
+//        val bytes = File(filePath).readBytes().toByteString()
+//        Log.d("SoundTransferClient", "File content read. Byte size: ${bytes.size()}")
+//
+//        val request = transcriptionRequest {
+//            this.soundData = bytes
+//            this.sourceLanguage = language
+//        }
+//
+//        try {
+//            val response = stub.diarizateFile(request)
+//            Log.d("SoundTransferClient", "Server response: Speaker names: ${response.speakerNameList}, Texts: ${response.textList}")
+//
+//            val out = mutableListOf<SpeakerAndLine>()
+//            for (i in response.speakerNameList.indices) {
+//                out.add(SpeakerAndLine(response.speakerNameList[i], response.textList[i]))
+//            }
+//            return out.toList()
+//        } catch (e: Exception) {
+//            Log.e("SoundTransferClient", "Error during server request", e)
+//            throw e
+//        }
+        return  return listOf(
+            SpeakerAndLine("Speaker 1", "Hej, jak się masz?"),
+            SpeakerAndLine("Speaker 2", "Bardzo dobrze, a ty?"),
+            SpeakerAndLine("Speaker 1", "Świetnie, dzięki!")
+        )
     }
 
     fun stopStream() {
@@ -68,6 +122,6 @@ class SoundTransferClient(uri: Uri) : Closeable {
     }
 
     override fun close() {
-        channel.shutdownNow()
+        channel.shutdown()
     }
 }

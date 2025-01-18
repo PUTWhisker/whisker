@@ -6,7 +6,7 @@ import warnings
 import authentication_pb2 as authentication__pb2
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
-GRPC_GENERATED_VERSION = '1.68.0'
+GRPC_GENERATED_VERSION = '1.68.1'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -78,6 +78,11 @@ class ClientServiceStub(object):
         self.DeleteTranslation = channel.unary_unary(
                 '/ClientService/DeleteTranslation',
                 request_serializer=authentication__pb2.Id.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                _registered_method=True)
+        self.SaveOnlyTranslation = channel.unary_unary(
+                '/ClientService/SaveOnlyTranslation',
+                request_serializer=authentication__pb2.TranslationText.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
         self.GetDiarization = channel.unary_stream(
@@ -159,6 +164,12 @@ class ClientServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SaveOnlyTranslation(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def GetDiarization(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -229,6 +240,11 @@ def add_ClientServiceServicer_to_server(servicer, server):
             'DeleteTranslation': grpc.unary_unary_rpc_method_handler(
                     servicer.DeleteTranslation,
                     request_deserializer=authentication__pb2.Id.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+            'SaveOnlyTranslation': grpc.unary_unary_rpc_method_handler(
+                    servicer.SaveOnlyTranslation,
+                    request_deserializer=authentication__pb2.TranslationText.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
             'GetDiarization': grpc.unary_stream_rpc_method_handler(
@@ -494,6 +510,33 @@ class ClientService(object):
             target,
             '/ClientService/DeleteTranslation',
             authentication__pb2.Id.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SaveOnlyTranslation(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/ClientService/SaveOnlyTranslation',
+            authentication__pb2.TranslationText.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options,
             channel_credentials,

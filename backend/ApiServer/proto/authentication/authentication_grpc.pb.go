@@ -32,6 +32,7 @@ type ClientServiceClient interface {
 	GetTranslation(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (ClientService_GetTranslationClient, error)
 	EditTranslation(ctx context.Context, in *NewTranslation, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DeleteTranslation(ctx context.Context, in *Id, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	SaveOnlyTranslation(ctx context.Context, in *TranslationText, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetDiarization(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (ClientService_GetDiarizationClient, error)
 	EditDiarization(ctx context.Context, in *NewDiarization, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DeleteDiarization(ctx context.Context, in *Id, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -173,6 +174,15 @@ func (c *clientServiceClient) DeleteTranslation(ctx context.Context, in *Id, opt
 	return out, nil
 }
 
+func (c *clientServiceClient) SaveOnlyTranslation(ctx context.Context, in *TranslationText, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/ClientService/SaveOnlyTranslation", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *clientServiceClient) GetDiarization(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (ClientService_GetDiarizationClient, error) {
 	stream, err := c.cc.NewStream(ctx, &ClientService_ServiceDesc.Streams[2], "/ClientService/GetDiarization", opts...)
 	if err != nil {
@@ -268,6 +278,7 @@ type ClientServiceServer interface {
 	GetTranslation(*QueryParamethers, ClientService_GetTranslationServer) error
 	EditTranslation(context.Context, *NewTranslation) (*emptypb.Empty, error)
 	DeleteTranslation(context.Context, *Id) (*emptypb.Empty, error)
+	SaveOnlyTranslation(context.Context, *TranslationText) (*emptypb.Empty, error)
 	GetDiarization(*QueryParamethers, ClientService_GetDiarizationServer) error
 	EditDiarization(context.Context, *NewDiarization) (*emptypb.Empty, error)
 	DeleteDiarization(context.Context, *Id) (*emptypb.Empty, error)
@@ -305,6 +316,9 @@ func (UnimplementedClientServiceServer) EditTranslation(context.Context, *NewTra
 }
 func (UnimplementedClientServiceServer) DeleteTranslation(context.Context, *Id) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTranslation not implemented")
+}
+func (UnimplementedClientServiceServer) SaveOnlyTranslation(context.Context, *TranslationText) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveOnlyTranslation not implemented")
 }
 func (UnimplementedClientServiceServer) GetDiarization(*QueryParamethers, ClientService_GetDiarizationServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetDiarization not implemented")
@@ -499,6 +513,24 @@ func _ClientService_DeleteTranslation_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ClientService_SaveOnlyTranslation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TranslationText)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClientServiceServer).SaveOnlyTranslation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ClientService/SaveOnlyTranslation",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClientServiceServer).SaveOnlyTranslation(ctx, req.(*TranslationText))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ClientService_GetDiarization_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(QueryParamethers)
 	if err := stream.RecvMsg(m); err != nil {
@@ -611,6 +643,10 @@ var ClientService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteTranslation",
 			Handler:    _ClientService_DeleteTranslation_Handler,
+		},
+		{
+			MethodName: "SaveOnlyTranslation",
+			Handler:    _ClientService_SaveOnlyTranslation_Handler,
 		},
 		{
 			MethodName: "EditDiarization",

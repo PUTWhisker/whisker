@@ -8,6 +8,9 @@
   <title>DEMO PAGE</title>
   <script src="./dist/client.js"></script>
   <script>
+    localStorage.setItem('whisker-last-page', 'index.html');
+  </script>
+  <script>
     function showTransBox() {
       document.getElementById("show_transcript").style.display = 'block';
     }
@@ -34,6 +37,7 @@
         translationarrow.classList.add('hidden');
       }
     }
+
     function handleUpload(file) {
       const fileNameLabel = document.getElementById("input_file");
       const sourceLangTile = document.getElementById("source_language_container");
@@ -64,76 +68,102 @@
       const uploadButton = document.getElementById("upload");
       const fileNameLabel = document.getElementById("input_file");
       const closeButton = document.getElementById("delete_button");
+      const sourceLangTile = document.getElementById("source_language_container");
+      const languageChooser = document.getElementById("choose_lang");
+      const optionsTile = document.getElementById("translation_options_container");
+      const translationCheckbox = document.getElementById("translate");
+      const rolesCheckbox = document.getElementById("role_division");
+      const translationList = document.getElementById("choose_trans_lang");
+      const translate_check = document.getElementById("translate");
+      const roles_check = document.getElementById("role_division");
+      const fourthTile = document.getElementById("fourth_tile");
+      const generateButton = document.getElementById("start");
+
       uploadButton.value = '';
       fileNameLabel.innerHTML = 'Browse <span class="material-symbols-outlined">folder_open</span>';
-      closeButton.classList.add("hidden")
+      closeButton.classList.add("hidden");
+
+      sourceLangTile.classList.add("locked");
+      languageChooser.disabled = true;
+
+      optionsTile.classList.add("locked");
+      translationCheckbox.disabled = true;
+      rolesCheckbox.disabled = true;
+      translationList.disabled = true;
+      translate_check.disabled = true;
+      roles_check.disabled = true;
+      fourthTile.classList.add("locked");
+      generateButton.disabled = true;
     }
   </script>
   <!-- text & file I/O-->
   <!-- API handler -->
   <script src="text_file_io.js"></script>
   <script>
-    // function placeholderFetchTranscript() {
-    //   return new Promise((resolve) => {
-    //     setTimeout(() => {
-    //       resolve("");
-    //     }, 2000);
-    //   });
-    // }
-    // function placeholderFetchTranslation() {
-    //   return new Promise((resolve) => {
-    //     setTimeout(() => {
-    //       resolve("");
-    //     }, 2200);
-    //   });
-    // }
-    // function startTranscription() {
-    //   const translationCheckBox = document.getElementById("translate");
-    //   const transcriptionResult = document.getElementById("transcription_result");
-    //   const transciptionButtons = document.getElementById("show_transcript").querySelectorAll(".result_option_button");
-    //   const translationButtons = document.getElementById("show_translation").querySelectorAll(".result_option_button");
-    //   transcriptionResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
-    //   transciptionButtons.forEach((e) => e.disabled = true);
-    //   placeholderFetchTranscript().then((transcript) => {
-    //     transcriptionResult.innerHTML = transcript;
-    //     transciptionButtons.forEach((e) => e.disabled = false);
-    //   });
-    //   if (translationCheckBox.checked) {
-    //     const translationResult = document.getElementById("translation_result");
-    //     translationResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
-    //     translationButtons.forEach((e) => e.disabled = true);
-    //     placeholderFetchTranslation().then((translation) => {
-    //       translationResult.innerHTML = translation;
-    //       translationButtons.forEach((e) => e.disabled = false);
-    //     });
-    //   }
-    // }
+    function placeholderFetchTranscript() {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve("Lo siento muchísimo.");
+        }, 2000);
+      });
+    }
+    function placeholderFetchTranslation() {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve("I am incredibly sorry.");
+        }, 2200);
+      });
+    }
+    function startTranscription() {
+      const translationCheckBox = document.getElementById("translate");
+      const transcriptionResult = document.getElementById("transcription_result");
+      const transciptionButtons = document.getElementById("show_transcript").querySelectorAll(".result_option_button");
+      const translationButtons = document.getElementById("show_translation").querySelectorAll(".result_option_button");
+      transcriptionResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
+      transciptionButtons.forEach((e) => e.disabled = true);
+      placeholderFetchTranscript().then((transcript) => {
+        transcriptionResult.innerHTML = transcript;
+        transciptionButtons.forEach((e) => e.disabled = false);
+      });
+      if (translationCheckBox.checked) {
+        const translationResult = document.getElementById("translation_result");
+        translationResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
+        translationButtons.forEach((e) => e.disabled = true);
+        placeholderFetchTranslation().then((translation) => {
+          translationResult.innerHTML = translation;
+          translationButtons.forEach((e) => e.disabled = false);
+        });
+      }
+    }
   </script>
   <link rel="stylesheet" href="style.css">
   <link rel="shortcut icon" href="#">
 </head>
 
-<body">
+<body>
   <main>
     <div id="top_menu">
       <p>Whisker</p>
-      <a href="http://127.0.0.1:5500/webApp/record.html" class="icon_button">
+      <a href="#" class="icon_button selected">
+        Transcribe <span class="material-symbols-outlined">edit_document</span>
+      </a>
+      <a href="/webApp/record.html" class="icon_button">
         Dictate <span class="material-symbols-outlined">mic</span>
       </a>
-      <a href="http://127.0.0.1:5500/webApp/history.html" class="icon_button locked">
+      <a href="/webApp/history.html" class="icon_button locked">
         History <span class="material-symbols-outlined">lock</span>
       </a>
-      <a href="http://127.0.0.1:5500/webApp/history.html" class="icon_button locked">
+      <a href="/webApp/swagger.html" class="icon_button locked">
         Swagger <span class="material-symbols-outlined">lock</span>
       </a>
-      <a href="http://127.0.0.1:5500/webApp/about.html" class="icon_button">
+      <a href="/webApp/about.html" class="icon_button">
         About <span class="material-symbols-outlined">help</span>
       </a>
       <div id="blank_space"></div>
-      <a href="http://127.0.0.1:5500/webApp/login.html" class="icon_button">
+      <a href="/webApp/login.html" class="icon_button">
         Log in&nbsp;<span class="material-symbols-outlined">login</span>
       </a>
-      <a href="http://127.0.0.1:5500/webApp/signup.html" class="icon_button">
+      <a href="/webApp/signup.html" class="icon_button">
         Sign up&nbsp;<span class="material-symbols-outlined">person_add</span>
       </a>
     </div>
@@ -144,7 +174,7 @@
           <div class="help-text">
             Drag and drop or browse an audio file to transcribe.
             Viable extensions: .mp3, .wav.
-            Maximum file size: 50Mb.
+            Maximum file size: 50MB.
           </div>
         </div>
         <div class="fields_in_options">
@@ -336,6 +366,6 @@
       }
     });
   </script>
-  </body>
+</body>
 
 </html>

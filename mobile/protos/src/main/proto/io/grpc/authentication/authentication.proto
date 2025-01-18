@@ -6,6 +6,7 @@ option java_outer_classname = "AuthenticationProto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
+
 service ClientService {
     rpc Login (UserCredits) returns (LoginResponse) {};
     rpc Register (UserCredits) returns (google.protobuf.Empty) {};
@@ -18,6 +19,8 @@ service ClientService {
     rpc GetTranslation(QueryParamethers) returns (stream TranslationHistory) {};
     rpc EditTranslation(NewTranslation) returns (google.protobuf.Empty) {}
     rpc DeleteTranslation(Id) returns(google.protobuf.Empty) {}
+    
+    rpc SaveOnlyTranslation(TranslationText) returns(google.protobuf.Empty) {}
 
     rpc GetDiarization(QueryParamethers) returns (stream DiarizationHistory) {};
     rpc EditDiarization(NewDiarization) returns (google.protobuf.Empty) {};
@@ -83,7 +86,7 @@ message NewTranslation {
 
 message NewDiarization {
     int32 id = 1;
-    repeated string  line = 2;
+    repeated string  line = 2; 
     repeated string speaker = 3;
 }
 
@@ -95,6 +98,11 @@ message QueryParamethers {
     string translation_language = 5; //used only by translation
 }
 
+message TranslationText {
+    int32 transcription_id = 1;
+    string content = 2;
+    string language = 3;
+}
 
 message Combined {
     DiarizationHistory diarization = 1;

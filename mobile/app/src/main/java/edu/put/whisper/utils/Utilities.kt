@@ -25,8 +25,7 @@ class Utilities(private val context: Context) {
         try {
             val serverUri = Uri.parse(context.resources.getString(R.string.server_url))
             val transfer = SoundTransferClient(serverUri)
-            val output: String? = transfer.transcribeFile(filePath, language)
-
+            val output = transfer.transcribeFile(filePath, language).text
             withContext(Dispatchers.Main) {
                 callback(output)
             }
