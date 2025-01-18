@@ -27,7 +27,15 @@ window.onload = async function () {
     let translationHistory = await getTranslationHistory();
     let transcriptionHistory = await getTranscriptionHistory();
     let diarizationHistory = await getDiarizationHistory(); // TODO ZRUPCIE TO ŻEBY DZIAŁAŁO
-    const njGlobals = { getCountry: getCountry, clipString: clipString, timestampToDate: timestampToDate }
+    console.log(translationHistory);
+    console.log(transcriptionHistory);
+    console.log(diarizationHistory);
+    const njGlobals = {
+        getCountry: getCountry,
+        clipString: clipString,
+        buildDiarizationText: buildDiarizationText,
+        timestampToDate: timestampToDate
+    }
     if (translationHistory.length > 0) {
         translationHistory.forEach(element => {
             const html = njTemplate.render(Object.assign({}, njGlobals, { event: element, mode: "translation" }));
@@ -36,22 +44,17 @@ window.onload = async function () {
     } else {
         document.getElementById("translation_history").innerHTML = emptyHistory;
     }
-    if (transcriptionHistory.length > 0 /*|| diarizationHistory.length > 0*/) {
+    if (transcriptionHistory.length > 0 || diarizationHistory.length > 0) {
         transcriptionHistory.forEach(element => {
             const html = njTemplate.render(Object.assign({}, njGlobals, { event: element, mode: "transcription" }));
             document.getElementById("transcription_history").innerHTML += html;
         });
-    } else {
-        document.getElementById("transcription_history").innerHTML = emptyHistory;
-    }
-    console.log(diarizationHistory)
-    if (diarizationHistory.length > 0) {
         diarizationHistory.forEach(element => {
             const html = njTemplate.render(Object.assign({}, njGlobals, { event: element, mode: "diarization" }));
-            document.getElementById("diarization_history").innerHTML += html;
+            document.getElementById("transcription_history").innerHTML += html;
         });
     } else {
-        document.getElementById("diarization_history").innerHTML = emptyHistory;
+        document.getElementById("transcription_history").innerHTML = emptyHistory;
     }
 }
 
