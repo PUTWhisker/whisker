@@ -3,9 +3,10 @@ const { transcribeLiveWeb, connectionTest, getSessionId } = require('./send-file
 
 let intervalId
 var recording = false;
+let audioChunks = []
 
 
-window.onload = function() {
+window.onload = async function() {
     connectionTest()
 
     const blob = new Blob(
@@ -22,20 +23,20 @@ window.onload = function() {
         registerProcessor('my-processor', MyProcessor);
     `], { type: 'application/javascript' }
     )
-    const url = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob)
     const audioContext = new AudioContext( { sampleRate: 44100 })
-    audioContext.audioWorklet.addModule(url)
+    await audioContext.audioWorklet.addModule(url)
     const myAudioWorkletNode = new AudioWorkletNode(audioContext, 'my-processor')
 
     micButton = document.getElementById("mic_button")
-    micButton.addEventListener("click", changeMicState(this, audioContext, myAudioWorkletNode))
+    micButton.addEventListener("click", () => changeMicState(this))
 }
 
 function changeMicState(microphone, audioContext, myAudioWorkletNode) {
     const recording_dots = document.getElementById("recording_dots");
     recording = !recording;
-    const icon = microphone.querySelector('.material-symbols-outlined');
-    icon.innerText = recording ? 'stop_circle' : 'mic';
+    // const icon = microphone.querySelector('.material-symbols-outlined'); //TODO: commented icon here
+    // icon.innerText = recording ? 'stop_circle' : 'mic';
     if (recording) {
       recordAndSend(audioContext, myAudioWorkletNode)
     } else {
@@ -47,8 +48,6 @@ function changeMicState(microphone, audioContext, myAudioWorkletNode) {
 
 async function recordAndSend(audioContext, myAudioWorkletNode) {
     
-    recordButton.disabled = true
-    stopButton.disabled = false
     console.log("button pressed")
 
     const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1} })
@@ -74,8 +73,6 @@ async function recordAndSend(audioContext, myAudioWorkletNode) {
 
 
 function stopRecording(audioContext, myAudioWorkletNode) {
-    stopButton.disabled = true
-    recordButton.disabled = false
 
     clearInterval(intervalId)
     myAudioWorkletNode.disconnect()
