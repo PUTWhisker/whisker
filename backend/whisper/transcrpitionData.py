@@ -46,10 +46,12 @@ class TranscriptionData():
         self.diarizate = diarizate
         self.sessionId = None
 
+
     def appendData(self, receivedAudio: bytes):
         if self.curSeconds < 10:
             self.audio = self.previousAudio + receivedAudio
         self.previousAudio = self.audio
+
 
     def _saveAudioFile(self, fileName: Path, data: bytes, webTranscription: bool):
         p = pyaudio.PyAudio()
@@ -64,6 +66,7 @@ class TranscriptionData():
         output.writeframes(b"".join([data]))
         output.close()
 
+
     def saveFile(self, save_as_wav=True, webTranscription=False) -> Path:
         if save_as_wav:
             self.filePath = self.filePath.with_suffix(".wav")
@@ -72,6 +75,7 @@ class TranscriptionData():
             with self.filePath.open("wb") as file:
                 file.write(self.audio)
         return self.filePath
+    
 
     def detectSilence(self, path: Path, silenceLength: int) -> bool:
         silenceAudio = AudioSegment.from_wav(path)

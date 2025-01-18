@@ -12,6 +12,11 @@ CREATE TABLE app_user (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE refresh_token (
+    app_user_id INT UNIQUE REFERENCES app_user(id) ON DELETE CASCADE,
+    token_hash VARCHAR(32) NOT NULL,
+    expires_at TIMESTAMP NOT NULL
+);
 
 CREATE TABLE transcription (
     id SERIAL PRIMARY KEY,
@@ -19,7 +24,7 @@ CREATE TABLE transcription (
     content TEXT NOT NULL,
     is_translation BOOLEAN NOT NULL,
     lang TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     title VARCHAR(100)
 );
 

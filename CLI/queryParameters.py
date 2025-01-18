@@ -3,7 +3,7 @@ import datetime
 import dicts
 import re
 
-class QuerryParameters():
+class QueryParameters():
 
     def __init__(
             self,

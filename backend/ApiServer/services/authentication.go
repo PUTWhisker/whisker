@@ -122,10 +122,15 @@ func (s *AuthenticationServer) checkUserCredentials(username string, password st
 }
 
 func (s *AuthenticationServer) Login(ctx context.Context, in *pb.UserCredits) (*pb.LoginResponse, error) {
-	database_id, is_login_succesfull := s.checkUserCredentials(in.Username, in.Password)
-	if is_login_succesfull {
-		token, _ := s.JwtGenerator.generate(database_id)
-		return &pb.LoginResponse{Successful: true, JWT: token}, nil
+	userId, isLoginSuccesfull := s.checkUserCredentials(in.Username, in.Password)
+	if isLoginSuccesfull {
+		token, _ := s.JwtGenerator.generate(userId)
+		newRefreshToken, _ := generateOpaqueToken()
+		err := s.Db.addRefreshToken(ctx, userId, newRefreshToken)
+		if err != nil {
+			return nil, err
+		}
+		return &pb.LoginResponse{JWT: token, RefreshToken: newRefreshToken}, nil
 
 	}
 	return &pb.LoginResponse{Successful: false, JWT: ""}, nil

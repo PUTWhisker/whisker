@@ -14,7 +14,7 @@ _cleanup_coroutines = []  # Needed for asyncio graceful shutdown
 # Read user's input flags and arguments
 def parse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="Whisper Wrapper", description="Simple speach-to-text console application"
+        prog="Whisper Wrapper", description="Simple speech-to-text console application"
     )
 
     parser.add_argument(
@@ -56,7 +56,7 @@ def parse() -> argparse.ArgumentParser:
         type=str,
         default=50051,
         metavar="",
-        help="Set it to the server's listening port number (only aviable when using --local flag)",
+        help="Set it to the server's listening port number (only available when using --local flag)",
     )
 
     parser.add_argument(
@@ -67,7 +67,7 @@ def parse() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "--diarizate",
+        "--diarization",
         action="store_true",
         help="Use this flag to enable speaker diarization",
     )
@@ -80,6 +80,12 @@ def parse() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--logout",
+        action="store_true",
+        help="Use this flag to logout of your account (clear tokens)"
+    )
+
+    parser.add_argument(
         "--register",
         action="store_true",
         help="Use this flag when creating a new account"
@@ -88,11 +94,11 @@ def parse() -> argparse.ArgumentParser:
     parser.add_argument(
         "--retrieve", "-r",
         action="store_true",
-        help="Set this flag to retreive transcription history from your account"
+        help="Set this flag to retrieve transcription history from your account"
     )
 
     parser.add_argument(
-        "fileName", nargs="?", default=None, help="File to be transcripted"
+        "fileName", nargs="?", default=None, help="File to be transcribed"
     )
 
     parser.add_argument(
@@ -104,70 +110,70 @@ def parse() -> argparse.ArgumentParser:
 
 async def handleException(e: Exception):
     if isinstance(e, LoginFailure):
-        print("Error occured when logging into your account.")
+        print("Error occurred when logging into your account.")
     else:
-        print(f"An exception occured: {type(e)}: {e}")
+        print(f"An exception occurred: {type(e)}: {e}")
     pass
 
 
 async def main(parser: argparse.ArgumentParser):
-    try:
-        args = parser.parse_args()
-        # read server's details
-        if args.local:
-            logging.info("local option")
-            host = args.host
-            port = args.port
+    args = parser.parse_args()
+    env = '.env'
+    load_dotenv(env)
+    # read server's details
+    if args.local:
+        logging.info("local option")
+        host = args.host
+        port = args.port
+    else:
+        logging.info("server option")
+        host = "100.80.80.156"  # Here insert pp server address
+        port = args.port
+
+    # Check if file exists if it was passed as an argument
+    if args.fileName is not None:
+        if not os.path.isfile(args.fileName):
+            logging.error("Incorrect file name.")
+            return
+
+    console = ConsolePrinter(
+        host, port, args.language, args.save, args.trans, ".env"
+    )
+    if args.logout:
+        set_key(env, "JWT_TOKEN", "")
+        set_key(env, "REFRESH_TOKEN", "")
+        print("Successfully logout!")
+        return
+    elif not await console.startApp():
+        return
+    
+    if args.register:
+        await console.register()
+    elif args.retrieve:
+        # if token != "":
+            await console.retrieveHistory()
+        # else:
+        #     print("Login into your account first!")
+
+    elif args.username is not None:
+        await console.login(args.username)
+    elif (
+        args.fileName is not None
+    ):  # If there is a valid audio file as an argument, initiate SendSoundFile method
+        with open(args.fileName, "rb") as file:
+            audio = file.read()  # read audio as bytes
+        if args.diarization:
+            await console.speakersDiarization(audio)
+        elif args.trans:
+            await console.sendFileTranslation(audio)
         else:
-            logging.info("server option")
-            host = "100.80.80.156"  # Here insert pp server address
-            port = args.port
-
-        # Check if file exists if it was passed as an argument
-        if args.fileName is not None:
-            if not os.path.isfile(args.fileName):
-                logging.error("Incorrect file name.")
-                return
-
-        env = ".env"
-        load_dotenv(env)
-        token = os.getenv("JWT_TOKEN")
-        # Innitiate connection with the server
-        console = ConsolePrinter(
-            host, port, args.language, args.save, args.trans, token
+            await console.sendFile(audio)
+    elif args.record:  # If there is a record flag, initiate StreamSoundFile method (app can't do both, record and translate file)
+        await console.record()
+    else:  # No action specified by the user
+        print(
+            "You have to specify an action (supply an audio file/initiate recording/register/retrieve transcripts)."
         )
-        if not await console.startApp():
-            return
-        if args.register:
-            await console.register()
-        elif args.retrieve:
-            if token != "":
-                await console.retrieveHistory()
-            else:
-                print("Login into your account first!")
-        elif args.username is not None:
-            token = await console.retreiveToken(args.username)
-            set_key(env, "JWT_TOKEN", token)
-        elif (
-            args.fileName is not None
-        ):  # If there is a valid audio file as an argument, initiate SendSoundFile method
-            with open(args.fileName, "rb") as file:
-                audio = file.read()  # read audio as bytes
-            if args.diarizate:
-                await console.diarizateSpeakers(audio)
-            elif args.trans:
-                await console.sendFileTranslation(audio)
-            else:
-                await console.sendFile(audio)
-        elif args.record:  # If there is a record flag, initiate StreamSoundFile method (app can't do both, record and translate file)
-            await console.record()
-        else:  # No action specified by the user
-            print(
-                "You have to specify an action (supply an audio file/initiate recording/register/retreive transcripts)."
-            )
-            return
-    except Exception as e:
-        await handleException(e)
     return
 
 

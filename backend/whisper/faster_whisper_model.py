@@ -31,7 +31,7 @@ class FasterWhisperHandler:
         webTranscription: bool
     ) -> Union[Path, TranscriptionData]:
         data.appendData(receivedAudio)
-        filePath = data.saveFile(webTranscription=True)
+        filePath = data.saveFile(webTranscription=webTranscription)
         data.isSilence = data.detectSilence(filePath, self.silenceLength)
         return filePath, data
     
@@ -90,7 +90,7 @@ class FasterWhisperHandler:
         return data
     
 
-    async def handleFile(
+    def handleFile(
         self,
         receivedAudio: bytes,
         data: TranscriptionData,
@@ -103,7 +103,7 @@ class FasterWhisperHandler:
         return result, data
     
 
-    async def handleRecord(
+    def handleRecord(
         self,
         receivedAudio: bytes,
         data: TranscriptionData,

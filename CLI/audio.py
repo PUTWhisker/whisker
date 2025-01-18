@@ -65,7 +65,6 @@ class AudioRecorder():
                 await asyncio.sleep(self.probeTime) # Await for set in constructor time
                 yield Variables.TranscirptionLiveRequest( # After probeTime seconds send 
                     sound_data=b''.join(self.frames),
-                    language=language
                 )
                 if self.save is not None: # Saving bytes if --save flag is raised
                     self.data += self.frames
@@ -75,9 +74,8 @@ class AudioRecorder():
                 self._saveFile(self.sampleSize)
 
         except Exception as e:
-            logging.error(f'Problem occured while recording audio: {e}')
+            logging.error(f'Problem occurred while recording audio: {e}')
         finally:
             yield Variables.TranscirptionLiveRequest( # Send recorded data after keyboard interruption
                     sound_data=b''.join(self.frames),
-                    language=language
                 ) 

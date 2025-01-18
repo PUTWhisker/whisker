@@ -1,7 +1,8 @@
 #TODO: waiting animation for SendFileTranslation and diarization doesn't work for reasons
 from grpcClient import GrpcClient
 from getpass import getpass
-from querryParameters import QuerryParameters
+from queryParameters import QueryParameters
+from dotenv import load_dotenv, set_key
 
 import random
 import asyncio
@@ -25,30 +26,31 @@ class ConsolePrinter:
         language: str = None,
         save: str = None,
         translation: str = None,
-        token:str = ""
+        envFile: str = ".env"
     ):
-        self.grpcClient = GrpcClient(host, port, language, save, translation, token)
-        self.token = token
+        self.env = envFile
+        self.grpcClient = GrpcClient(host, port, language, save, translation)
         self.language = language
 
 
+    def _errorMessage(self, e: Exception):
+        if e is grpc.RpcError:
+            return # It is already handled in GrpcClient
+        else:
+            print(f"This is an unhandled exception: {e}")
+
+
     def _errorHandler(func):
-        async def wrapper(*args, **kwargs):
+        async def wrapper(self, *args, **kwargs):
             start = time.time()
             try:
-                return await func(*args, **kwargs)
-            except grpc.RpcError as grpcError:
-                print(f"Grpc connection failure: {grpcError.details()}") # <- custom message sent by server
-                print(f"{grpcError.code()}") # <- one of the 17 rpcError status codes
-                print(f"{grpcError.debug_error_string()}") # <- Error message string, Usefull might be IP address and created_time
-                return
-            except Exception as e:
-                print(f"This is an unhandled exception: {e}")
+                return await func(self, *args, **kwargs)
+            except Exception as e: # Exceptions from the client side 
+                self._errorMessage(e)
                 return
             finally:
                 end = time.time()
                 print(f"Execution time: {end - start}")
-
         return wrapper
 
 
@@ -73,7 +75,7 @@ class ConsolePrinter:
     
 
     @_errorHandler
-    async def diarizateSpeakers(self, audio: bytes):
+    async def speakersDiarization(self, audio: bytes):
         sendTask = asyncio.create_task(
             self.grpcClient.diarizateFile(audio)
         )  # Initiate sending file async
@@ -132,26 +134,20 @@ class ConsolePrinter:
                 break
             else:
                 print("Password mismatch, please try again.")
-        registered = await self.grpcClient.register(username, password1)
-        if not registered.successful:
-            print(registered.error)
-            raise LoginFailure
+        await self.grpcClient.register(username, password1)
         print("Successfully registered your account!")
         return
             
 
     @_errorHandler
-    async def retreiveToken(self, username:str):
-        if os.getenv("JWT_TOKEN") == "":
+    async def login(self, username:str):
+        if self.grpcClient.accessToken == "":
             password = getpass(f"{username}'s password: ")
-            newTokenJWT = await self.grpcClient.retreiveJWT(username, password)
-            print(newTokenJWT.successful)
-            if not newTokenJWT.successful:
-                raise LoginFailure
+            _ = await self.grpcClient.login(username, password)
             print("Successfully logged into your account!")
-            return newTokenJWT.JWT
         else:
-            print("You already have retreived a token. Clear env file if you want to retreive a different one.")
+            print("You are already logged in. Logout before changing accounts.")
+        return
 
 
     @_errorHandler
@@ -187,7 +183,7 @@ class ConsolePrinter:
 
     @_errorHandler
     async def transcriptionHistory(self):
-        async def transcriptionHistoryRequest(params: QuerryParameters):
+        async def transcriptionHistoryRequest(params: QueryParameters):
             history = dict()
             responseIter = self.grpcClient.getTranscription(params)
             async for response in responseIter:
@@ -198,7 +194,7 @@ class ConsolePrinter:
             return history
         
         print("Choose filters for transcription retrieving")
-        params = await self._setParameters(QuerryParameters(False))
+        params = await self._setParameters(QueryParameters(False))
         print("Response structure: \033[1m[id | creation_time | lanugage]:\033[0m transcription")
         history = await transcriptionHistoryRequest(params)
         print("\nWrite 'e<id> to edit transcription. Write 'd<id>' to delete transcription. Write '0' to end program.")
@@ -219,12 +215,25 @@ class ConsolePrinter:
             else:
                 print("\033[1mIncorrect input.\033[0m")
             choice = input()
+            while choice != 0:
+                if len(choice) > 1 and choice[1:len(choice)].isdigit() and choice[1:len(choice)] in history:
+                        await self.grpcClient.editTranscription(int(choice[1:len(choice)]), correctedTranscription)
+                        history = await transcriptionHistoryRequest(params)
+                        print("\nWrite 'e<id>' to edit transcription. Write 'd<id>' to delete transcription. Write '0' to end program.")
+                elif choice[0] == "d":
+                    await self.grpcClient.deleteTranscription(int(choice[1:len(choice)]))
+                    history = await transcriptionHistoryRequest(params)
+                    print("\nWrite 'e<id>' to edit transcription. Write 'd<id>' to delete transcription. Write '0' to end program.")
+                elif choice == "0":
+                    break
+                else:
+                    print("\033[1mIncorrect input.\033[0m")
+                choice = input()
         return
     
 
-    @_errorHandler
     async def translationHistory(self):
-        async def translationHistoryRequest(params: QuerryParameters):
+        async def translationHistoryRequest(params: QueryParameters):
             history = dict()
             responseIter = self.grpcClient.getTranslation(params)
             async for response in responseIter:
@@ -235,27 +244,26 @@ class ConsolePrinter:
             return history
         
         print("Choose filters for translation retrieving")
-        params = await self._setParameters(QuerryParameters(True))
+        params = await self._setParameters(QueryParameters(True))
         print("Response structure: \033[1m[id | creation_time | audio_language -> translate_language]\033[0m\n transcription\n translation")
         history = await translationHistoryRequest(params)
-        print("\nWrite 'e<id> to edit translation. Write 'd<id>' to delete translation. Write '0' to end program.")
+        print("\nWrite 'e<id> to edit transcription. Write 'd<id>' to delete transcription. Write '0' to end program.")
         choice = input()
         while choice != 0:
             if len(choice) > 1 and choice[1:len(choice)].isdigit() and choice[1:len(choice)] in history:
-                if choice[0] == "e":
-                    editTranscription, editTranslation = False, False
-                    correctedTranslation = await self._editTranslation(history[choice[1:len(choice)]])
-                    if correctedTranslation[0] != history[choice[1:len(choice)]][0]:
-                        editTranscription = True
-                    if correctedTranslation[1] != history[choice[1:len(choice)]][1]:
-                        editTranslation = True
-                    await self.grpcClient.editTranslation(int(choice[1:len(choice)]), correctedTranslation[0], correctedTranslation[1], editTranscription, editTranslation)
-                    history = await translationHistoryRequest(params)
-                    print("\nWrite 'e<id> to edit translation. Write 'd<id>' to delete translation. Write '0' to end program.")
-                elif choice[0] == "d":
-                    await self.grpcClient.deleteTranslation(int(choice[1:len(choice)]))
-                    history = await translationHistoryRequest(params)
-                    print("\nWrite 'e<id> to edit translation. Write 'd<id>' to delete translation. Write '0' to end program.")
+                editTranscription, editTranslation = False, False
+                correctedTranslation = await self._editTranslation(history[choice[1:len(choice)]])
+                if correctedTranslation[0] != history[choice[1:len(choice)]][0]:
+                    editTranscription = True
+                if correctedTranslation[1] != history[choice[1:len(choice)]][1]:
+                    editTranslation = True
+                await self.grpcClient.editTranslation(int(choice[1:len(choice)]), correctedTranslation[0], correctedTranslation[1], editTranscription, editTranslation)
+                history = await translationHistoryRequest(params)
+                print("\nWrite 'e<id> to edit translation. Write 'd<id>' to delete translation. Write '0' to end program.")
+            elif choice[0] == "d":
+                await self.grpcClient.deleteTranslation(int(choice[1:len(choice)]))
+                history = await translationHistoryRequest(params)
+                print("\nWrite 'e<id> to edit translation. Write 'd<id>' to delete translation. Write '0' to end program.")
             elif choice == "0":
                 break
             else:
@@ -266,7 +274,7 @@ class ConsolePrinter:
 
     @_errorHandler
     async def diarizationHistory(self):
-        async def diarizationHistoryRequest(params: QuerryParameters):
+        async def diarizationHistoryRequest(params: QueryParameters):
             history = dict()
             responseIter = self.grpcClient.getDiarization(params)
             async for response in responseIter:
@@ -280,7 +288,7 @@ class ConsolePrinter:
             return history
         
         print("Choose filters for diarization retrieving")
-        params = await self._setParameters(QuerryParameters(True))
+        params = await self._setParameters(QueryParameters(True))
         print("Response structure: \033[1m[id | creation_time | language]\033[0m\nspeaker: speaker_line")
         history = await diarizationHistoryRequest(params)
         print("\nWrite 'e<id> to edit dialog. Write 'd<id>' to delete dialog. Write '0' to end program.")
@@ -401,15 +409,15 @@ class ConsolePrinter:
                             break
                         continue
                     if chunk == 0:
-                        splited = readLine.split('->')
-                        speakerDict[splited[0]] = splited[1]
+                        splitted = readLine.split('->')
+                        speakerDict[splitted[0]] = splitted[1]
                     else:
-                        splited = readLine.split(': ')
-                        correctedLines.append(splited[1])
-                        if splited[0] in speakerDict:
-                            correctedSpeakers.append(speakerDict[splited[0]])
+                        splitted = readLine.split(': ')
+                        correctedLines.append(splitted[1])
+                        if splitted[0] in speakerDict:
+                            correctedSpeakers.append(speakerDict[splitted[0]])
                         else:
-                            correctedSpeakers.append(splited[0])
+                            correctedSpeakers.append(splitted[0])
             os.remove("./temp.txt")
             return (correctedSpeakers, correctedLines)
         except Exception:
@@ -417,7 +425,7 @@ class ConsolePrinter:
             return initialContent
 
 
-    async def _setParameters(self, params: QuerryParameters):
+    async def _setParameters(self, params: QueryParameters):
         choice = -1
         while choice != "0":
             print("=======================================")

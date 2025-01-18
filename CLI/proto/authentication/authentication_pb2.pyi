@@ -64,12 +64,12 @@ class UserCredits(_message.Message):
     def __init__(self, username: _Optional[str] = ..., password: _Optional[str] = ...) -> None: ...
 
 class LoginResponse(_message.Message):
-    __slots__ = ("JWT", "successful")
+    __slots__ = ("JWT", "refresh_token")
     JWT_FIELD_NUMBER: _ClassVar[int]
-    SUCCESSFUL_FIELD_NUMBER: _ClassVar[int]
+    REFRESH_TOKEN_FIELD_NUMBER: _ClassVar[int]
     JWT: str
-    successful: bool
-    def __init__(self, JWT: _Optional[str] = ..., successful: bool = ...) -> None: ...
+    refresh_token: str
+    def __init__(self, JWT: _Optional[str] = ..., refresh_token: _Optional[str] = ...) -> None: ...
 
 class Id(_message.Message):
     __slots__ = ("id",)
@@ -123,6 +123,16 @@ class QueryParamethers(_message.Message):
     translation_language: str
     def __init__(self, start_time: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., end_time: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., limit: _Optional[int] = ..., language: _Optional[str] = ..., translation_language: _Optional[str] = ...) -> None: ...
 
+class TranslationText(_message.Message):
+    __slots__ = ("transcription_id", "content", "language")
+    TRANSCRIPTION_ID_FIELD_NUMBER: _ClassVar[int]
+    CONTENT_FIELD_NUMBER: _ClassVar[int]
+    LANGUAGE_FIELD_NUMBER: _ClassVar[int]
+    transcription_id: int
+    content: str
+    language: str
+    def __init__(self, transcription_id: _Optional[int] = ..., content: _Optional[str] = ..., language: _Optional[str] = ...) -> None: ...
+
 class Combined(_message.Message):
     __slots__ = ("diarization", "transcription")
     DIARIZATION_FIELD_NUMBER: _ClassVar[int]
@@ -130,3 +140,17 @@ class Combined(_message.Message):
     diarization: DiarizationHistory
     transcription: TranscriptionHistory
     def __init__(self, diarization: _Optional[_Union[DiarizationHistory, _Mapping]] = ..., transcription: _Optional[_Union[TranscriptionHistory, _Mapping]] = ...) -> None: ...
+
+class RefreshTokenRequest(_message.Message):
+    __slots__ = ("refresh_token",)
+    REFRESH_TOKEN_FIELD_NUMBER: _ClassVar[int]
+    refresh_token: str
+    def __init__(self, refresh_token: _Optional[str] = ...) -> None: ...
+
+class RefreshTokenResponse(_message.Message):
+    __slots__ = ("refresh_token", "access_token")
+    REFRESH_TOKEN_FIELD_NUMBER: _ClassVar[int]
+    ACCESS_TOKEN_FIELD_NUMBER: _ClassVar[int]
+    refresh_token: str
+    access_token: str
+    def __init__(self, refresh_token: _Optional[str] = ..., access_token: _Optional[str] = ...) -> None: ...
