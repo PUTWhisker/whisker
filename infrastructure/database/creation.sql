@@ -33,7 +33,7 @@ CREATE TABLE diarization (
     id SERIAL PRIMARY KEY,
     app_user_id INT REFERENCES app_user(id),
     lang VARCHAR(2) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     title VARCHAR(100)
 );
 

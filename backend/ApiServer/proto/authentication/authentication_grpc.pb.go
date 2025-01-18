@@ -31,9 +31,11 @@ type ClientServiceClient interface {
 	GetTranslation(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (ClientService_GetTranslationClient, error)
 	EditTranslation(ctx context.Context, in *NewTranslation, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DeleteTranslation(ctx context.Context, in *Id, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	SaveOnlyTranslation(ctx context.Context, in *TranslationText, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetDiarization(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (ClientService_GetDiarizationClient, error)
 	EditDiarization(ctx context.Context, in *NewDiarization, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DeleteDiarization(ctx context.Context, in *Id, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetTranscriptionAndDiarization(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (ClientService_GetTranscriptionAndDiarizationClient, error)
 }
 
 type clientServiceClient struct {
@@ -162,6 +164,15 @@ func (c *clientServiceClient) DeleteTranslation(ctx context.Context, in *Id, opt
 	return out, nil
 }
 
+func (c *clientServiceClient) SaveOnlyTranslation(ctx context.Context, in *TranslationText, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/ClientService/SaveOnlyTranslation", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *clientServiceClient) GetDiarization(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (ClientService_GetDiarizationClient, error) {
 	stream, err := c.cc.NewStream(ctx, &ClientService_ServiceDesc.Streams[2], "/ClientService/GetDiarization", opts...)
 	if err != nil {
@@ -212,6 +223,38 @@ func (c *clientServiceClient) DeleteDiarization(ctx context.Context, in *Id, opt
 	return out, nil
 }
 
+func (c *clientServiceClient) GetTranscriptionAndDiarization(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (ClientService_GetTranscriptionAndDiarizationClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ClientService_ServiceDesc.Streams[3], "/ClientService/GetTranscriptionAndDiarization", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &clientServiceGetTranscriptionAndDiarizationClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type ClientService_GetTranscriptionAndDiarizationClient interface {
+	Recv() (*Combined, error)
+	grpc.ClientStream
+}
+
+type clientServiceGetTranscriptionAndDiarizationClient struct {
+	grpc.ClientStream
+}
+
+func (x *clientServiceGetTranscriptionAndDiarizationClient) Recv() (*Combined, error) {
+	m := new(Combined)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // ClientServiceServer is the server API for ClientService service.
 // All implementations must embed UnimplementedClientServiceServer
 // for forward compatibility
@@ -224,9 +267,11 @@ type ClientServiceServer interface {
 	GetTranslation(*QueryParamethers, ClientService_GetTranslationServer) error
 	EditTranslation(context.Context, *NewTranslation) (*emptypb.Empty, error)
 	DeleteTranslation(context.Context, *Id) (*emptypb.Empty, error)
+	SaveOnlyTranslation(context.Context, *TranslationText) (*emptypb.Empty, error)
 	GetDiarization(*QueryParamethers, ClientService_GetDiarizationServer) error
 	EditDiarization(context.Context, *NewDiarization) (*emptypb.Empty, error)
 	DeleteDiarization(context.Context, *Id) (*emptypb.Empty, error)
+	GetTranscriptionAndDiarization(*QueryParamethers, ClientService_GetTranscriptionAndDiarizationServer) error
 	mustEmbedUnimplementedClientServiceServer()
 }
 
@@ -258,6 +303,9 @@ func (UnimplementedClientServiceServer) EditTranslation(context.Context, *NewTra
 func (UnimplementedClientServiceServer) DeleteTranslation(context.Context, *Id) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTranslation not implemented")
 }
+func (UnimplementedClientServiceServer) SaveOnlyTranslation(context.Context, *TranslationText) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveOnlyTranslation not implemented")
+}
 func (UnimplementedClientServiceServer) GetDiarization(*QueryParamethers, ClientService_GetDiarizationServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetDiarization not implemented")
 }
@@ -266,6 +314,9 @@ func (UnimplementedClientServiceServer) EditDiarization(context.Context, *NewDia
 }
 func (UnimplementedClientServiceServer) DeleteDiarization(context.Context, *Id) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteDiarization not implemented")
+}
+func (UnimplementedClientServiceServer) GetTranscriptionAndDiarization(*QueryParamethers, ClientService_GetTranscriptionAndDiarizationServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetTranscriptionAndDiarization not implemented")
 }
 func (UnimplementedClientServiceServer) mustEmbedUnimplementedClientServiceServer() {}
 
@@ -430,6 +481,24 @@ func _ClientService_DeleteTranslation_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ClientService_SaveOnlyTranslation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TranslationText)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClientServiceServer).SaveOnlyTranslation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ClientService/SaveOnlyTranslation",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClientServiceServer).SaveOnlyTranslation(ctx, req.(*TranslationText))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ClientService_GetDiarization_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(QueryParamethers)
 	if err := stream.RecvMsg(m); err != nil {
@@ -487,6 +556,27 @@ func _ClientService_DeleteDiarization_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ClientService_GetTranscriptionAndDiarization_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(QueryParamethers)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ClientServiceServer).GetTranscriptionAndDiarization(m, &clientServiceGetTranscriptionAndDiarizationServer{stream})
+}
+
+type ClientService_GetTranscriptionAndDiarizationServer interface {
+	Send(*Combined) error
+	grpc.ServerStream
+}
+
+type clientServiceGetTranscriptionAndDiarizationServer struct {
+	grpc.ServerStream
+}
+
+func (x *clientServiceGetTranscriptionAndDiarizationServer) Send(m *Combined) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // ClientService_ServiceDesc is the grpc.ServiceDesc for ClientService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -519,6 +609,10 @@ var ClientService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ClientService_DeleteTranslation_Handler,
 		},
 		{
+			MethodName: "SaveOnlyTranslation",
+			Handler:    _ClientService_SaveOnlyTranslation_Handler,
+		},
+		{
 			MethodName: "EditDiarization",
 			Handler:    _ClientService_EditDiarization_Handler,
 		},
@@ -541,6 +635,11 @@ var ClientService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "GetDiarization",
 			Handler:       _ClientService_GetDiarization_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GetTranscriptionAndDiarization",
+			Handler:       _ClientService_GetTranscriptionAndDiarization_Handler,
 			ServerStreams: true,
 		},
 	},

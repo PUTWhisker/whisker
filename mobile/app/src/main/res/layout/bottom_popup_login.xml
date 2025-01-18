@@ -13,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Log in"
+        android:textColor="@color/primaryDark"
         android:layout_marginTop="20dp"
         android:textSize="26sp"
         android:textAlignment="center"/>
@@ -29,7 +30,9 @@
             android:layout_height="wrap_content"
             android:hint="Your nick"
             android:padding="16dp"
-            android:imeOptions="actionNext"/>
+            android:imeOptions="actionNext"
+            android:focusable="true"
+            android:focusableInTouchMode="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -44,8 +47,11 @@
             android:layout_height="wrap_content"
             android:hint="Password"
             android:inputType="textPassword"
+            android:textColor="@color/primaryDark"
             android:padding="16dp"
-            android:imeOptions="actionNext"/>
+            android:imeOptions="actionNext"
+            android:focusable="true"
+            android:focusableInTouchMode="true"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -77,8 +83,8 @@
             android:layout_width="140dp"
             android:layout_height="60dp"
             android:text="Cancel"
-            android:backgroundTint="@color/gray"
-            android:textColor="@color/grayDark"
+            android:backgroundTint="@color/primaryLight"
+            android:textColor="@color/primaryDark"
             app:cornerRadius="26dp"
             app:rippleColor="@color/primaryDark"/>
 
@@ -89,8 +95,8 @@
             android:layout_height="60dp"
             android:text="Log in"
             android:layout_marginStart="20dp"
-            android:backgroundTint="@color/playerColor"
-            android:textColor="@color/white"
+            android:backgroundTint="@color/primaryDark"
+            android:textColor="@color/primaryLight"
             app:cornerRadius="26dp"
             app:rippleColor="@color/primaryDark"/>
     </LinearLayout>
