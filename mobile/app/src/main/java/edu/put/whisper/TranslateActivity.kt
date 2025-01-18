@@ -68,10 +68,8 @@ class TranslateActivity : AppCompatActivity() {
             if (originalText.isNotEmpty()) {
                 CoroutineScope(Dispatchers.Main).launch {
                     try {
-                        val tempFile = createTempFile(originalText)
                         val respone = client.translateText(originalText, sourceLanguage, targetLanguage)
                         editTextTranslated.setText(respone.text)
-                        tempFile.delete()
                     } catch (e: Exception) {
                         e.printStackTrace()
                         editTextTranslated.setText("Wystąpił błąd podczas tłumaczenia")

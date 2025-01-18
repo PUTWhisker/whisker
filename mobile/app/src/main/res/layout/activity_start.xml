@@ -10,7 +10,8 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:id="@+id/start_layout">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="end"
-            android:padding="16dp"
+            android:padding="8dp"
             android:orientation="horizontal"
             android:background = "@color/primaryDark">
 
@@ -143,8 +144,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/btnRecordActivity"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_marginBottom="16dp"
+                android:layout_height="90dp"
                 style="@style/CardViewStyle">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -165,7 +165,7 @@
                         android:id="@+id/text"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Record a file to transcript"
+                        android:text="Record a file to transcribe"
                         style="@style/TextViewStyle"
                         app:layout_constraintStart_toEndOf="@id/icon"
                         app:layout_constraintTop_toTopOf="parent"
@@ -187,8 +187,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/btnChooseFile"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_marginBottom="16dp"
+                android:layout_height="90dp"
                 style="@style/CardViewStyle">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -208,7 +207,7 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Choose a file to transcript"
+                        android:text="Choose a file to transcribe"
                         style="@style/TextViewStyle"
                         app:layout_constraintStart_toEndOf="@id/icon2"
                         app:layout_constraintTop_toTopOf="parent"
@@ -229,8 +228,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/btnTranscriptLive"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_marginBottom="16dp"
+                android:layout_height="90dp"
                 style="@style/CardViewStyle">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -250,7 +248,7 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Transcript live"
+                        android:text="Transcribe live"
                         style="@style/TextViewStyle"
                         app:layout_constraintStart_toEndOf="@id/icon3"
                         app:layout_constraintTop_toTopOf="parent"
@@ -271,14 +269,17 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/btnHistory"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_marginBottom="16dp"
+                android:layout_height="90dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="6dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                android:background="@color/primary">
+                android:background="@color/primary"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -368,6 +369,12 @@
 
     </LinearLayout>
     </ScrollView>
+    <edu.put.whisper.animations.LoadingAnimation
+        android:id="@+id/LoadingAnimationStart"
+        android:layout_width="wrap_content"
+        android:layout_height="250dp"
+        android:visibility="gone"
+        android:layout_gravity="center" />
     <View
         android:id="@+id/bottomSheetLogin"
         android:visibility="gone"

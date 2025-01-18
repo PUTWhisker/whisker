@@ -26,6 +26,7 @@ class TranscriptionDetailActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
         toolbar.setNavigationOnClickListener {
+
             onBackPressed()
         }
 

@@ -8,7 +8,8 @@
     tools:context=".MainActivity">
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:id="@+id/main_content">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -160,6 +161,13 @@
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <edu.put.whisper.animations.LoadingAnimation
+        android:id="@+id/LoadingAnimation"
+        android:layout_width="wrap_content"
+        android:layout_height="250dp"
+        android:visibility="gone"
+        android:layout_gravity="center" />
     <View
         android:id="@+id/bottomSheetBG"
         android:visibility="gone"
@@ -170,3 +178,4 @@
     <include layout="@layout/bottom_popup"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+

@@ -47,12 +47,13 @@ class LiveTranscriptionActivity : AppCompatActivity() {
     }
 
     private fun startTranscription() {
-        soundTransferClient.transcribeLive { transcribedText ->
+        soundTransferClient.transcribeLive { updatedText ->
             runOnUiThread {
-                tvTranscriptionsLive.append("\n$transcribedText")
+                tvTranscriptionsLive.text = updatedText
             }
         }
     }
+
 
     private fun stopTranscription() {
         try {

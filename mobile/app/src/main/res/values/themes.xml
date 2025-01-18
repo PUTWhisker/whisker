@@ -52,6 +52,10 @@
         <item name="android:focusable">true</item>
         <item name="android:foreground">?attr/selectableItemBackground</item>
         <item name="android:background">@color/primary</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
     </style>
 
     <style name="ImageViewStyle">
