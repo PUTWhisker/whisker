@@ -73,6 +73,7 @@ class TranslateActivity : AppCompatActivity() {
 
                         var translatedText = ""
                         flow.collect { response ->
+                            Log.d("TranslateActivity", "Received response: ${response.text}")
                             translatedText += response.text
                         }
 

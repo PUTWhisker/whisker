@@ -14,11 +14,13 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import edu.put.whisper.animations.LoadingAnimation
 import edu.put.whisper.utils.Utilities
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -212,6 +214,10 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Please stop the recording first", Toast.LENGTH_LONG).show()
             return
         }
+        val mainContent = findViewById<ConstraintLayout>(R.id.main_content)
+        mainContent.visibility = View.GONE
+        val loadingAnimation = findViewById<LoadingAnimation>(R.id.LoadingAnimation)
+        loadingAnimation.visibility = View.VISIBLE
 
         lifecycleScope.launch {
             val filePath = tempFilePath ?: return@launch
@@ -423,5 +429,14 @@ class MainActivity : AppCompatActivity() {
         if (tempFile.exists()) {
             tempFile.delete()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val mainContent = findViewById<ConstraintLayout>(R.id.main_content)
+        mainContent.visibility = View.VISIBLE
+
+        val loadingAnimation = findViewById<LoadingAnimation>(R.id.LoadingAnimation)
+        loadingAnimation.visibility = View.GONE
     }
 }

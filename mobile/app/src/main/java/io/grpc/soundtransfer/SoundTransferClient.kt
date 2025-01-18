@@ -63,14 +63,48 @@ class SoundTransferClient(uri: Uri) : Closeable {
         metadata.put(key, "pl")
         audiStreamManager.initAudioRecorder()
         audiStreamManager.record()
+
         CoroutineScope(Dispatchers.Default).launch {
             val requests = audiStreamManager.record()
+            val builder = StringBuilder() // Bieżąca transkrypcja
+            var wasPreviousChunkNew = false // Czy poprzedni chunk był "true"
+
             stub.transcribeLive(requests, metadata).collect { response ->
                 Log.i("stream", "Got message: \"${response.text}\"")
-                callback(response.text)
+
+                if (response.newChunk) {
+                    if (wasPreviousChunkNew) {
+                        // Ignoruj, ponieważ kolejny pusty "newChunk == true" oznacza, że nic nie jest mówione
+                        Log.i("stream", "Ignoring consecutive newChunk == true with no text.")
+                        return@collect
+                    }
+                    wasPreviousChunkNew = true // Ustaw flagę, że aktualny jest "true"
+
+                    // Dodaj nową linię tylko wtedy, gdy faktycznie jest coś mówione
+                    if (response.text.isNotEmpty()) {
+                        builder.append("\n")
+                    }
+                } else {
+                    wasPreviousChunkNew = false // Zresetuj flagę, gdy chunk nie jest nowy
+                }
+
+                // Aktualizuj treść ostatniej linii tylko wtedy, gdy tekst nie jest pusty
+                if (response.text.isNotEmpty()) {
+                    val lines = builder.lines()
+                    if (lines.isNotEmpty()) {
+                        val updated = lines.dropLast(1) + response.text
+                        builder.clear()
+                        builder.append(updated.joinToString("\n"))
+                    } else {
+                        builder.append(response.text)
+                    }
+                }
+
+                callback(builder.toString())
             }
         }
     }
+
 
     fun translate(filePath: String, sourceLanguage : String, translationLanguage: String): Flow<SoundResponse> {
         val bytes = File(filePath).readBytes().toByteString()

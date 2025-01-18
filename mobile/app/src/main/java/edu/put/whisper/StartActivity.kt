@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
 import android.util.Log
+import android.util.TypedValue
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -14,15 +15,18 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import edu.put.whisper.animations.LoadingAnimation
 import edu.put.whisper.utils.Utilities
 import io.grpc.authentication.AuthenticationClient
 import io.grpc.soundtransfer.SoundTransferClient
@@ -133,7 +137,8 @@ class StartActivity : AppCompatActivity() {
         btnRegister.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             bottomSheetLogin.visibility = View.VISIBLE
-            bottomSheetTitle.setText("Register")
+            bottomSheetTitle.setText("Register to see transcription history")
+            bottomSheetTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
             repeatPasswordInput.visibility = View.VISIBLE
             btnSubmit.text = "Register"
             showKeyboard(loginInput)
@@ -247,10 +252,15 @@ class StartActivity : AppCompatActivity() {
         }
 
         btnChooseFile.setOnClickListener {
+            val startLayout = findViewById<ScrollView>(R.id.start_layout)
+            startLayout.visibility = View.GONE
+            val loadingAnimation = findViewById<LoadingAnimation>(R.id.LoadingAnimationStart)
+            loadingAnimation.visibility = View.VISIBLE
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
                 type = "audio/*"  // Tylko pliki audio
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
+
             startActivityForResult(intent, PICK_FILE_REQUEST_CODE)
         }
         btnTranscriptLive.setOnClickListener {
@@ -372,6 +382,15 @@ class StartActivity : AppCompatActivity() {
         editText.requestFocus()
         val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val mainContent = findViewById<ScrollView>(R.id.start_layout)
+        mainContent.visibility = View.VISIBLE
+
+        val loadingAnimation = findViewById<LoadingAnimation>(R.id.LoadingAnimationStart)
+        loadingAnimation.visibility = View.GONE
     }
 
 }
