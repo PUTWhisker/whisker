@@ -41,18 +41,18 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - postgresData:/var/lib/postgresql/data
+      - PostgresData:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=password
 
-  # client:
-  #   build:
-  #     context: ../webApp
-  #     dockerfile: docker/Dockerfile
-  #     args:
-  #       no-cache: "true"
-  #   ports:
-  #     - "8080:8080"
+  client:
+    build:
+      context: ../webApp
+      dockerfile: docker/Dockerfile
+      args:
+        no-cache: "true"
+    ports:
+      - "8080:8080"
       
 volumes:
   postgres_data:
