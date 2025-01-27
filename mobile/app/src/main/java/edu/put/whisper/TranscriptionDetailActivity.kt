@@ -48,7 +48,8 @@ class TranscriptionDetailActivity : AppCompatActivity() {
 
 
         if (errorMessage != null) {
-            Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+            tvTranscriptionText.setText(errorMessage)
         }
 
         if (transcriptionText != null && transcriptionDate != null) {

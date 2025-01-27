@@ -66,6 +66,8 @@ class StartActivity : AppCompatActivity() {
     private val PICK_FILE_REQUEST_CODE = 1
     private lateinit var authClient: AuthenticationClient
     private var isUserLoggedIn = false
+    private var isReturningFromFileSelection = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -303,11 +305,17 @@ class StartActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PICK_FILE_REQUEST_CODE && resultCode == RESULT_OK) {
+            isReturningFromFileSelection = true
             data?.data?.let { uri ->
                 val fileName = getFileNameFromUri(uri)
                 if (fileName != null) {
                     tvSelectedFile.text = "$fileName is being transcripted"
                     Log.d("DEBUG", "File selected: $fileName")
+
+                    val startLayout = findViewById<ScrollView>(R.id.start_layout)
+                    startLayout.visibility = View.GONE
+                    val loadingAnimation = findViewById<LoadingAnimation>(R.id.LoadingAnimationStart)
+                    loadingAnimation.visibility = View.VISIBLE
 
                     lifecycleScope.launch {
                         val filePath = getFilePathFromUri(uri)
@@ -386,11 +394,15 @@ class StartActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val mainContent = findViewById<ScrollView>(R.id.start_layout)
-        mainContent.visibility = View.VISIBLE
+        if (!isReturningFromFileSelection) {
+            val mainContent = findViewById<ScrollView>(R.id.start_layout)
+            mainContent.visibility = View.VISIBLE
 
-        val loadingAnimation = findViewById<LoadingAnimation>(R.id.LoadingAnimationStart)
-        loadingAnimation.visibility = View.GONE
+            val loadingAnimation = findViewById<LoadingAnimation>(R.id.LoadingAnimationStart)
+            loadingAnimation.visibility = View.GONE
+        } else {
+            isReturningFromFileSelection = false
+        }
     }
 
 }
