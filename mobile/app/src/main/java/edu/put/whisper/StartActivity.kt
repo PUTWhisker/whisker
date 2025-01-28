@@ -134,8 +134,6 @@ class StartActivity : AppCompatActivity() {
         }
 
 
-
-
         btnRegister.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             bottomSheetLogin.visibility = View.VISIBLE
@@ -328,7 +326,6 @@ class StartActivity : AppCompatActivity() {
                                     val intent = Intent(this@StartActivity, TranscriptionDetailActivity::class.java)
                                     if (transcription != null) {
                                         intent.putExtra("EXTRA_TRANSCRIPTION_TEXT", transcription)
-                                        intent.putExtra("EXTRA_TRANSCRIPTION_DATE", System.currentTimeMillis().toString())
                                         intent.putExtra("EXTRA_FILE_PATH", filePath)
                                         intent.putExtra("EXTRA_LANGUAGE", "en")
                                     } else {

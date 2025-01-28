@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">voicememos</string>
+    <string name="app_name">Whisker</string>
     <string name="start_recording">Start Recording</string>
-    <string name="title_activity_start">StartActivity</string>
-    <!-- Strings used for fragments for navigation -->
+    <string name="title_activity_start">MainActivity</string>
+
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
@@ -53,6 +53,38 @@
             <item>es</item>
         </string-array>
         <string name="select_language">Wybierz język</string>
+    <string name="recordings">Recordings</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="history">History</string>
+    <string name="live_transcription">Live transcription</string>
+    <string name="we_re_getting_your_data">We\'re getting your data</string>
+    <string name="record_transcription">Record Transcription</string>
+    <string name="transcript">Transcript</string>
+    <string name="hello">Hello</string>
+    <string name="log_in">Log In</string>
+    <string name="register">Register</string>
+    <string name="log_out">Log out</string>
+    <string name="what_do_you_want_to_do">What do you want to do?</string>
+    <string name="record_a_file_to_transcribe">Record a file to transcribe</string>
+    <string name="choose_a_file_to_transcribe">Choose a file to transcribe</string>
+    <string name="transcription">Transcription</string>
+    <string name="transcription_will_be_here">Transcription will be here</string>
+    <string name="translate">Translate</string>
+    <string name="split_into_roles">Split into roles</string>
+    <string name="discard">Discard</string>
+    <string name="accept">Accept</string>
+    <string name="original_text">Original text</string>
+    <string name="translated_text">Translated text</string>
+    <string name="save_record">Save Record?</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">Ok</string>
+    <string name="swipe_down_to_use_app_as_a_guest">Swipe down to use app as a guest</string>
+    <string name="your_nick">Your nick</string>
+    <string name="password">Password</string>
+    <string name="repeat_password">Repeat password</string>
+    <string name="rename_record">Rename Record?</string>
+    <string name="save">Save</string>
     <string-array name="languages_full">
         <item>Polski</item>
         <item>English</item>

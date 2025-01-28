@@ -10,9 +10,13 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import android.content.Context
+import android.util.Log
 import android.view.View
 import android.widget.EditText
 import edu.put.whisper.utils.Utilities
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class TranscriptionDetailActivity : AppCompatActivity() {
     private lateinit var utilities: Utilities
@@ -45,6 +49,7 @@ class TranscriptionDetailActivity : AppCompatActivity() {
         val btnDiscardChanges = findViewById<LinearLayout>(R.id.btnDiscardChanges)
         val tvTranscriptionText = findViewById<EditText>(R.id.tvFullTranscription)
         val tvTranscriptionDate = findViewById<TextView>(R.id.tvTranscriptionDate)
+        Log.d("DEBUG", "Transcription date received: $transcriptionDate")
 
 
         if (errorMessage != null) {
@@ -56,7 +61,16 @@ class TranscriptionDetailActivity : AppCompatActivity() {
 
 
             tvTranscriptionText.setText(transcriptionText)
-            tvTranscriptionDate.text = transcriptionDate
+            try {
+                val timestamp = transcriptionDate.toLong()
+                val date = Date(timestamp)
+
+                val outputFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
+                tvTranscriptionDate.text = outputFormat.format(date)
+            } catch (e: Exception) {
+                tvTranscriptionDate.text = transcriptionDate
+                Log.e("DateParseError", "Error parsing timestamp: $transcriptionDate", e)
+            }
 
             findViewById<LinearLayout>(R.id.btnTranslate).setOnClickListener {
                 val intent = Intent(this, TranslateActivity::class.java)
@@ -83,7 +97,6 @@ class TranscriptionDetailActivity : AppCompatActivity() {
             }
 
             btnAcceptChanges.setOnClickListener {
-                // Tutaj ten updatedText mozesz zapisac do bazy danych czy tam uzyc swojej funkcji, cokolwiek chcesz z tym zrobic :3
                 val updatedText = tvTranscriptionText.text.toString()
                 Toast.makeText(this, "Changes Accepted", Toast.LENGTH_SHORT).show()
 

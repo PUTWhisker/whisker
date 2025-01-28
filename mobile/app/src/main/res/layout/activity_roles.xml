@@ -11,7 +11,7 @@
         android:background="@color/primaryDark"
         android:theme="?attr/actionBarTheme"
         android:elevation="4dp"
-        app:title="Record Transcription"
+        app:title="@string/record_transcription"
         app:titleTextColor="@color/primaryLight"
         app:navigationIcon="@drawable/ic_arrow_toolbar"
         app:titleTextAppearance="@style/ToolbarTitleStyle"

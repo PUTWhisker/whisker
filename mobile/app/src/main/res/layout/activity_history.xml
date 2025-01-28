@@ -13,7 +13,7 @@
         android:background="@color/primaryDark"
         android:theme="?attr/actionBarTheme"
         android:elevation="4dp"
-        app:title="History"
+        app:title="@string/history"
         app:titleTextColor="@color/primaryLight"
         app:navigationIcon="@drawable/ic_arrow_toolbar"
         app:titleTextAppearance="@style/ToolbarTitleStyle"
@@ -68,7 +68,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Delete"
+            android:text="@string/delete"
             android:textSize="16sp"
             android:textColor="@color/primaryLight" />
     </LinearLayout>
