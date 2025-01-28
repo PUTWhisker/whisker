@@ -87,10 +87,9 @@ class TranslateActivity : AppCompatActivity() {
 
                 CoroutineScope(Dispatchers.Main).launch {
                     try {
-                        //val respone = client.translateText(originalText, sourceLanguage, targetLanguage)
-                        val mockedResponse = "Jakis przetlumaczony tekst"
+                        val respone = client.translateText(originalText, sourceLanguage, targetLanguage)
                         handler.removeCallbacks(runnable)
-                        editTextTranslated.setText(mockedResponse)
+                        editTextTranslated.setText(respone.text)
                     } catch (e: Exception) {
                         e.printStackTrace()
                         handler.removeCallbacks(runnable)

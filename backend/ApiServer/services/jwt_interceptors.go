@@ -17,8 +17,9 @@ var (
 	errMissingMetadata = status.Errorf(codes.InvalidArgument, "missing metadata")
 	errInvalidToken    = status.Errorf(codes.Unauthenticated, "invalid token")
 	nonAuthMethods     = map[string]bool{
-		"/ClientService/Login":    true,
-		"/ClientService/Register": true,
+		"/ClientService/Login":        true,
+		"/ClientService/Register":     true,
+		"/ClientService/RefreshToken": true,
 	}
 	nonAuthServices = map[string]bool{
 		"/SoundService": true,
@@ -44,7 +45,7 @@ func parseJWT(tokenString string) (*jwt.Token, error) {
 
 	// Check if the token is valid
 	if !token.Valid {
-		return nil, fmt.Errorf("invalid token")
+		return nil, errInvalidToken
 	}
 
 	// Return the verified token

@@ -74,7 +74,7 @@ class StartActivity : AppCompatActivity() {
         setContentView(R.layout.activity_start)
 
         val serverUri = Uri.parse(getString(R.string.server_url))
-        authClient = AuthenticationClient(serverUri)
+        authClient = AuthenticationClient(serverUri, this)
         utilities = Utilities(this)
 
         btnRecordActivity = findViewById(R.id.btnRecordActivity)
