@@ -62,7 +62,6 @@ class StartActivity : AppCompatActivity() {
     private lateinit var passwordInput: EditText
     private lateinit var repeatPasswordInput: EditText
     private lateinit var loginInput: EditText
-    private lateinit var tvHello: TextView
     private lateinit var btnLogout: Button
     private lateinit var btnHistory: CardView
     private lateinit var btnCopy: ImageButton
@@ -142,7 +141,6 @@ class StartActivity : AppCompatActivity() {
         btnCancelLog = findViewById(R.id.btnCancelLog)
         btnSubmit = findViewById(R.id.btnSubmit)
         bottomSheetTitle = findViewById(R.id.bottomSheetTitle)
-        tvHello = findViewById(R.id.tvHello)
         btnHistory = findViewById(R.id.btnHistory)
         btnLogout = findViewById(R.id.btnLogout)
         btnBack = findViewById(R.id.btnBack)
@@ -267,8 +265,7 @@ class StartActivity : AppCompatActivity() {
                             bottomSheetLogin.visibility = View.GONE
                             Toast.makeText(this@StartActivity, "Login successful!", Toast.LENGTH_SHORT).show()
                             utilities.setVisibility(View.GONE, btnLogin, btnRegister)
-                            tvHello.text = "Hello $username"
-                            utilities.setVisibility(View.VISIBLE, btnLogout, tvHello)
+                            utilities.setVisibility(View.VISIBLE, btnLogout)
                             val icHistoryImageView: ImageView = findViewById(R.id.ic_history)
                             val icArrowImageView: ImageView = findViewById(R.id.ic_arrow)
                             icHistoryImageView.backgroundTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.primaryDark)
@@ -327,12 +324,11 @@ class StartActivity : AppCompatActivity() {
 
         btnLogout.setOnClickListener {
             utilities.setVisibility(View.VISIBLE, btnLogin, btnRegister, btnChooseFile, btnRecordActivity)
-            utilities.setVisibility(View.GONE, btnLogout, tvHello)
+            utilities.setVisibility(View.GONE, btnLogout)
             utilities.setVisibility(View.INVISIBLE, rvTranscriptions)
             isUserLoggedIn = false
             loginInput.text.clear()
             passwordInput.text.clear()
-            tvHello.text = ""
             val icHistoryImageView: ImageView = findViewById(R.id.ic_history)
             val icArrowImageView: ImageView = findViewById(R.id.ic_arrow)
             icHistoryImageView.backgroundTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.grayDarkDisabled)

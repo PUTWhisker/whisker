@@ -86,6 +86,8 @@
     <string name="rename_record">Rename Record?</string>
     <string name="save">Save</string>
     <string name="wrong_file_format">Wrong file format</string>
+    <string name="about">About</string>
+    <string name="settings">Settings</string>
     <string-array name="languages_full">
         <item>Polski</item>
         <item>English</item>

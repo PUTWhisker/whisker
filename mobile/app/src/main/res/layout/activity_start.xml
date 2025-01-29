@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".StartActivity">
 
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -30,59 +31,66 @@
             android:background="@color/primaryDark"
             android:visibility="gone" />
 
-        <LinearLayout
-            android:id="@+id/llLoginRegister"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="end"
             android:padding="8dp"
-            android:orientation="horizontal"
-            android:background = "@color/primaryDark">
+            android:background="@color/primaryDark">
 
-            <TextView
-                android:id="@+id/tvHello"
+            <ImageButton
+                android:id="@+id/btnSettings"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_settings"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/settings"
+                app:tint="@color/white"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true" />
+
+            <ImageButton
+                android:id="@+id/btnAbout"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_about"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/about"
+                app:tint="@color/white"
+                android:layout_marginStart="4dp"
+                android:layout_toEndOf="@id/btnSettings"
+                android:layout_centerVertical="true" />
+
+            <LinearLayout
+                android:id="@+id/llLoginRegister"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:text="@string/hello"
-                android:visibility="gone"
-                app:autoSizeTextType="uniform"/>
+                android:orientation="horizontal"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnLogin"
-                android:layout_width="100dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
-                android:backgroundTint="@color/playerColor"
-                android:text="@string/log_in"
-                android:textColor="@color/white"
-                android:textSize="12sp"
-                app:cornerRadius="26dp"
-                app:rippleColor="@color/primaryDark" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnLogin"
+                    android:layout_width="100dp"
+                    android:layout_height="48dp"
+                    android:backgroundTint="@color/playerColor"
+                    android:text="@string/log_in"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    app:cornerRadius="26dp"
+                    app:rippleColor="@color/primaryDark" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnRegister"
-                android:layout_width="100dp"
-                android:layout_height="48dp"
-                android:backgroundTint="@color/primaryLight"
-                android:text="@string/register"
-                android:textColor="@color/primaryDark"
-                android:textSize="12sp"
-                app:cornerRadius="26dp"
-                app:rippleColor="@color/primaryDark" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnHistoryMock"
-                android:layout_width="100dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="16dp"
-                android:backgroundTint="@color/gray"
-                android:text="@string/history"
-                android:textColor="@color/grayDark"
-                android:textSize="12sp"
-                android:visibility="gone"
-                app:cornerRadius="26dp"
-                app:rippleColor="@color/grayDark" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnRegister"
+                    android:layout_width="100dp"
+                    android:layout_height="48dp"
+                    android:backgroundTint="@color/primaryLight"
+                    android:text="@string/register"
+                    android:textColor="@color/primaryDark"
+                    android:textSize="12sp"
+                    app:cornerRadius="26dp"
+                    app:rippleColor="@color/primaryDark"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLogout"
@@ -92,10 +100,26 @@
                 android:text="@string/log_out"
                 android:textColor="@color/grayDark"
                 android:textSize="12sp"
+                app:cornerRadius="26dp"
+                app:rippleColor="@color/grayDark"
+                android:layout_toStartOf="@id/llLoginRegister"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="8dp"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnHistoryMock"
+                android:layout_width="100dp"
+                android:layout_height="48dp"
+                android:backgroundTint="@color/gray"
+                android:text="@string/history"
+                android:textColor="@color/grayDark"
+                android:textSize="12sp"
                 android:visibility="gone"
                 app:cornerRadius="26dp"
                 app:rippleColor="@color/grayDark" />
-        </LinearLayout>
+
+        </RelativeLayout>
 
         <FrameLayout
             android:layout_width="match_parent"
