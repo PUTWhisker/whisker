@@ -91,21 +91,36 @@ class StartActivity : AppCompatActivity() {
         Log.d("ServerStatus", "Server URL: $serverUrl")
         tvConnectionStatus = findViewById(R.id.tvConnectionStatus)
 
-        val connectivityReceiver = object : BroadcastReceiver() {
+        connectivityReceiver = object : BroadcastReceiver() {
+            private val handler = Handler(Looper.getMainLooper())
+            private var lastCheckTime = 0L
+
             override fun onReceive(context: Context?, intent: Intent?) {
                 val noConnectivity = intent?.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false) == true
                 if (noConnectivity) {
                     tvConnectionStatus.text = "Brak połączenia z internetem"
-                    tvConnectionStatus.visibility = TextView.VISIBLE
+                    tvConnectionStatus.visibility = View.VISIBLE
                 } else {
-                    checkConnectionAndServerStatus(serverUrl)
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastCheckTime > 3000) {
+                        lastCheckTime = currentTime
+                        lifecycleScope.launch {
+                            val isAlive = isServerAlive(serverUrl)
+                            updateUI(isAlive)
+                        }
+                    }
                 }
             }
         }
+
+
         val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
         registerReceiver(connectivityReceiver, filter)
-        checkConnectionAndServerStatus(serverUrl)
 
+        lifecycleScope.launch {
+            val isAlive = isServerAlive(serverUrl)
+            updateUI(isAlive)
+        }
 
         val serverUri = Uri.parse(getString(R.string.server_url))
         authClient = AuthenticationClient(serverUri, this)
@@ -339,6 +354,14 @@ class StartActivity : AppCompatActivity() {
         if (requestCode == PICK_FILE_REQUEST_CODE && resultCode == RESULT_OK) {
             isReturningFromFileSelection = true
             data?.data?.let { uri ->
+
+                val contentResolver = contentResolver
+                val mimeType = contentResolver.getType(uri)
+                // sprawdzenie czy uzytkownik wgrywa odpowiedni typ pliku
+                if (mimeType?.startsWith("audio/") != true) {
+                    Toast.makeText(this, getString(R.string.wrong_file_format), Toast.LENGTH_SHORT).show()
+                    return
+                }
                 val fileName = getFileNameFromUri(uri)
                 if (fileName != null) {
                     tvSelectedFile.text = "$fileName is being transcripted"
@@ -422,25 +445,14 @@ class StartActivity : AppCompatActivity() {
         val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
     }
-
-
-
-    private fun checkConnectionAndServerStatus(serverUrl: String) {
-        if (!isConnectedToInternet(this)) {
-            tvConnectionStatus.text = "Brak połączenia z internetem"
-            tvConnectionStatus.visibility = TextView.VISIBLE
+    private fun updateUI(isServerAvailable: Boolean) {
+        tvConnectionStatus.text = if (isServerAvailable) {
+            "Serwer dostępny"
         } else {
-            if (!isServerAlive(serverUrl)) {
-                tvConnectionStatus.text = "Serwer jest niedostępny"
-                tvConnectionStatus.visibility = TextView.VISIBLE
-
-            } else {
-                tvConnectionStatus.visibility = TextView.GONE
-            }
+            "Serwer niedostępny"
         }
+        tvConnectionStatus.visibility = View.VISIBLE
     }
-
-
 
     override fun onResume() {
         super.onResume()

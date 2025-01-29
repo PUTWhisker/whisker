@@ -7,9 +7,14 @@ import android.net.NetworkInfo
 import android.provider.Settings.Global.getString
 import android.util.Log
 import edu.put.whisper.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.InetAddress
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
+import java.util.concurrent.TimeUnit
 
 
 fun isConnectedToInternet(context: Context): Boolean {
@@ -18,23 +23,31 @@ fun isConnectedToInternet(context: Context): Boolean {
     return activeNetwork?.isConnected == true
 }
 
-fun isServerAlive(serverUrl: String): Boolean {
-    Log.d("ServerStatus", "Checking server: $serverUrl")
-    return try {
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("$serverUrl")
-            .build()
 
-        val response = client.newCall(request).execute()
-        val isSuccessful = response.isSuccessful
-        Log.d("ServerStatus", "Server reachable: $isSuccessful")
-        response.close()
-        isSuccessful
-    } catch (e: Exception) {
-        Log.e("ServerStatus", "Error checking server: ${e.message}")
-        false
-    }
+suspend fun isServerAlive(serverUrl: String): Boolean {
+        Log.d("ServerStatus", "Checking server: $serverUrl")
+        return withContext(Dispatchers.IO) {
+            val client = OkHttpClient.Builder()
+                .connectTimeout(2, TimeUnit.SECONDS)
+                .readTimeout(2, TimeUnit.SECONDS)
+                .writeTimeout(2, TimeUnit.SECONDS)
+                .build()
+
+            val request = Request.Builder()
+                .url(serverUrl.trim())
+                .get()
+                .build()
+
+            try {
+                client.newCall(request).execute().use { response ->
+                    response.isSuccessful
+                }
+            } catch (e: Exception) {
+                false
+            }
+        }
 }
+
+
 
 
