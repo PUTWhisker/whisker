@@ -19,6 +19,17 @@
         android:gravity="center"
         android:orientation="vertical">
 
+        <TextView
+            android:id="@+id/tvConnectionStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            android:background="@color/primaryDark"
+            android:visibility="gone" />
+
         <LinearLayout
             android:id="@+id/llLoginRegister"
             android:layout_width="match_parent"

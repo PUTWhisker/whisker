@@ -1,10 +1,16 @@
 package edu.put.whisper
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.OpenableColumns
+import android.provider.Settings.Global
 import android.util.Log
 import android.util.TypedValue
 import android.view.KeyEvent
@@ -28,6 +34,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import edu.put.whisper.animations.LoadingAnimation
 import edu.put.whisper.utils.Utilities
+import edu.put.whisper.utils.isConnectedToInternet
+import edu.put.whisper.utils.isServerAlive
 import io.grpc.authentication.AuthenticationClient
 import io.grpc.soundtransfer.SoundTransferClient
 import kotlinx.coroutines.Dispatchers
@@ -67,11 +75,37 @@ class StartActivity : AppCompatActivity() {
     private lateinit var authClient: AuthenticationClient
     private var isUserLoggedIn = false
     private var isReturningFromFileSelection = false
+    private lateinit var tvConnectionStatus: TextView
+    private lateinit var connectivityReceiver: BroadcastReceiver
+    private lateinit var handler: Handler
+    private lateinit var runnable: Runnable
+
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
+
+        val serverUrl = getString(R.string.server_url)
+        Log.d("ServerStatus", "Server URL: $serverUrl")
+        tvConnectionStatus = findViewById(R.id.tvConnectionStatus)
+
+        val connectivityReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val noConnectivity = intent?.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false) == true
+                if (noConnectivity) {
+                    tvConnectionStatus.text = "Brak połączenia z internetem"
+                    tvConnectionStatus.visibility = TextView.VISIBLE
+                } else {
+                    checkConnectionAndServerStatus(serverUrl)
+                }
+            }
+        }
+        val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        registerReceiver(connectivityReceiver, filter)
+        checkConnectionAndServerStatus(serverUrl)
+
 
         val serverUri = Uri.parse(getString(R.string.server_url))
         authClient = AuthenticationClient(serverUri, this)
@@ -389,6 +423,25 @@ class StartActivity : AppCompatActivity() {
         imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
     }
 
+
+
+    private fun checkConnectionAndServerStatus(serverUrl: String) {
+        if (!isConnectedToInternet(this)) {
+            tvConnectionStatus.text = "Brak połączenia z internetem"
+            tvConnectionStatus.visibility = TextView.VISIBLE
+        } else {
+            if (!isServerAlive(serverUrl)) {
+                tvConnectionStatus.text = "Serwer jest niedostępny"
+                tvConnectionStatus.visibility = TextView.VISIBLE
+
+            } else {
+                tvConnectionStatus.visibility = TextView.GONE
+            }
+        }
+    }
+
+
+
     override fun onResume() {
         super.onResume()
         if (!isReturningFromFileSelection) {
@@ -400,6 +453,12 @@ class StartActivity : AppCompatActivity() {
         } else {
             isReturningFromFileSelection = false
         }
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(connectivityReceiver)
     }
 
 }
