@@ -78,6 +78,8 @@ class StartActivity : AppCompatActivity() {
     private lateinit var connectivityReceiver: BroadcastReceiver
     private lateinit var handler: Handler
     private lateinit var runnable: Runnable
+    private lateinit var btnAbout: ImageButton
+
 
 
 
@@ -148,6 +150,7 @@ class StartActivity : AppCompatActivity() {
         llFileRecord = findViewById(R.id.llFileRecord)
         logoWhisper = findViewById(R.id.logoWhisper)
         rvTranscriptions.layoutManager = LinearLayoutManager(this)
+        btnAbout = findViewById(R.id.btnAbout)
 
         val bottomSheetL: LinearLayout = findViewById(R.id.bottomSheetL)
         bottomSheetLogin = findViewById(R.id.bottomSheetLogin)
@@ -155,6 +158,11 @@ class StartActivity : AppCompatActivity() {
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetL)
         bottomSheetBehavior.peekHeight = 0
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+
+        btnAbout.setOnClickListener {
+            val intent = Intent(this, AboutActivity::class.java)
+            startActivity(intent)
+        }
 
         loginInput.setOnKeyListener { v, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN) {
@@ -263,7 +271,8 @@ class StartActivity : AppCompatActivity() {
                             isUserLoggedIn = true
                             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
                             bottomSheetLogin.visibility = View.GONE
-                            Toast.makeText(this@StartActivity, "Login successful!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@StartActivity,
+                                getString(R.string.login_successful), Toast.LENGTH_SHORT).show()
                             utilities.setVisibility(View.GONE, btnLogin, btnRegister)
                             utilities.setVisibility(View.VISIBLE, btnLogout)
                             val icHistoryImageView: ImageView = findViewById(R.id.ic_history)
@@ -276,7 +285,8 @@ class StartActivity : AppCompatActivity() {
 
 
                         } else {
-                            Toast.makeText(this@StartActivity, "Login failed. Try again.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@StartActivity,
+                                getString(R.string.login_failed_try_again), Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
