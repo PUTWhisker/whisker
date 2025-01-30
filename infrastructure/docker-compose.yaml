@@ -5,9 +5,11 @@ services:
       context: ../backend/whisper
       dockerfile: Dockerfile
     environment:
-     - HUGGING_FACE_API_KEY="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"
-    ports:
-     - 7070:7070
+     - HUGGING_FACE_API_KEY=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
+     - FASTER_WHISPER_MODEL=tiny
+     - M2M100_MODEL=facebook/m2m100_418M
+     - MAX_FILE_MB=50
+     - SERVER_PORT=7070
 
   golang-server:
     build:
@@ -21,29 +23,26 @@ services:
     depends_on: # Change depends_on to healthcheck
       - whisper-server
       - postgres
-    ports:
-      - 9900:9900
-    
+
   proxy:
     build:
       context: .
       dockerfile: proxy/Dockerfile
-    ports:
-      - 50051:50051
-      - 9901:9901
     depends_on:
       - golang-server
+    ports:
+      - 80:50051
   
   postgres:
     image: postgres
     container_name: whisper-postgres
     hostname: postgres
-    ports:
-      - 5432:5432
     volumes:
-      - postgresData:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=whisper
 
   # client:
   #   build:

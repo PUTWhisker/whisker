@@ -1,11 +1,3 @@
-DROP TABLE IF EXISTS refresh_token;
-DROP TABLE IF EXISTS translation;
-DROP TABLE IF EXISTS transcription;
-DROP TABLE IF EXISTS speaker_line;
-DROP TABLE IF EXISTS diarization;
-DROP TABLE IF EXISTS app_user;
-
-
 CREATE TABLE app_user (
     id SERIAL PRIMARY KEY,
     username VARCHAR(100) UNIQUE NOT NULL,

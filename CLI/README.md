@@ -9,6 +9,6 @@ To see available flags with descriptions run `python main.py --help`
 
 
 ### Example use
-`python main.py --local --port 7070 --save file_path C:\Users\bombo\Documents\studia-inf\whisper-monorepo\CLI\english.wav`
+`python main.py --local --port 7070 --save file_path english.wav`
 
-`python main.py --local --diarizate --port 7070 --save file_path C:\Users\bombo\Documents\studia-inf\whisper-monorepo\CLI\to_test.mp3`
+`python main.py --local --diarizate --port 7070 to_test.mp3`

@@ -1,5 +1,0 @@
-ALTER TABLE transcription
-ADD COLUMN title VARCHAR(100);
-
-ALTER TABLE diarization
-ADD COLUMN title VARCHAR(100);
