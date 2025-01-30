@@ -10,9 +10,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.OpenableColumns
-import android.provider.Settings.Global
 import android.util.Log
-import android.util.TypedValue
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -26,7 +24,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -34,10 +31,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import edu.put.whisper.animations.LoadingAnimation
 import edu.put.whisper.utils.Utilities
-import edu.put.whisper.utils.isConnectedToInternet
 import edu.put.whisper.utils.isServerAlive
 import io.grpc.authentication.AuthenticationClient
-import io.grpc.soundtransfer.SoundTransferClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -52,15 +47,24 @@ class StartActivity : AppCompatActivity() {
     private lateinit var logoWhisper: ImageView
     private lateinit var tvSelectedFile: TextView
     private lateinit var tvTranscriptedFile: TextView
-    private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
+    private lateinit var bottomSheetBehaviorLogin: BottomSheetBehavior<LinearLayout>
+    private lateinit var bottomSheetBehaviorRegister: BottomSheetBehavior<LinearLayout>
     private lateinit var bottomSheetLogin: View
+    private lateinit var bottomSheetRegister: View
     private lateinit var bottomSheetTitle: TextView
     private lateinit var btnLogin: Button
     private lateinit var btnRegister: Button
     private lateinit var btnCancelLog: Button
-    private lateinit var btnSubmit: Button
-    private lateinit var passwordInput: EditText
+    private lateinit var btnLoginConfirm: Button
+
+    private lateinit var btnRegisterConfirm: Button
+    private lateinit var registerPasswordInput: EditText
     private lateinit var repeatPasswordInput: EditText
+    private lateinit var registerNickInput: EditText
+    private lateinit var btnCancelRegister: Button
+
+
+    private lateinit var passwordInput: EditText
     private lateinit var loginInput: EditText
     private lateinit var btnLogout: Button
     private lateinit var btnHistory: CardView
@@ -81,9 +85,6 @@ class StartActivity : AppCompatActivity() {
     private lateinit var btnAbout: ImageButton
 
 
-
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
@@ -97,7 +98,10 @@ class StartActivity : AppCompatActivity() {
             private var lastCheckTime = 0L
 
             override fun onReceive(context: Context?, intent: Intent?) {
-                val noConnectivity = intent?.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false) == true
+                val noConnectivity = intent?.getBooleanExtra(
+                    ConnectivityManager.EXTRA_NO_CONNECTIVITY,
+                    false
+                ) == true
                 if (noConnectivity) {
                     tvConnectionStatus.text = "Brak połączenia z internetem"
                     tvConnectionStatus.visibility = View.VISIBLE
@@ -137,11 +141,17 @@ class StartActivity : AppCompatActivity() {
         btnLogin = findViewById(R.id.btnLogin)
         loginInput = findViewById(R.id.loginInput)
         passwordInput = findViewById(R.id.passwordInput)
-        repeatPasswordInput = findViewById(R.id.repeatPasswordInput)
         btnRegister = findViewById(R.id.btnRegister)
         btnLogin = findViewById(R.id.btnLogin)
         btnCancelLog = findViewById(R.id.btnCancelLog)
-        btnSubmit = findViewById(R.id.btnSubmit)
+        btnLoginConfirm = findViewById(R.id.btnLoginConfirm)
+
+        btnRegisterConfirm = findViewById(R.id.btnRegisterIn)
+        registerPasswordInput = findViewById(R.id.RegisterPasswordInput)
+        registerNickInput = findViewById(R.id.RegisterNickInput)
+        repeatPasswordInput = findViewById(R.id.repeatPasswordInput)
+        btnCancelRegister = findViewById(R.id.btnCancelRegister)
+
         bottomSheetTitle = findViewById(R.id.bottomSheetTitle)
         btnHistory = findViewById(R.id.btnHistory)
         btnLogout = findViewById(R.id.btnLogout)
@@ -152,12 +162,21 @@ class StartActivity : AppCompatActivity() {
         rvTranscriptions.layoutManager = LinearLayoutManager(this)
         btnAbout = findViewById(R.id.btnAbout)
 
+        // bottom popup LOGIN
         val bottomSheetL: LinearLayout = findViewById(R.id.bottomSheetL)
         bottomSheetLogin = findViewById(R.id.bottomSheetLogin)
 
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetL)
-        bottomSheetBehavior.peekHeight = 0
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        bottomSheetBehaviorLogin = BottomSheetBehavior.from(bottomSheetL)
+        bottomSheetBehaviorLogin.peekHeight = 0
+        bottomSheetBehaviorLogin.state = BottomSheetBehavior.STATE_COLLAPSED
+
+        // bottom popup REGISTER
+        val bottomSheetR: LinearLayout = findViewById(R.id.bottomSheetR)
+        bottomSheetRegister = findViewById(R.id.bottomSheetRegister)
+
+        bottomSheetBehaviorRegister = BottomSheetBehavior.from(bottomSheetR)
+        bottomSheetBehaviorRegister.peekHeight = 0
+        bottomSheetBehaviorRegister.state = BottomSheetBehavior.STATE_COLLAPSED
 
         btnAbout.setOnClickListener {
             val intent = Intent(this, AboutActivity::class.java)
@@ -181,7 +200,7 @@ class StartActivity : AppCompatActivity() {
 
         passwordInput.setOnKeyListener { v, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN) {
-                btnSubmit.performClick()
+                btnLoginConfirm.performClick()
                 true
             } else {
                 false
@@ -190,104 +209,115 @@ class StartActivity : AppCompatActivity() {
 
 
         btnRegister.setOnClickListener {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-            bottomSheetLogin.visibility = View.VISIBLE
-            bottomSheetTitle.setText("Register to see transcription history")
-            bottomSheetTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-            repeatPasswordInput.visibility = View.VISIBLE
-            btnSubmit.text = "Register"
-            showKeyboard(loginInput)
+            bottomSheetBehaviorRegister.state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetRegister.visibility = View.VISIBLE
+            //showKeyboard(loginInput)
 
+        }
+
+        btnCancelRegister.setOnClickListener { view ->
+            bottomSheetBehaviorRegister.state = BottomSheetBehavior.STATE_COLLAPSED
+            bottomSheetRegister.visibility = View.GONE
+            registerNickInput.text?.clear()
+            registerPasswordInput.text?.clear()
+
+            val inputMethodManager = view.context.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
         }
 
         btnLogin.setOnClickListener {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetBehaviorLogin.state = BottomSheetBehavior.STATE_EXPANDED
             bottomSheetLogin.visibility = View.VISIBLE
-            bottomSheetTitle.setText("Log in")
-            btnLogin.setText("Log in")
-            showKeyboard(loginInput)
+            //showKeyboard(loginInput)
         }
-        btnCancelLog.setOnClickListener {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        btnCancelLog.setOnClickListener { view ->
+            bottomSheetBehaviorLogin.state = BottomSheetBehavior.STATE_COLLAPSED
             bottomSheetLogin.visibility = View.GONE
-            loginInput.text.clear()
-            passwordInput.text.clear()
-            repeatPasswordInput.text.clear()
-            repeatPasswordInput.visibility = View.GONE
-            hideKeyboard()
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            loginInput.text?.clear()
+            passwordInput.text?.clear()
 
+            val inputMethodManager = view.context.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
         }
 
-        btnSubmit.setOnClickListener {
-            val username = loginInput.text.toString()
-            val password = passwordInput.text.toString()
+        btnRegisterConfirm.setOnClickListener {
+            val username = registerNickInput.text.toString()
+            val password = registerPasswordInput.text.toString()
             val repeatPassword = repeatPasswordInput.text.toString()
-            val title = bottomSheetTitle.text.toString()
-
-            hideKeyboard()
-            if (title == "Register") {
-                if (password == repeatPassword) {
-                    GlobalScope.launch(Dispatchers.IO) {
-                        val success = authClient.Register(username, password)
-                        withContext(Dispatchers.Main) {
-                            if (success) {
-                                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-                                bottomSheetLogin.visibility = View.GONE
-                                Toast.makeText(
-                                    this@StartActivity,
-                                    "Registration successful! You can now log in.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-
-                                loginInput.text.clear()
-                                passwordInput.text.clear()
-                                repeatPasswordInput.text.clear()
-                                repeatPasswordInput.visibility = View.GONE
-                                btnLogin.setText("Log in")
-                            } else {
-                                Toast.makeText(
-                                    this@StartActivity,
-                                    "Registration failed. Try again.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                    }
-                } else {
-                    Toast.makeText(
-                        this,
-                        "Passwords do not match. Please try again.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    passwordInput.text.clear()
-                    repeatPasswordInput.text.clear()
-                }
-            } else if (title == "Log in") {
+            if (password == repeatPassword) {
                 GlobalScope.launch(Dispatchers.IO) {
-                    val success = authClient.Login(username, password)
+                    val success = authClient.Register(username, password)
                     withContext(Dispatchers.Main) {
                         if (success) {
-                            isUserLoggedIn = true
-                            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-                            bottomSheetLogin.visibility = View.GONE
-                            Toast.makeText(this@StartActivity,
-                                getString(R.string.login_successful), Toast.LENGTH_SHORT).show()
-                            utilities.setVisibility(View.GONE, btnLogin, btnRegister)
-                            utilities.setVisibility(View.VISIBLE, btnLogout)
-                            val icHistoryImageView: ImageView = findViewById(R.id.ic_history)
-                            val icArrowImageView: ImageView = findViewById(R.id.ic_arrow)
-                            icHistoryImageView.backgroundTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.primaryDark)
-                            icHistoryImageView.imageTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.white)
-                            findViewById<TextView>(R.id.historyText).text = "History"
-                            findViewById<TextView>(R.id.historyText).setTextColor(ContextCompat.getColor(this@StartActivity, R.color.primaryDark))
-                            icArrowImageView.imageTintList = ContextCompat.getColorStateList(this@StartActivity, R.color.primaryDark)
-
-
+                            bottomSheetBehaviorRegister.state = BottomSheetBehavior.STATE_COLLAPSED
+                            bottomSheetRegister.visibility = View.GONE
+                            Toast.makeText(
+                                this@StartActivity,
+                                getString(R.string.registration_successful_you_can_now_log_in),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            registerNickInput.text.clear()
+                            registerPasswordInput.text.clear()
+                            repeatPasswordInput.text.clear()
                         } else {
-                            Toast.makeText(this@StartActivity,
-                                getString(R.string.login_failed_try_again), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@StartActivity,
+                                getString(R.string.registration_failed_try_again),
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
+                    }
+                }
+            } else {
+                Toast.makeText(
+                    this,
+                    getString(R.string.passwords_do_not_match_please_try_again),
+                    Toast.LENGTH_SHORT
+                ).show()
+                registerPasswordInput.text.clear()
+                repeatPasswordInput.text.clear()
+            }
+        }
+
+        btnLoginConfirm.setOnClickListener {
+            val username = loginInput.text.toString()
+            val password = passwordInput.text.toString()
+            GlobalScope.launch(Dispatchers.IO) {
+                val success = authClient.Login(username, password)
+                withContext(Dispatchers.Main) {
+                    if (success) {
+                        hideKeyboard()
+                        isUserLoggedIn = true
+                        bottomSheetBehaviorLogin.state = BottomSheetBehavior.STATE_COLLAPSED
+                        bottomSheetLogin.visibility = View.GONE
+                        Toast.makeText(
+                            this@StartActivity,
+                            getString(R.string.login_successful), Toast.LENGTH_SHORT
+                        ).show()
+                        utilities.setVisibility(View.GONE, btnLogin, btnRegister)
+                        utilities.setVisibility(View.VISIBLE, btnLogout)
+                        val icHistoryImageView: ImageView = findViewById(R.id.ic_history)
+                        val icArrowImageView: ImageView = findViewById(R.id.ic_arrow)
+                        icHistoryImageView.backgroundTintList =
+                            ContextCompat.getColorStateList(this@StartActivity, R.color.primaryDark)
+                        icHistoryImageView.imageTintList =
+                            ContextCompat.getColorStateList(this@StartActivity, R.color.white)
+                        findViewById<TextView>(R.id.historyText).text = "History"
+                        findViewById<TextView>(R.id.historyText).setTextColor(
+                            ContextCompat.getColor(
+                                this@StartActivity,
+                                R.color.primaryDark
+                            )
+                        )
+                        icArrowImageView.imageTintList =
+                            ContextCompat.getColorStateList(this@StartActivity, R.color.primaryDark)
+
+
+                    } else {
+                        Toast.makeText(
+                            this@StartActivity,
+                            getString(R.string.login_failed_try_again), Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
@@ -298,7 +328,8 @@ class StartActivity : AppCompatActivity() {
             val intent = Intent(this, HistoryActivity::class.java)
             startActivity(intent)
             } else {
-                Toast.makeText(this, "Please log in to view history.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,
+                    getString(R.string.please_log_in_to_view_history), Toast.LENGTH_SHORT).show()
             }
         }
 

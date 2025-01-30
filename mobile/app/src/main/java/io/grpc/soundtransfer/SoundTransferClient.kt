@@ -11,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import org.intellij.lang.annotations.Language
 import java.io.Closeable
 import java.io.File
@@ -36,19 +35,6 @@ class SoundTransferClient(uri: Uri) : Closeable {
         builder.executor(Dispatchers.IO.asExecutor()).build()
     }
     private val stub = SoundServiceGrpcKt.SoundServiceCoroutineStub(channel)
-
-
-    suspend fun testConnection() : Boolean {
-        try {
-            withTimeout(2000){
-                stub.testConnection(textMessage { text = "test" })
-            }
-            return true
-        } catch (e : Exception){
-            return false
-        }
-    }
-
 
 
     //zmienic funkcje tak zeby zwracala wszystko

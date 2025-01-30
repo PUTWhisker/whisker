@@ -4,11 +4,9 @@ import android.app.VoiceInteractor
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
-import android.net.Uri
 import android.provider.Settings.Global.getString
 import android.util.Log
 import edu.put.whisper.R
-import io.grpc.soundtransfer.SoundTransferClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -28,11 +26,26 @@ fun isConnectedToInternet(context: Context): Boolean {
 
 suspend fun isServerAlive(serverUrl: String): Boolean {
         Log.d("ServerStatus", "Checking server: $serverUrl")
+        return withContext(Dispatchers.IO) {
+            val client = OkHttpClient.Builder()
+                .connectTimeout(2, TimeUnit.SECONDS)
+                .readTimeout(2, TimeUnit.SECONDS)
+                .writeTimeout(2, TimeUnit.SECONDS)
+                .build()
 
-    val soundTransferClient = SoundTransferClient(Uri.parse(serverUrl))
-    return withContext(Dispatchers.IO) {
-        soundTransferClient.testConnection()
-    }
+            val request = Request.Builder()
+                .url(serverUrl.trim())
+                .get()
+                .build()
+
+            try {
+                client.newCall(request).execute().use { response ->
+                    response.isSuccessful
+                }
+            } catch (e: Exception) {
+                false
+            }
+        }
 }
 
 

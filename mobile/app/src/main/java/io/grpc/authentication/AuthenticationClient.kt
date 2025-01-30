@@ -91,8 +91,6 @@ class AuthenticationClient(uri: Uri, context: Context) : Closeable {
         }
     }
 
-
-
     suspend fun refreshToken()  {
         val rToken = sharedPreferences.getString("refresh_token", null)
             ?: throw Exception("No refresh token")
@@ -130,6 +128,8 @@ class AuthenticationClient(uri: Uri, context: Context) : Closeable {
             }.toList()
         }
     }
+
+
 
     suspend fun editTranscription(id : Int, newContent : String){
 

@@ -25,6 +25,7 @@ class AboutActivity : AppCompatActivity() {
         }
 
         logoWhisper = findViewById(R.id.logoWhisper)
+        tvAboutWhisker = findViewById(R.id.tvAboutWhisker)
 
         logoWhisper.post {
             logoWhisper.alpha = 0f

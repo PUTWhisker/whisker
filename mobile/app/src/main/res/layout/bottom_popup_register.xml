@@ -1,24 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/bottomSheetL"
+    android:id="@+id/bottomSheetR"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:layout_behavior="@string/bottom_sheet_behavior"
     android:background="@drawable/background_round"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    app:behavior_skipCollapsed="true"
+    app:behavior_hideable="true">
 
     <TextView
-        android:id="@+id/bottomSheetTitle"
+        android:id="@+id/RbottomSheetTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/log_in"
+        android:text="@string/register"
         android:textColor="@color/primaryDark"
         android:layout_marginTop="20dp"
         android:textSize="26sp"
         android:textAlignment="center"/>
     <TextView
-        android:id="@+id/bottomFirstUseTitle"
+        android:id="@+id/RbottomFirstUseTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/swipe_down_to_use_app_as_a_guest"
@@ -34,7 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="12dp">
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/loginInput"
+            android:id="@+id/RegisterNickInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/your_nick"
@@ -51,7 +53,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="12dp">
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/passwordInput"
+            android:id="@+id/RegisterPasswordInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/password"
@@ -63,6 +65,20 @@
             android:focusableInTouchMode="true"/>
     </com.google.android.material.textfield.TextInputLayout>
 
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/TextLayoutStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/repeatPasswordInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/repeat_password"
+            android:inputType="textPassword"
+            android:padding="16dp"
+            android:imeOptions="actionNext"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
 
     <LinearLayout
@@ -73,7 +89,7 @@
 
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCancelLog"
+            android:id="@+id/btnCancelRegister"
             android:layout_width="140dp"
             android:layout_height="60dp"
             android:text="@string/cancel"
@@ -84,10 +100,10 @@
 
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLoginConfirm"
+            android:id="@+id/btnRegisterIn"
             android:layout_width="140dp"
             android:layout_height="60dp"
-            android:text="@string/log_in"
+            android:text="@string/register"
             android:layout_marginStart="20dp"
             android:backgroundTint="@color/primaryDark"
             android:textColor="@color/primaryLight"
