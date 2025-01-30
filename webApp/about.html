@@ -37,10 +37,59 @@
             <a href="/webApp/signup.html" class="icon_button">
                 Sign up&nbsp;<span class="material-symbols-outlined">person_add</span>
             </a>
+            <div id="hamborgir" onclick="document.getElementById('side_menu').classList.toggle('hidden')">
+                <span class="material-symbols-outlined">menu</span>
+            </div>
+        </div>
+        <div id="side_menu" class="hidden">
+            <div id="hamborgir" onclick="document.getElementById('side_menu').classList.toggle('hidden')">
+                <span class="material-symbols-outlined">close</span>
+            </div>
+            <a href="/webApp/index.html" class="icon_button">
+                Transcribe <span class="material-symbols-outlined">edit_document</span>
+            </a>
+            <a href="/webApp/record.html" class="icon_button">
+                Dictate <span class="material-symbols-outlined">mic</span>
+            </a>
+            <a href="/webApp/history.html" class="icon_button locked">
+                History <span class="material-symbols-outlined">lock</span>
+            </a>
+            <a href="/webApp/swagger.html" class="icon_button locked">
+                Swagger <span class="material-symbols-outlined">lock</span>
+            </a>
+            <a href="#" class="icon_button selected">
+                About <span class="material-symbols-outlined">help</span>
+            </a>
+            <div id="blank_space"></div>
+            <a href="/webApp/login.html" class="icon_button">
+                Log in&nbsp;<span class="material-symbols-outlined">login</span>
+            </a>
+            <a href="/webApp/signup.html" class="icon_button">
+                Sign up&nbsp;<span class="material-symbols-outlined">person_add</span>
+            </a>
         </div>
         <div class="centered-message" style="display: inline-block;">
-            jEsTeŚmY sTuDeNtAmI pOlItEcHnIkI pOzNaŃsKiEj<br>To JeSt NaSzA iNżYnIeRkA kTóRa Ma WsPoMaGaĆ nIeDoSłYsZąCyCh
-            I sTuDeNtÓw DeBiLi
+            The aim of this thesis is to make the transcription process accurate and user-friendly by creating a service
+            that enables speech-to-text conversion. Communication is a key aspect of every person's life, and in today’s
+            fast-paced world, people need tools that offer intuitive and on-the-go functionality. A live speech-to-text
+            feature should address this need by providing a quick and convenient way to capture spoken information. By
+            offering it on multiple platforms, users have the ability to transcribe speech accurately anytime, anywhere,
+            and on any device, improving their quality of life. In addition to generating plain text, the system should
+            support the generation of output tailored for specific purposes, such as distinguishing between speakers in
+            a dialogue. Users should be able to rely on such tools in various contexts, whether in professional settings
+            or casual conversations. To eliminate the language barrier, the project is expected to support a variety of
+            languages and provide swift translation of the speech to English. While making the application versatile is
+            important, it is crucial to prioritize accessibility for people with disabilities. On the one hand, people
+            suffering from hearing loss would benefit from using the speech-to-text function. On the other hand, users
+            who cannot type on the standard keyboard will also gladly use the project. Bearing in mind that a large part
+            of the target group is not well acquainted with technology, it is necessary to provide a user-friendly way
+            to interact with the speech-to-text language model. Therefore, the project incorporates a modern and
+            intuitive interface, making the solution accessible to less tech-savvy users. The entire transcription
+            process should appear automated from the user’s perspective and is expected to be performed on a remote
+            server to minimize the hardware requirements on the client’s side. After receiving the transcription, users
+            should be provided with the ability to edit the output, copy it to the clipboard, or save it in multiple
+            file formats. The application is also expected to allow registered users the option to store their
+            transcription history for later access.
         </div>
     </main>
     <script src="./dist/record.js"></script>
