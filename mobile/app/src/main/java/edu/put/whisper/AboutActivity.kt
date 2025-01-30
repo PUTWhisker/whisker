@@ -27,13 +27,5 @@ class AboutActivity : AppCompatActivity() {
         logoWhisper = findViewById(R.id.logoWhisper)
         tvAboutWhisker = findViewById(R.id.tvAboutWhisker)
 
-        logoWhisper.post {
-            logoWhisper.alpha = 0f
-
-            val fadeAnimator = ObjectAnimator.ofFloat(logoWhisper, "alpha", 1f)
-            fadeAnimator.duration = 800
-            fadeAnimator.startDelay = 300
-            fadeAnimator.start()
-        }
     }
 }
