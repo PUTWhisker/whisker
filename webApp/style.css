@@ -43,7 +43,8 @@ select {
     background-color: red;
 }
 
-.button {
+.button,
+#hamborgir {
     margin: 0px 10px 0px 10px;
     border: solid black 1px;
     font-size: 15px;
@@ -61,18 +62,46 @@ select {
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
 }
 
+
+#mew {
+    margin: 0 0.5em;
+    padding-top: 0.1em;
+    height: 1em;
+    transform: scale(2);
+}
+
 #top_menu .locked {
     opacity: 0.5;
 }
 
+#hamborgir {
+    display: none;
+    border: none;
+}
+
 @media(max-aspect-ratio:1/1) {
+
     #top_menu {
-        font-size: 3vw;
+        justify-content: space-between;
+    }
+
+    #top_menu .icon_button {
+        display: none !important;
+    }
+
+    #mew_banner {
+        font-size: 2.5dvh;
+    }
+
+    #hamborgir {
+        display: block;
     }
 }
 
 #top_menu a,
-#top_menu p {
+#side_menu a,
+#top_menu p,
+#mew_banner {
     /* float: left; */
     color: white;
     background-color: rgb(86, 58, 156);
@@ -86,19 +115,27 @@ select {
     background-color: rgb(106, 66, 194);
 }
 
+#side_menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(86, 58, 156);
+    z-index: 2;
+}
+
 .selected {
     background-color: rgb(106, 66, 194) !important;
 }
 
 .centered-message {
-    position: relative;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     font-size: 1.5em;
     opacity: 0.4;
     margin-top: 5dvh;
-    text-align: center;
+    padding: 0 10vw;
+    text-align: justify;
 }
 
 #blank_space {

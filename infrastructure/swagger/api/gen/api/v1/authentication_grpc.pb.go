@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,22 +20,54 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ClientService_Login_FullMethodName               = "/authentication.ClientService/Login"
-	ClientService_Register_FullMethodName            = "/authentication.ClientService/Register"
-	ClientService_GetTranslation_FullMethodName      = "/authentication.ClientService/GetTranslation"
-	ClientService_EditTranscription_FullMethodName   = "/authentication.ClientService/EditTranscription"
-	ClientService_DeleteTranscription_FullMethodName = "/authentication.ClientService/DeleteTranscription"
+	ClientService_Login_FullMethodName                          = "/authentication.ClientService/Login"
+	ClientService_Register_FullMethodName                       = "/authentication.ClientService/Register"
+	ClientService_RefreshToken_FullMethodName                   = "/authentication.ClientService/RefreshToken"
+	ClientService_GetTranscription_FullMethodName               = "/authentication.ClientService/GetTranscription"
+	ClientService_EditTranscription_FullMethodName              = "/authentication.ClientService/EditTranscription"
+	ClientService_DeleteTranscription_FullMethodName            = "/authentication.ClientService/DeleteTranscription"
+	ClientService_GetTranslation_FullMethodName                 = "/authentication.ClientService/GetTranslation"
+	ClientService_EditTranslation_FullMethodName                = "/authentication.ClientService/EditTranslation"
+	ClientService_DeleteTranslation_FullMethodName              = "/authentication.ClientService/DeleteTranslation"
+	ClientService_GetDiarization_FullMethodName                 = "/authentication.ClientService/GetDiarization"
+	ClientService_EditDiarization_FullMethodName                = "/authentication.ClientService/EditDiarization"
+	ClientService_DeleteDiarization_FullMethodName              = "/authentication.ClientService/DeleteDiarization"
+	ClientService_SaveOnlyTranslation_FullMethodName            = "/authentication.ClientService/SaveOnlyTranslation"
+	ClientService_GetTranscriptionAndDiarization_FullMethodName = "/authentication.ClientService/GetTranscriptionAndDiarization"
 )
 
 // ClientServiceClient is the client API for ClientService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ClientServiceClient interface {
+	// Login into a user's account
 	Login(ctx context.Context, in *UserCredits, opts ...grpc.CallOption) (*LoginResponse, error)
-	Register(ctx context.Context, in *UserCredits, opts ...grpc.CallOption) (*StatusResponse, error)
-	GetTranslation(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[TextHistory], error)
-	EditTranscription(ctx context.Context, in *NewContent, opts ...grpc.CallOption) (*StatusResponse, error)
-	DeleteTranscription(ctx context.Context, in *Id, opts ...grpc.CallOption) (*StatusResponse, error)
+	// Create a new account
+	Register(ctx context.Context, in *UserCredits, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Retrieve new access and refresh token
+	RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
+	// Retrieve transcription history
+	GetTranscription(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (grpc.ServerStreamingClient[TranscriptionHistory], error)
+	// Edit transcription history
+	EditTranscription(ctx context.Context, in *NewTranscription, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Remove transcription history
+	DeleteTranscription(ctx context.Context, in *Id, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Retrieve translation history
+	GetTranslation(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (grpc.ServerStreamingClient[TranslationHistory], error)
+	// Edit translation history
+	EditTranslation(ctx context.Context, in *NewTranslation, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Remove translation history
+	DeleteTranslation(ctx context.Context, in *Id, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Retrieve diarization history
+	GetDiarization(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (grpc.ServerStreamingClient[DiarizationHistory], error)
+	// Edit diarization history
+	EditDiarization(ctx context.Context, in *NewDiarization, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Remove diarization history
+	DeleteDiarization(ctx context.Context, in *Id, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Save text's translation
+	SaveOnlyTranslation(ctx context.Context, in *TranslationText, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Retrieve transcription and diarization history
+	GetTranscriptionAndDiarization(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Combined], error)
 }
 
 type clientServiceClient struct {
@@ -55,9 +88,9 @@ func (c *clientServiceClient) Login(ctx context.Context, in *UserCredits, opts .
 	return out, nil
 }
 
-func (c *clientServiceClient) Register(ctx context.Context, in *UserCredits, opts ...grpc.CallOption) (*StatusResponse, error) {
+func (c *clientServiceClient) Register(ctx context.Context, in *UserCredits, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(StatusResponse)
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, ClientService_Register_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -65,13 +98,23 @@ func (c *clientServiceClient) Register(ctx context.Context, in *UserCredits, opt
 	return out, nil
 }
 
-func (c *clientServiceClient) GetTranslation(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[TextHistory], error) {
+func (c *clientServiceClient) RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ClientService_ServiceDesc.Streams[0], ClientService_GetTranslation_FullMethodName, cOpts...)
+	out := new(RefreshTokenResponse)
+	err := c.cc.Invoke(ctx, ClientService_RefreshToken_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[Empty, TextHistory]{ClientStream: stream}
+	return out, nil
+}
+
+func (c *clientServiceClient) GetTranscription(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (grpc.ServerStreamingClient[TranscriptionHistory], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &ClientService_ServiceDesc.Streams[0], ClientService_GetTranscription_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[QueryParamethers, TranscriptionHistory]{ClientStream: stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -82,11 +125,11 @@ func (c *clientServiceClient) GetTranslation(ctx context.Context, in *Empty, opt
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type ClientService_GetTranslationClient = grpc.ServerStreamingClient[TextHistory]
+type ClientService_GetTranscriptionClient = grpc.ServerStreamingClient[TranscriptionHistory]
 
-func (c *clientServiceClient) EditTranscription(ctx context.Context, in *NewContent, opts ...grpc.CallOption) (*StatusResponse, error) {
+func (c *clientServiceClient) EditTranscription(ctx context.Context, in *NewTranscription, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(StatusResponse)
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, ClientService_EditTranscription_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -94,9 +137,9 @@ func (c *clientServiceClient) EditTranscription(ctx context.Context, in *NewCont
 	return out, nil
 }
 
-func (c *clientServiceClient) DeleteTranscription(ctx context.Context, in *Id, opts ...grpc.CallOption) (*StatusResponse, error) {
+func (c *clientServiceClient) DeleteTranscription(ctx context.Context, in *Id, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(StatusResponse)
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, ClientService_DeleteTranscription_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -104,15 +147,145 @@ func (c *clientServiceClient) DeleteTranscription(ctx context.Context, in *Id, o
 	return out, nil
 }
 
+func (c *clientServiceClient) GetTranslation(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (grpc.ServerStreamingClient[TranslationHistory], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &ClientService_ServiceDesc.Streams[1], ClientService_GetTranslation_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[QueryParamethers, TranslationHistory]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ClientService_GetTranslationClient = grpc.ServerStreamingClient[TranslationHistory]
+
+func (c *clientServiceClient) EditTranslation(ctx context.Context, in *NewTranslation, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, ClientService_EditTranslation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *clientServiceClient) DeleteTranslation(ctx context.Context, in *Id, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, ClientService_DeleteTranslation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *clientServiceClient) GetDiarization(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (grpc.ServerStreamingClient[DiarizationHistory], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &ClientService_ServiceDesc.Streams[2], ClientService_GetDiarization_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[QueryParamethers, DiarizationHistory]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ClientService_GetDiarizationClient = grpc.ServerStreamingClient[DiarizationHistory]
+
+func (c *clientServiceClient) EditDiarization(ctx context.Context, in *NewDiarization, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, ClientService_EditDiarization_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *clientServiceClient) DeleteDiarization(ctx context.Context, in *Id, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, ClientService_DeleteDiarization_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *clientServiceClient) SaveOnlyTranslation(ctx context.Context, in *TranslationText, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, ClientService_SaveOnlyTranslation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *clientServiceClient) GetTranscriptionAndDiarization(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Combined], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &ClientService_ServiceDesc.Streams[3], ClientService_GetTranscriptionAndDiarization_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[QueryParamethers, Combined]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ClientService_GetTranscriptionAndDiarizationClient = grpc.ServerStreamingClient[Combined]
+
 // ClientServiceServer is the server API for ClientService service.
 // All implementations should embed UnimplementedClientServiceServer
 // for forward compatibility.
 type ClientServiceServer interface {
+	// Login into a user's account
 	Login(context.Context, *UserCredits) (*LoginResponse, error)
-	Register(context.Context, *UserCredits) (*StatusResponse, error)
-	GetTranslation(*Empty, grpc.ServerStreamingServer[TextHistory]) error
-	EditTranscription(context.Context, *NewContent) (*StatusResponse, error)
-	DeleteTranscription(context.Context, *Id) (*StatusResponse, error)
+	// Create a new account
+	Register(context.Context, *UserCredits) (*emptypb.Empty, error)
+	// Retrieve new access and refresh token
+	RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error)
+	// Retrieve transcription history
+	GetTranscription(*QueryParamethers, grpc.ServerStreamingServer[TranscriptionHistory]) error
+	// Edit transcription history
+	EditTranscription(context.Context, *NewTranscription) (*emptypb.Empty, error)
+	// Remove transcription history
+	DeleteTranscription(context.Context, *Id) (*emptypb.Empty, error)
+	// Retrieve translation history
+	GetTranslation(*QueryParamethers, grpc.ServerStreamingServer[TranslationHistory]) error
+	// Edit translation history
+	EditTranslation(context.Context, *NewTranslation) (*emptypb.Empty, error)
+	// Remove translation history
+	DeleteTranslation(context.Context, *Id) (*emptypb.Empty, error)
+	// Retrieve diarization history
+	GetDiarization(*QueryParamethers, grpc.ServerStreamingServer[DiarizationHistory]) error
+	// Edit diarization history
+	EditDiarization(context.Context, *NewDiarization) (*emptypb.Empty, error)
+	// Remove diarization history
+	DeleteDiarization(context.Context, *Id) (*emptypb.Empty, error)
+	// Save text's translation
+	SaveOnlyTranslation(context.Context, *TranslationText) (*emptypb.Empty, error)
+	// Retrieve transcription and diarization history
+	GetTranscriptionAndDiarization(*QueryParamethers, grpc.ServerStreamingServer[Combined]) error
 }
 
 // UnimplementedClientServiceServer should be embedded to have
@@ -125,17 +298,44 @@ type UnimplementedClientServiceServer struct{}
 func (UnimplementedClientServiceServer) Login(context.Context, *UserCredits) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
-func (UnimplementedClientServiceServer) Register(context.Context, *UserCredits) (*StatusResponse, error) {
+func (UnimplementedClientServiceServer) Register(context.Context, *UserCredits) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
-func (UnimplementedClientServiceServer) GetTranslation(*Empty, grpc.ServerStreamingServer[TextHistory]) error {
-	return status.Errorf(codes.Unimplemented, "method GetTranslation not implemented")
+func (UnimplementedClientServiceServer) RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RefreshToken not implemented")
 }
-func (UnimplementedClientServiceServer) EditTranscription(context.Context, *NewContent) (*StatusResponse, error) {
+func (UnimplementedClientServiceServer) GetTranscription(*QueryParamethers, grpc.ServerStreamingServer[TranscriptionHistory]) error {
+	return status.Errorf(codes.Unimplemented, "method GetTranscription not implemented")
+}
+func (UnimplementedClientServiceServer) EditTranscription(context.Context, *NewTranscription) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EditTranscription not implemented")
 }
-func (UnimplementedClientServiceServer) DeleteTranscription(context.Context, *Id) (*StatusResponse, error) {
+func (UnimplementedClientServiceServer) DeleteTranscription(context.Context, *Id) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTranscription not implemented")
+}
+func (UnimplementedClientServiceServer) GetTranslation(*QueryParamethers, grpc.ServerStreamingServer[TranslationHistory]) error {
+	return status.Errorf(codes.Unimplemented, "method GetTranslation not implemented")
+}
+func (UnimplementedClientServiceServer) EditTranslation(context.Context, *NewTranslation) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EditTranslation not implemented")
+}
+func (UnimplementedClientServiceServer) DeleteTranslation(context.Context, *Id) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTranslation not implemented")
+}
+func (UnimplementedClientServiceServer) GetDiarization(*QueryParamethers, grpc.ServerStreamingServer[DiarizationHistory]) error {
+	return status.Errorf(codes.Unimplemented, "method GetDiarization not implemented")
+}
+func (UnimplementedClientServiceServer) EditDiarization(context.Context, *NewDiarization) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EditDiarization not implemented")
+}
+func (UnimplementedClientServiceServer) DeleteDiarization(context.Context, *Id) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteDiarization not implemented")
+}
+func (UnimplementedClientServiceServer) SaveOnlyTranslation(context.Context, *TranslationText) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveOnlyTranslation not implemented")
+}
+func (UnimplementedClientServiceServer) GetTranscriptionAndDiarization(*QueryParamethers, grpc.ServerStreamingServer[Combined]) error {
+	return status.Errorf(codes.Unimplemented, "method GetTranscriptionAndDiarization not implemented")
 }
 func (UnimplementedClientServiceServer) testEmbeddedByValue() {}
 
@@ -193,19 +393,37 @@ func _ClientService_Register_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ClientService_GetTranslation_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(Empty)
+func _ClientService_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefreshTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClientServiceServer).RefreshToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ClientService_RefreshToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClientServiceServer).RefreshToken(ctx, req.(*RefreshTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ClientService_GetTranscription_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(QueryParamethers)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ClientServiceServer).GetTranslation(m, &grpc.GenericServerStream[Empty, TextHistory]{ServerStream: stream})
+	return srv.(ClientServiceServer).GetTranscription(m, &grpc.GenericServerStream[QueryParamethers, TranscriptionHistory]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type ClientService_GetTranslationServer = grpc.ServerStreamingServer[TextHistory]
+type ClientService_GetTranscriptionServer = grpc.ServerStreamingServer[TranscriptionHistory]
 
 func _ClientService_EditTranscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NewContent)
+	in := new(NewTranscription)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -217,7 +435,7 @@ func _ClientService_EditTranscription_Handler(srv interface{}, ctx context.Conte
 		FullMethod: ClientService_EditTranscription_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClientServiceServer).EditTranscription(ctx, req.(*NewContent))
+		return srv.(ClientServiceServer).EditTranscription(ctx, req.(*NewTranscription))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -240,6 +458,129 @@ func _ClientService_DeleteTranscription_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ClientService_GetTranslation_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(QueryParamethers)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ClientServiceServer).GetTranslation(m, &grpc.GenericServerStream[QueryParamethers, TranslationHistory]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ClientService_GetTranslationServer = grpc.ServerStreamingServer[TranslationHistory]
+
+func _ClientService_EditTranslation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NewTranslation)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClientServiceServer).EditTranslation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ClientService_EditTranslation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClientServiceServer).EditTranslation(ctx, req.(*NewTranslation))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ClientService_DeleteTranslation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Id)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClientServiceServer).DeleteTranslation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ClientService_DeleteTranslation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClientServiceServer).DeleteTranslation(ctx, req.(*Id))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ClientService_GetDiarization_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(QueryParamethers)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ClientServiceServer).GetDiarization(m, &grpc.GenericServerStream[QueryParamethers, DiarizationHistory]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ClientService_GetDiarizationServer = grpc.ServerStreamingServer[DiarizationHistory]
+
+func _ClientService_EditDiarization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NewDiarization)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClientServiceServer).EditDiarization(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ClientService_EditDiarization_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClientServiceServer).EditDiarization(ctx, req.(*NewDiarization))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ClientService_DeleteDiarization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Id)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClientServiceServer).DeleteDiarization(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ClientService_DeleteDiarization_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClientServiceServer).DeleteDiarization(ctx, req.(*Id))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ClientService_SaveOnlyTranslation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TranslationText)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ClientServiceServer).SaveOnlyTranslation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ClientService_SaveOnlyTranslation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ClientServiceServer).SaveOnlyTranslation(ctx, req.(*TranslationText))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ClientService_GetTranscriptionAndDiarization_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(QueryParamethers)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ClientServiceServer).GetTranscriptionAndDiarization(m, &grpc.GenericServerStream[QueryParamethers, Combined]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ClientService_GetTranscriptionAndDiarizationServer = grpc.ServerStreamingServer[Combined]
+
 // ClientService_ServiceDesc is the grpc.ServiceDesc for ClientService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -256,6 +597,10 @@ var ClientService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ClientService_Register_Handler,
 		},
 		{
+			MethodName: "RefreshToken",
+			Handler:    _ClientService_RefreshToken_Handler,
+		},
+		{
 			MethodName: "EditTranscription",
 			Handler:    _ClientService_EditTranscription_Handler,
 		},
@@ -263,11 +608,46 @@ var ClientService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "DeleteTranscription",
 			Handler:    _ClientService_DeleteTranscription_Handler,
 		},
+		{
+			MethodName: "EditTranslation",
+			Handler:    _ClientService_EditTranslation_Handler,
+		},
+		{
+			MethodName: "DeleteTranslation",
+			Handler:    _ClientService_DeleteTranslation_Handler,
+		},
+		{
+			MethodName: "EditDiarization",
+			Handler:    _ClientService_EditDiarization_Handler,
+		},
+		{
+			MethodName: "DeleteDiarization",
+			Handler:    _ClientService_DeleteDiarization_Handler,
+		},
+		{
+			MethodName: "SaveOnlyTranslation",
+			Handler:    _ClientService_SaveOnlyTranslation_Handler,
+		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
+			StreamName:    "GetTranscription",
+			Handler:       _ClientService_GetTranscription_Handler,
+			ServerStreams: true,
+		},
+		{
 			StreamName:    "GetTranslation",
 			Handler:       _ClientService_GetTranslation_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GetDiarization",
+			Handler:       _ClientService_GetDiarization_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GetTranscriptionAndDiarization",
+			Handler:       _ClientService_GetTranscriptionAndDiarization_Handler,
 			ServerStreams: true,
 		},
 	},

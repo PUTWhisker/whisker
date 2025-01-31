@@ -9,8 +9,6 @@ window.onload = function () {
 }
 
 async function processFile() {
-    document.getElementById("transcription_result").textContent = ""
-    document.getElementById("translation_result").textContent = ""
     console.log("Trying to execute translation");
     let source_language = document.getElementById("choose_lang").value
     if (source_language == "Choose language") {
@@ -30,9 +28,9 @@ async function processFile() {
                 return;
             }
             const transcriptionResult = document.getElementById("transcription_result");
-            transcriptionResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
+            transcriptionResult.innerHTML = 'Loading... <img class="loading_icon" src="assets/sun.gif"></img>';
             const translationResult = document.getElementById("translation_result");
-            translationResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
+            translationResult.innerHTML = 'Loading... <img class="loading_icon" src="assets/sun.gif"></img>';
             let answer = sendFileTranslation(uploadedFile.files[0], source_language, translate_language)
             let receivedTranscription = false
             for await (const res of answer) {
@@ -45,6 +43,8 @@ async function processFile() {
                 }
             }
         } else if (document.getElementById("role_division").checked) {
+            const transcriptionResult = document.getElementById("transcription_result");
+            transcriptionResult.innerHTML = 'Loading... <img class="loading_icon" src="assets/sun.gif"></img>';
             let answer = await diarizateFile(uploadedFile.files[0], source_language)
             let speakers = answer.getSpeakernameList()
             let line = answer.getTextList()
@@ -54,6 +54,8 @@ async function processFile() {
             }
         } else {
             console.log("Trying to execute transcription")
+            const transcriptionResult = document.getElementById("transcription_result");
+            transcriptionResult.innerHTML = 'Loading... <img class="loading_icon" src="assets/sun.gif"></img>';
             answer = await sendFile(uploadedFile.files[0], source_language)
             console.log(answer)
             document.getElementById("transcription_result").textContent = answer.getText()

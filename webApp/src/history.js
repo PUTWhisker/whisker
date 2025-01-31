@@ -10,47 +10,51 @@ const { getTranscription,
 
 const { connectionTest } = require('./send-file.js')
 
-const flags = {
-    'pl': '🇵🇱',
-    'en': '🇬🇧',
-    'es-ES': '🇪🇸'
+const countryNames = {
+    "Polish": "pl",
+    "en": "gb",
 };
+
+function getCountry(langCode) {
+    let countryCode = langCode;
+    if (countryNames[langCode] !== undefined) countryCode = countryNames[langCode];
+    if (langCode.includes('-')) countryCode = getCountry(langCode.split('-')[1]);
+    return countryCode.toLowerCase();
+}
 
 window.onload = async function () {
     connectionTest()
     let translationHistory = await getTranslationHistory();
     let transcriptionHistory = await getTranscriptionHistory();
     let diarizationHistory = await getDiarizationHistory(); // TODO ZRUPCIE TO ŻEBY DZIAŁAŁO
+    console.log(translationHistory);
+    console.log(transcriptionHistory);
+    console.log(diarizationHistory);
+    const njGlobals = {
+        getCountry: getCountry,
+        clipString: clipString,
+        buildDiarizationText: buildDiarizationText,
+        timestampToDate: timestampToDate
+    }
     if (translationHistory.length > 0) {
         translationHistory.forEach(element => {
-            const html = njTemplate.render(
-                { event: element, mode: "translation", clipString: clipString, timestampToDate: timestampToDate } // escapeQuotes: escapeQuotes,
-            );
+            const html = njTemplate.render(Object.assign({}, njGlobals, { event: element, mode: "translation" }));
             document.getElementById("translation_history").innerHTML += html;
         });
     } else {
         document.getElementById("translation_history").innerHTML = emptyHistory;
     }
-    if (transcriptionHistory.length > 0 /*|| diarizationHistory.length > 0*/) {
+    if (transcriptionHistory.length > 0 || diarizationHistory.length > 0) {
         transcriptionHistory.forEach(element => {
-            const html = njTemplate.render(
-                { event: element, mode: "transcription", clipString: clipString, timestampToDate: timestampToDate } // escapeQuotes: escapeQuotes,
-            );
+            const html = njTemplate.render(Object.assign({}, njGlobals, { event: element, mode: "transcription" }));
+            document.getElementById("transcription_history").innerHTML += html;
+        });
+        diarizationHistory.forEach(element => {
+            const html = njTemplate.render(Object.assign({}, njGlobals, { event: element, mode: "diarization" }));
             document.getElementById("transcription_history").innerHTML += html;
         });
     } else {
         document.getElementById("transcription_history").innerHTML = emptyHistory;
-    }
-    console.log(diarizationHistory)
-    if (diarizationHistory.length > 0) {
-        diarizationHistory.forEach(element => {
-            const html = njTemplate.render(
-                { event: element, flags: "diarization", clipString: clipString, timestampToDate: timestampToDate }
-            );
-            document.getElementById("diarization_history").innerHTML += html;
-        });
-    } else {
-        document.getElementById("diarization_history").innerHTML = emptyHistory;
     }
 }
 
