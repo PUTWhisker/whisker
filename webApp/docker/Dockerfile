@@ -16,5 +16,5 @@ COPY --from=webapp /webApp /usr/share/nginx/html/webApp
 
 COPY ./swagger /usr/share/nginx/html/swagger
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 

@@ -33,6 +33,7 @@ export function connectionTest() { // Verify whether we can connect with the Whi
 
 export function sendFile(file, source_language) { // Send file to the server and return the answer
     console.log("Sending file for transcription")
+    console.log(source_language)
     let reader = new FileReader()
     console.log(file)
     reader.readAsArrayBuffer(file)

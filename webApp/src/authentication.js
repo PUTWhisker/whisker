@@ -51,7 +51,6 @@ export async function *getTranscription(start_time, end_time, limit=10) {
     if (token) {
         metadata = {"jwt": token}
     }
-    console.log(metadata)
     const stream = authenticationClient.getTranscription(request, metadata)
     const responseQueue = []
     let resolveQueue = null;
@@ -66,7 +65,6 @@ export async function *getTranscription(start_time, end_time, limit=10) {
     });
 
     stream.on('end', () => {
-        console.log('Received everything, stream ended.');
         streamEnded = true;
         if (resolveQueue) {
             resolveQueue();
@@ -155,7 +153,6 @@ export async function *getTranslation(start_time, end_time, limit) {
         }
     })
     stream.on('end', () => {
-        console.log('Received everything, stream ended.')
         streamEnded = true
         if (resolveQueue) {
             resolveQueue()
@@ -246,7 +243,6 @@ export async function *getDiarization(start_time, end_time, limit) {
         }
     })
     stream.on('end', () => {
-        console.log('Received everything, stream ended.')
         streamEnded = true
         if (resolveQueue) {
             resolveQueue()

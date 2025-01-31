@@ -11,7 +11,7 @@ window.onload = function () {
 async function processFile() {
     console.log("Trying to execute translation");
     let source_language = document.getElementById("choose_lang").value
-    if (source_language == "Choose language") {
+    if (source_language == "Detect") {
         source_language = ""
     }
     let uploadedFile = document.getElementById("upload")
@@ -34,7 +34,6 @@ async function processFile() {
             let answer = sendFileTranslation(uploadedFile.files[0], source_language, translate_language)
             let receivedTranscription = false
             for await (const res of answer) {
-                console.log(res)
                 if (!receivedTranscription) {
                     document.getElementById("transcription_result").textContent = res
                     receivedTranscription = true

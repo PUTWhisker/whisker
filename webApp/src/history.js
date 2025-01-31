@@ -27,9 +27,6 @@ window.onload = async function () {
     let translationHistory = await getTranslationHistory();
     let transcriptionHistory = await getTranscriptionHistory();
     let diarizationHistory = await getDiarizationHistory(); // TODO ZRUPCIE TO ŻEBY DZIAŁAŁO
-    console.log(translationHistory);
-    console.log(transcriptionHistory);
-    console.log(diarizationHistory);
     const njGlobals = {
         getCountry: getCountry,
         clipString: clipString,
@@ -76,13 +73,11 @@ async function editTranscriptionEvent() {
     let id = 1;
     let newTranscription = "Here is a text of an edited transcription";
     let result = await editTranscription(id, newTranscription);
-    console.log(result);
 }
 
 async function deleteTranscriptionEvent() {
     let id = 1;
     let result = await deleteTranscription(id);
-    console.log(result);
 }
 
 async function getTranslationHistory() {
@@ -106,13 +101,11 @@ async function editTranslationEvent() {
     let edit_transcription = true;
     let edit_translation = true;
     let result = await editTranslation(id, transcription, translation, edit_transcription, edit_translation);
-    console.log(result);
 }
 
 async function deleteTranslationEvent() {
     let id = 1;
     let result = await deleteTranslation(id);
-    console.log(result);
 }
 
 async function getDiarizationHistory() {
@@ -134,13 +127,11 @@ async function editDiarizationEvent() {
     let line = ["AAAAA", "BBBBB"];
     let speaker = ["SPEK1", "SPOK2"];
     let result = await editDiarization(id, line, speaker);
-    console.log(result);
 }
 
 async function deleteDiarizationEvent() {
     let id = 1;
     let result = await deleteDiarization(id);
-    console.log(result);
 }
 
 function timestampToDate(timestamp) {

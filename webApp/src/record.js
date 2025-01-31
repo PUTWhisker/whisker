@@ -12,22 +12,6 @@ let isSending = false
 let audioContext;
 let myAudioWorkletNode
 
-const blob = new Blob([`
-    class MyProcessor extends AudioWorkletProcessor {
-        process(inputs, outputs, parameters) {
-            const input = inputs[0];
-            if (input && input.length > 0) {
-                this.port.postMessage(input[0]);
-            }
-            return true;
-        }
-    }
-    registerProcessor('my-processor', MyProcessor);
-`], { type: 'application/javascript' }
-)
-const url = URL.createObjectURL(blob)
-
-
 window.onload = async function () {
     connectionTest()
     resultField = document.getElementById("transcription_result")
@@ -41,17 +25,30 @@ async function changeMicState(microphone) {
     // icon.innerText = recording ? 'stop_circle' : 'mic';
     if (canRecord) {
         const languages = document.getElementById("choose_record_lang");
-        console.log(LANGUAGES)
         let selectedLanguage = languages.options[languages.selectedIndex].text;
         if (LANGUAGES.hasOwnProperty(selectedLanguage)) {
             selectedLanguage = LANGUAGES[selectedLanguage]
         } else {
             selectedLanguage = ""
         }
-        console.log(selectedLanguage)
         recording_dots.classList.toggle('hidden');
         transcriptReceived = []
         transcriptIter = 0
+
+        const blob = new Blob([`
+            class MyProcessor extends AudioWorkletProcessor {
+                process(inputs, outputs, parameters) {
+                    const input = inputs[0];
+                    if (input && input.length > 0) {
+                        this.port.postMessage(input[0]);
+                    }
+                    return true;
+                }
+            }
+            registerProcessor('my-processor', MyProcessor);
+        `], { type: 'application/javascript' }
+        )
+        const url = URL.createObjectURL(blob)        
         audioContext = new AudioContext( { sampleRate: 44100 })
         await audioContext.audioWorklet.addModule(url)
         myAudioWorkletNode = new AudioWorkletNode(audioContext, 'my-processor')
@@ -60,14 +57,13 @@ async function changeMicState(microphone) {
         recording_dots.classList.toggle('hidden');
         stopRecording(audioContext, myAudioWorkletNode)
     } else {
-        console.log("Poprzednia sesja jeszcze sie transkrybuje, poczekaj chwilkę :3")
+        alert("Previous session is still active, please wait")
     }
   }
 
 
 async function recordAndSend(audioContext, myAudioWorkletNode, selectedLanguage) {
     if (canRecord) {
-        console.log("button pressed")
         const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1} })
         const source = audioContext.createMediaStreamSource(stream)
         source.connect(myAudioWorkletNode)
@@ -79,7 +75,6 @@ async function recordAndSend(audioContext, myAudioWorkletNode, selectedLanguage)
 
         shouldRecord = true
         canRecord = false
-        console.log("Before metadata")
         let sessionId = await getSessionId()
         let metadata = {"session_id": sessionId}
 
@@ -95,12 +90,10 @@ async function recordAndSend(audioContext, myAudioWorkletNode, selectedLanguage)
             if (!isSending && recordedChunks.length > 0) {
                 isSending = true
                 const currentChunk = recordedChunks.shift(0)
-                console.log("Wymsyłam")
                 response = await transcribeLiveWeb(currentChunk, selectedLanguage, metadata)
                 printResult(response)
                 isSending = false
             } else if (!shouldRecord && recordedChunks.length == 0 && !isSending) {
-                console.log("Que?")
                 canRecord = true
                 clearInterval(sendingInterval)
                 return
@@ -113,14 +106,11 @@ function stopRecording(audioContext, myAudioWorkletNode) {
     shouldRecord = false
     myAudioWorkletNode.disconnect()
     audioContext.close()
-    console.log("Recording finished")
 }
 
 
 function printResult(response) {
     resultField.textContent = ""
-    console.log(response.getText())
-    console.log(response.getNewChunk())
     transcriptReceived[transcriptIter] = response.getText()
     for (const entry of transcriptReceived) {
         resultField.textContent += entry

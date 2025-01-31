@@ -1,4 +1,4 @@
 {
-    "host": "whisper.cs.put.poznan.pl",
+    "host": "http://whisper.cs.put.poznan.pl",
     "port": 80
 }
