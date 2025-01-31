@@ -5,6 +5,7 @@
 # Install necessery libraries
 `npm install`
 
-# Generate code that can be used in web browser
+# Generate code that can be used in web browser (When changing anything in a code, this step need to be repeated)
 `npx webpack --mode=development`
 
+# To change destination address, modify ./src/configuration.json
