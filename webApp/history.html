@@ -118,6 +118,30 @@
                 About <span class="material-symbols-outlined">help</span>
             </a>
             <div id="blank_space"></div>
+            <div id="hamborgir" onclick="document.getElementById('side_menu').classList.toggle('hidden')">
+                <span class="material-symbols-outlined">menu</span>
+            </div>
+        </div>
+        <div id="side_menu" class="hidden">
+            <div id="hamborgir" onclick="document.getElementById('side_menu').classList.toggle('hidden')">
+                <span class="material-symbols-outlined">close</span>
+            </div>
+            <a href="/webApp/index.html" class="icon_button">
+                Transcribe <span class="material-symbols-outlined">edit_document</span>
+            </a>
+            <a href="/webApp/record.html" class="icon_button">
+                Dictate <span class="material-symbols-outlined">mic</span>
+            </a>
+            <a href="#" class="icon_button selected">
+                History <span class="material-symbols-outlined">lock</span>
+            </a>
+            <a href="/webApp/swagger.html" class="icon_button locked">
+                Swagger <span class="material-symbols-outlined">lock</span>
+            </a>
+            <a href="/webApp/about.html" class="icon_button">
+                About <span class="material-symbols-outlined">help</span>
+            </a>
+            <div id="blank_space"></div>
         </div>
         <div class="header selected" id="navigation">
             <div class="tab_button selected" onclick="openTab(this, 'transcription')">
