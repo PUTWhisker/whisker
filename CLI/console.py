@@ -34,7 +34,7 @@ class ConsolePrinter:
 
 
     def _errorMessage(self, e: Exception):
-        if e is grpc.RpcError:
+        if isinstance(e, grpc.RpcError):
             return # It is already handled in GrpcClient
         else:
             print(f"This is an unhandled exception: {e}")

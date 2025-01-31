@@ -53,9 +53,12 @@ class GrpcClient:
 
 
     def _errorMessage(self, grpcError: grpc.RpcError):
-        print(f"Grpc connection failure: {grpcError.details()}") 
-        print(f"{grpcError.code()}") 
-        print(f"{grpcError.debug_error_string()}") 
+        if grpcError.code() == grpc.StatusCode.UNAVAILABLE or grpcError.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+            print("\nCould not connect to the target server.")
+        else: 
+            print(f"Grpc connection failure: {grpcError.details()}") 
+            print(f"{grpcError.code()}") 
+            print(f"{grpcError.debug_error_string()}") 
 
 
     def _errorUnaryHandler(func: callable):
@@ -114,7 +117,8 @@ class GrpcClient:
     async def testConnection(self, seed: str) -> Union[bool, grpc.RpcError]:
         try:
             response = await self.stub.TestConnection(  # sending generated number
-                Variables.TextMessage(text=seed)
+                Variables.TextMessage(text=seed),
+                timeout=5
             )
             return response
         except Exception as e:

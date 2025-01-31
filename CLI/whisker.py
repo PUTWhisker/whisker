@@ -10,6 +10,7 @@ import logging
 
 _cleanup_coroutines = []  # Needed for asyncio graceful shutdown
 
+_file_extensions = [".mp3", ".wav"]
 
 # Read user's input flags and arguments
 def parse() -> argparse.ArgumentParser:
@@ -21,10 +22,6 @@ def parse() -> argparse.ArgumentParser:
         "--record",
         action="store_true",
         help="Set true to record audio from microphone, false to input audio file",
-    )
-
-    parser.add_argument(
-        "--local", action="store_true", help="Use this flag to use local Whisper server"
     )
 
     parser.add_argument(
@@ -46,7 +43,7 @@ def parse() -> argparse.ArgumentParser:
     parser.add_argument(
         "--host",
         type=str,
-        default="127.0.0.1",
+        default="whisper.cs.put.poznan.pl",
         metavar="APIserver IP",
         help="Set it to the server's IP address (only available when using --local flag)",
     )
@@ -54,7 +51,7 @@ def parse() -> argparse.ArgumentParser:
     parser.add_argument(
         "--port",
         type=str,
-        default=50051,
+        default=80,
         metavar="",
         help="Set it to the server's listening port number (only available when using --local flag)",
     )
@@ -120,15 +117,9 @@ async def main(parser: argparse.ArgumentParser):
     args = parser.parse_args()
     env = '.env'
     load_dotenv(env)
-    # read server's details
-    if args.local:
-        logging.info("local option")
-        host = args.host
-        port = args.port
-    else:
-        logging.info("server option")
-        host = "100.80.80.156"  # Here insert pp server address
-        port = args.port
+
+    host = args.host
+    port = args.port
 
     # Check if file exists if it was passed as an argument
     if args.fileName is not None:
@@ -160,6 +151,9 @@ async def main(parser: argparse.ArgumentParser):
     elif (
         args.fileName is not None
     ):  # If there is a valid audio file as an argument, initiate SendSoundFile method
+        if not verifyExtension(args.fileName):
+            print("File type not supported")
+            return
         with open(args.fileName, "rb") as file:
             audio = file.read()  # read audio as bytes
         if args.diarization:
@@ -176,6 +170,13 @@ async def main(parser: argparse.ArgumentParser):
         )
     return
 
+
+def verifyExtension(fileName: str):
+    for extension in _file_extensions:
+        if fileName.endswith(extension):
+            return True
+    return False
+    
 
 if __name__ == "__main__":
     parser = parse()
