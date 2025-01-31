@@ -25,7 +25,6 @@ class TranscriptionData():
                  translate:str="",
                  diarizate:bool=False
                  ):
-        # TODO: validate source and translate language
         self.transcription = transcription
         self.audio = audio
         self.previousAudio = previousAudio

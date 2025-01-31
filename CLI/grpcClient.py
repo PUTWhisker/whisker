@@ -52,7 +52,7 @@ class GrpcClient:
         self.refreshToken = os.getenv("REFRESH_TOKEN")
 
 
-    def _errorMessage(self, grpcError: grpc.RpcError): #TODO: Here can handle server's errors
+    def _errorMessage(self, grpcError: grpc.RpcError):
         print(f"Grpc connection failure: {grpcError.details()}") 
         print(f"{grpcError.code()}") 
         print(f"{grpcError.debug_error_string()}") 
@@ -153,7 +153,7 @@ class GrpcClient:
             raise e
         
 
-    @_errorUnaryHandler
+    @_errorStreamHandler
     async def translateFile(self, audioFile: bytes) -> Union[bool, grpc.RpcError]:
         try:
             metadata = (

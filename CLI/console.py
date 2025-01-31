@@ -1,4 +1,4 @@
-#TODO: waiting animation for SendFileTranslation and diarization doesn't work for reasons
+
 from grpcClient import GrpcClient
 from getpass import getpass
 from queryParameters import QueryParameters
@@ -91,7 +91,7 @@ class ConsolePrinter:
         if self.language is None:
             print(f"Detected transcription language: {scripts.detected_language}")
         for speaker, text in zip(speakers, texts):
-            print(f"\033[1m\033[38;2;{speakerColors[speaker][0]};{speakerColors[speaker][1]};{speakerColors[speaker][2]}m{speaker}\033[0m: {text}")
+            print(f"\033[1m\033[38;2;{speakerColors[speaker][0]};{speakerColors[speaker][1]};{speakerColors[speaker][2]}m{speaker}: {text}")
 
 
     @_errorHandler
@@ -159,7 +159,7 @@ class ConsolePrinter:
             terminalWidth, _ = os.get_terminal_size()
             print(" " * terminalWidth, end="\r", flush=True)
             print(transcription[iter], end="\r", flush=True)
-            if response.new_chunk == "True":
+            if response.new_chunk is True:
                 iter += 1
                 transcription.append("")
                 print()

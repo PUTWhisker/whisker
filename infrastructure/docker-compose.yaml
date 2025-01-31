@@ -6,6 +6,7 @@ services:
       dockerfile: Dockerfile
     environment:
      - HUGGING_FACE_API_KEY="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"
+     - ENABLE_CUDA=False
     ports:
      - 7070:7070
 

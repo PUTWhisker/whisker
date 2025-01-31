@@ -8,20 +8,32 @@ import logging
 import time
 import os
 from diarizate import Clip
+import torch
+
 
 class FasterWhisperHandler:
 
     def __init__(
         self,
         whisperSize:str,
+        cuda:str
     ):
         self.whisperSize = whisperSize
         super(FasterWhisperHandler, self).__init__()
-        self.model = WhisperModel(
-            self.whisperSize, device="cpu", compute_type="float32", cpu_threads=8
-        )
+        if cuda.lower() == "true":
+            if torch.cuda.is_available():
+                self.model = WhisperModel(
+                    self.whisperSize, device="cuda", compute_type="float32"
+                )
+                print("Cuda option enabled")
+            else:
+                print("Could not initiate Faster-Whisper model with cuda.")
+        else:
+            self.model = WhisperModel(
+                self.whisperSize, device="cpu", compute_type="float32", cpu_threads=8
+            )
+            print("CPU option enabled")
         self.silenceLength = 1.5
-        
 
     def preprocessStreaming(
         self,
@@ -74,7 +86,7 @@ class FasterWhisperHandler:
                 "[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text)
             )
             response += segment.text
-        audio.unlink()  # TODO: Instead of creating and deleting file all the time, just do it on one and delete it after all translations
+        audio.unlink()
         return response
     
 

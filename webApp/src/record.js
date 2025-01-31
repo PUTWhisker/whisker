@@ -60,6 +60,6 @@ window.onload = async function() {
         myAudioWorkletNode.disconnect()
         audioContext.close()
         console.log("Koniec nagrywania")
-        //TODO: Here send the remaining of the recording
+
     })
 }
