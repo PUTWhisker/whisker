@@ -20,8 +20,8 @@ const { TranscriptionHistory,
         NewDiarization,
         QueryParamethers } = require('../proto/authentication/authentication_pb.js')
 
-const soundClient = new SoundServiceClient('http://127.0.0.1:50051')
-const authenticationClient = new ClientServiceClient('http://127.0.0.1:50051')
+const soundClient = new SoundServiceClient('http://whisper.cs.put.poznan.pl:80')
+const authenticationClient = new ClientServiceClient('http://whisper.cs.put.poznan.pl:80')
 
 module.exports = {  soundClient, 
                     TextMessage, 

@@ -40,7 +40,7 @@ class ConsolePrinter:
             except grpc.RpcError as grpcError:
                 print(f"Grpc connection failure: {grpcError.details()}") # <- custom message sent by server
                 print(f"{grpcError.code()}") # <- one of the 17 rpcError status codes
-                print(f"{grpcError.debug_error_string()}") # <- Error message string, Usefull might be IP address and created_time
+                print(f"{grpcError.debug_error_string()}") # <- Error message string, Useful might be IP address and created_time
                 return
             except Exception as e:
                 print(f"This is an unhandled exception: {e}")

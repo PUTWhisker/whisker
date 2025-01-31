@@ -1,49 +1,49 @@
 
 services:
-  whisper-server:
-    build:
-      context: ../backend/whisper
-      dockerfile: Dockerfile
-    environment:
-     - HUGGING_FACE_API_KEY="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"
-    ports:
-     - 7070:7070
+  # whisper-server:
+  #   build:
+  #     context: ../backend/whisper
+  #     dockerfile: Dockerfile
+  #   environment:
+  #    - HUGGING_FACE_API_KEY="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"
+  #   ports:
+  #    - 7070:7070
 
-  golang-server:
-    build:
-      context: ../backend/ApiServer
-      dockerfile: Dockerfile
-    environment:
-      - SERVER_PORT=9900
-      - USE_DATABASE=True
-      - DATABASE_URL=postgres://postgres:password@postgres:5432/whisper
-      - WHISPER_SERVER=whisper-server
-    depends_on: # Change depends_on to healthcheck
-      - whisper-server
-      - postgres
-    ports:
-      - 9900:9900
+  # golang-server:
+  #   build:
+  #     context: ../backend/ApiServer
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     - SERVER_PORT=9900
+  #     - USE_DATABASE=True
+  #     - DATABASE_URL=postgres://postgres:password@postgres:5432/whisper
+  #     - WHISPER_SERVER=whisper-server
+  #   depends_on: 
+  #     - whisper-server
+  #     - postgres
+  #   ports:
+  #     - 9900:9900
     
-  proxy:
-    build:
-      context: .
-      dockerfile: proxy/Dockerfile
-    ports:
-      - 50051:50051
-      - 9901:9901
-    depends_on:
-      - golang-server
+  # proxy:
+  #   build:
+  #     context: .
+  #     dockerfile: proxy/Dockerfile
+  #   ports:
+  #     - 50051:50051
+  #     - 9901:9901
+  #   depends_on:
+  #     - golang-server
   
-  postgres:
-    image: postgres
-    container_name: whisper-postgres
-    hostname: postgres
-    ports:
-      - 5432:5432
-    volumes:
-      - PostgresData:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_PASSWORD=password
+  # postgres:
+  #   image: postgres
+  #   container_name: whisper-postgres
+  #   hostname: postgres
+  #   ports:
+  #     - 5432:5432
+  #   volumes:
+  #     - PostgresData:/var/lib/postgresql/data
+  #   environment:
+  #     - POSTGRES_PASSWORD=password
 
   client:
     build:
