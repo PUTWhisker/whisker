@@ -7,10 +7,12 @@
     android:layout_height="match_parent"
     tools:context=".StartActivity">
 
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:id="@+id/start_layout">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,72 +20,106 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <LinearLayout
-            android:id="@+id/llLoginRegister"
+        <TextView
+            android:id="@+id/tvConnectionStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="end"
-            android:padding="16dp"
-            android:orientation="horizontal"
-            android:background = "@color/primaryDark">
+            android:text=""
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            android:background="@color/primaryDark"
+            android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/tvHello"
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:background="@color/primaryDark">
+
+            <ImageButton
+                android:id="@+id/btnSettings"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_settings"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/settings"
+                app:tint="@color/white"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true" />
+
+            <ImageButton
+                android:id="@+id/btnAbout"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_about"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/about"
+                app:tint="@color/white"
+                android:layout_marginStart="4dp"
+                android:layout_toEndOf="@id/btnSettings"
+                android:layout_centerVertical="true" />
+
+            <LinearLayout
+                android:id="@+id/llLoginRegister"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:text="Hello"
-                android:visibility="gone"
-                app:autoSizeTextType="uniform"/>
+                android:orientation="horizontal"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnLogin"
-                android:layout_width="100dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
-                android:backgroundTint="@color/playerColor"
-                android:text="Log In"
-                android:textColor="@color/white"
-                android:textSize="12sp"
-                app:cornerRadius="26dp"
-                app:rippleColor="@color/primaryDark" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnLogin"
+                    android:layout_width="100dp"
+                    android:layout_height="48dp"
+                    android:backgroundTint="@color/playerColor"
+                    android:text="@string/log_in"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    app:cornerRadius="26dp"
+                    app:rippleColor="@color/primaryDark" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnRegister"
-                android:layout_width="100dp"
-                android:layout_height="48dp"
-                android:backgroundTint="@color/primaryLight"
-                android:text="Register"
-                android:textColor="@color/primaryDark"
-                android:textSize="12sp"
-                app:cornerRadius="26dp"
-                app:rippleColor="@color/primaryDark" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnHistoryMock"
-                android:layout_width="100dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="16dp"
-                android:backgroundTint="@color/gray"
-                android:text="History"
-                android:textColor="@color/grayDark"
-                android:textSize="12sp"
-                android:visibility="gone"
-                app:cornerRadius="26dp"
-                app:rippleColor="@color/grayDark" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnRegister"
+                    android:layout_width="100dp"
+                    android:layout_height="48dp"
+                    android:backgroundTint="@color/primaryLight"
+                    android:text="@string/register"
+                    android:textColor="@color/primaryDark"
+                    android:textSize="12sp"
+                    app:cornerRadius="26dp"
+                    app:rippleColor="@color/primaryDark"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLogout"
                 android:layout_width="100dp"
                 android:layout_height="48dp"
                 android:backgroundTint="@color/gray"
-                android:text="Log out"
+                android:text="@string/log_out"
+                android:textColor="@color/grayDark"
+                android:textSize="12sp"
+                app:cornerRadius="26dp"
+                app:rippleColor="@color/grayDark"
+                android:layout_toStartOf="@id/llLoginRegister"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="8dp"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnHistoryMock"
+                android:layout_width="100dp"
+                android:layout_height="48dp"
+                android:backgroundTint="@color/gray"
+                android:text="@string/history"
                 android:textColor="@color/grayDark"
                 android:textSize="12sp"
                 android:visibility="gone"
                 app:cornerRadius="26dp"
                 app:rippleColor="@color/grayDark" />
-        </LinearLayout>
+
+        </RelativeLayout>
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -96,7 +132,7 @@
                 android:layout_height="120dp"
                 android:layout_gravity="center"
                 app:tint="@color/white"
-                android:src="@drawable/voicememoslogo"/>
+                android:src="@drawable/whisker"/>
         </FrameLayout>
 
 
@@ -136,15 +172,14 @@
                 android:id="@+id/tvChoose"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="What do you want to do?"
+                android:text="@string/what_do_you_want_to_do"
                 android:gravity="center"
                 android:layout_marginBottom="16dp"/>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/btnRecordActivity"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_marginBottom="16dp"
+                android:layout_height="90dp"
                 style="@style/CardViewStyle">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -165,7 +200,7 @@
                         android:id="@+id/text"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Record a file to transcript"
+                        android:text="@string/record_a_file_to_transcribe"
                         style="@style/TextViewStyle"
                         app:layout_constraintStart_toEndOf="@id/icon"
                         app:layout_constraintTop_toTopOf="parent"
@@ -187,8 +222,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/btnChooseFile"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_marginBottom="16dp"
+                android:layout_height="90dp"
                 style="@style/CardViewStyle">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -208,7 +242,7 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Choose a file to transcript"
+                        android:text="@string/choose_a_file_to_transcribe"
                         style="@style/TextViewStyle"
                         app:layout_constraintStart_toEndOf="@id/icon2"
                         app:layout_constraintTop_toTopOf="parent"
@@ -229,8 +263,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/btnTranscriptLive"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_marginBottom="16dp"
+                android:layout_height="90dp"
                 style="@style/CardViewStyle">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -250,7 +283,7 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Transcript live"
+                        android:text="Transcribe live"
                         style="@style/TextViewStyle"
                         app:layout_constraintStart_toEndOf="@id/icon3"
                         app:layout_constraintTop_toTopOf="parent"
@@ -271,14 +304,17 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/btnHistory"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_marginBottom="16dp"
+                android:layout_height="90dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="6dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                android:background="@color/primary">
+                android:background="@color/primary"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -368,6 +404,12 @@
 
     </LinearLayout>
     </ScrollView>
+    <edu.put.whisper.animations.LoadingAnimation
+        android:id="@+id/LoadingAnimationStart"
+        android:layout_width="wrap_content"
+        android:layout_height="250dp"
+        android:visibility="gone"
+        android:layout_gravity="center" />
     <View
         android:id="@+id/bottomSheetLogin"
         android:visibility="gone"
@@ -376,5 +418,14 @@
         android:background="@color/opaqueBG"/>
 
     <include layout="@layout/bottom_popup_login"/>
+
+    <View
+        android:id="@+id/bottomSheetRegister"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/opaqueBG"/>
+
+    <include layout="@layout/bottom_popup_register"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

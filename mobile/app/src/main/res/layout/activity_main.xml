@@ -8,7 +8,8 @@
     tools:context=".MainActivity">
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:id="@+id/main_content">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -17,7 +18,7 @@
             android:background="@color/primaryDark"
             android:theme="?attr/actionBarTheme"
             android:elevation="4dp"
-            app:title="Record Transcription"
+            app:title="@string/record_transcription"
             app:titleTextColor="@color/primaryLight"
             app:navigationIcon="@drawable/ic_arrow_toolbar"
             app:titleTextAppearance="@style/ToolbarTitleStyle"
@@ -74,7 +75,7 @@
                 android:layout_height="60dp"
                 android:backgroundTint="@color/gray"
                 android:onClick="btnTranscriptPressed"
-                android:text="Transcript"
+                android:text="@string/transcript"
                 android:textColor="@color/grayDark"
                 android:visibility="invisible"
                 app:cornerRadius="26dp"
@@ -160,6 +161,13 @@
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <edu.put.whisper.animations.LoadingAnimation
+        android:id="@+id/LoadingAnimation"
+        android:layout_width="wrap_content"
+        android:layout_height="250dp"
+        android:visibility="gone"
+        android:layout_gravity="center" />
     <View
         android:id="@+id/bottomSheetBG"
         android:visibility="gone"
@@ -170,3 +178,4 @@
     <include layout="@layout/bottom_popup"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+

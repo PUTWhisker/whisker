@@ -23,7 +23,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize"
-                app:title="Recordings"/>
+                app:title="@string/recordings"/>
             <RelativeLayout
                 android:id="@+id/editBar"
                 android:visibility="gone"
@@ -99,7 +99,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/grayDarkDisabled"
-                android:text="Delete"/>
+                android:text="@string/delete"/>
         </LinearLayout>
 
         <LinearLayout
@@ -119,7 +119,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/grayDarkDisabled"
-                android:text="Edit"/>
+                android:text="@string/edit"/>
         </LinearLayout>
 
     </LinearLayout>

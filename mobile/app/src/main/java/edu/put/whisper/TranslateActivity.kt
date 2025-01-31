@@ -2,6 +2,7 @@ package edu.put.whisper
 
 import android.net.Uri
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -66,14 +67,32 @@ class TranslateActivity : AppCompatActivity() {
             val targetLanguage = languages[spinnerTargetLanguage.selectedItemPosition]
 
             if (originalText.isNotEmpty()) {
+                var dots = 0
+                val loadingText = "Loading"
+                editTextTranslated.setText(loadingText)
+
+                val handler = android.os.Handler(Looper.getMainLooper())
+                val runnable = object : Runnable {
+                    override fun run() {
+                        if (dots < 3) {
+                            editTextTranslated.setText(loadingText + ".".repeat(dots + 1))
+                            dots++
+                        } else {
+                            dots = 0
+                        }
+                        handler.postDelayed(this, 500)
+                    }
+                }
+                handler.post(runnable)
+
                 CoroutineScope(Dispatchers.Main).launch {
                     try {
-                        val tempFile = createTempFile(originalText)
                         val respone = client.translateText(originalText, sourceLanguage, targetLanguage)
+                        handler.removeCallbacks(runnable)
                         editTextTranslated.setText(respone.text)
-                        tempFile.delete()
                     } catch (e: Exception) {
                         e.printStackTrace()
+                        handler.removeCallbacks(runnable)
                         editTextTranslated.setText("Wystąpił błąd podczas tłumaczenia")
                     }
                 }

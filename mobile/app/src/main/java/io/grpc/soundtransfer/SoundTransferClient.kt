@@ -57,11 +57,44 @@ class SoundTransferClient(uri: Uri) : Closeable {
         metadata.put(key, "pl")
         audiStreamManager.initAudioRecorder()
         audiStreamManager.record()
+
         CoroutineScope(Dispatchers.Default).launch {
             val requests = audiStreamManager.record()
+            val builder = StringBuilder() // Bieżąca transkrypcja
+            var wasPreviousChunkNew = false // Czy poprzedni chunk był "true"
+
             stub.transcribeLive(requests, metadata).collect { response ->
                 Log.i("stream", "Got message: \"${response.text}\"")
-                callback(response.text)
+
+                if (response.newChunk) {
+                    if (wasPreviousChunkNew) {
+                        // Ignoruj, ponieważ kolejny pusty "newChunk == true" oznacza, że nic nie jest mówione
+                        Log.i("stream", "Ignoring consecutive newChunk == true with no text.")
+                        return@collect
+                    }
+                    wasPreviousChunkNew = true // Ustaw flagę, że aktualny jest "true"
+
+                    // Dodaj nową linię tylko wtedy, gdy faktycznie jest coś mówione
+                    if (response.text.isNotEmpty()) {
+                        builder.append("\n")
+                    }
+                } else {
+                    wasPreviousChunkNew = false // Zresetuj flagę, gdy chunk nie jest nowy
+                }
+
+                // Aktualizuj treść ostatniej linii tylko wtedy, gdy tekst nie jest pusty
+                if (response.text.isNotEmpty()) {
+                    val lines = builder.lines()
+                    if (lines.isNotEmpty()) {
+                        val updated = lines.dropLast(1) + response.text
+                        builder.clear()
+                        builder.append(updated.joinToString("\n"))
+                    } else {
+                        builder.append(response.text)
+                    }
+                }
+
+                callback(builder.toString())
             }
         }
     }
@@ -89,32 +122,32 @@ class SoundTransferClient(uri: Uri) : Closeable {
 
 
     suspend fun diarizateSpeakers(filePath: String, language: String): List<SpeakerAndLine> {
-//        val bytes = File(filePath).readBytes().toByteString()
-//        Log.d("SoundTransferClient", "File content read. Byte size: ${bytes.size()}")
-//
-//        val request = transcriptionRequest {
-//            this.soundData = bytes
-//            this.sourceLanguage = language
-//        }
-//
-//        try {
-//            val response = stub.diarizateFile(request)
-//            Log.d("SoundTransferClient", "Server response: Speaker names: ${response.speakerNameList}, Texts: ${response.textList}")
-//
-//            val out = mutableListOf<SpeakerAndLine>()
-//            for (i in response.speakerNameList.indices) {
-//                out.add(SpeakerAndLine(response.speakerNameList[i], response.textList[i]))
-//            }
-//            return out.toList()
-//        } catch (e: Exception) {
-//            Log.e("SoundTransferClient", "Error during server request", e)
-//            throw e
-//        }
-        return  return listOf(
-            SpeakerAndLine("Speaker 1", "Hej, jak się masz?"),
-            SpeakerAndLine("Speaker 2", "Bardzo dobrze, a ty?"),
-            SpeakerAndLine("Speaker 1", "Świetnie, dzięki!")
-        )
+        val bytes = File(filePath).readBytes().toByteString()
+        Log.d("SoundTransferClient", "File content read. Byte size: ${bytes.size()}")
+
+        val request = transcriptionRequest {
+            this.soundData = bytes
+            this.sourceLanguage = language
+        }
+
+        try {
+            val response = stub.diarizateFile(request)
+            Log.d("SoundTransferClient", "Server response: Speaker names: ${response.speakerNameList}, Texts: ${response.textList}")
+
+            val out = mutableListOf<SpeakerAndLine>()
+            for (i in response.speakerNameList.indices) {
+                out.add(SpeakerAndLine(response.speakerNameList[i], response.textList[i]))
+            }
+            return out.toList()
+        } catch (e: Exception) {
+            Log.e("SoundTransferClient", "Error during server request", e)
+            throw e
+        }
+//        return  return listOf(
+//            SpeakerAndLine("Speaker 1", "Hej, jak się masz?"),
+//            SpeakerAndLine("Speaker 2", "Bardzo dobrze, a ty?"),
+//            SpeakerAndLine("Speaker 1", "Świetnie, dzięki!")
+//        )
     }
 
     fun stopStream() {

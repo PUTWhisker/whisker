@@ -11,7 +11,7 @@
         android:background="@color/primaryDark"
         android:theme="?attr/actionBarTheme"
         android:elevation="4dp"
-        app:title="Record Transcription"
+        app:title="@string/record_transcription"
         app:titleTextColor="@color/primaryLight"
         app:navigationIcon="@drawable/ic_arrow_toolbar"
         app:titleTextAppearance="@style/ToolbarTitleStyle"
@@ -20,21 +20,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-
-    <ScrollView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSpeakers"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:id="@+id/tvDiarizedTranscription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Transcription split into roles here"
-            android:padding="16dp"/>
-    </ScrollView>
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

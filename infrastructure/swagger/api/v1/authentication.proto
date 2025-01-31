@@ -10,6 +10,7 @@ import "google/protobuf/empty.proto";
 service ClientService {
     rpc Login (UserCredits) returns (LoginResponse) {};
     rpc Register (UserCredits) returns (google.protobuf.Empty) {};
+    rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {};
 
     rpc GetTranscription(QueryParamethers) returns (stream TranscriptionHistory) {};
     rpc EditTranscription(NewTranscription) returns (google.protobuf.Empty) {};
@@ -61,7 +62,7 @@ message UserCredits {
 
 message LoginResponse {
     string JWT = 1;
-    bool successful = 2;
+    string refresh_token = 2;
 }
 
 message Id {
@@ -99,4 +100,12 @@ message QueryParamethers {
 message Combined {
     DiarizationHistory diarization = 1;
     TranscriptionHistory transcription = 2;
+}
+
+message RefreshTokenRequest {
+    string refresh_token = 1;
+}
+message RefreshTokenResponse {
+    string refresh_token = 1;
+    string access_token = 2;
 }
