@@ -15,16 +15,37 @@ http:
       get: /SoundService/TranscribeLive
     - selector: sound_transfer.SoundService.TranscribeLiveWeb
       get: /SoundService/TranscribeLiveWeb
+    - selector: sound_transfer.SoundService.TranslateText
+      get: /SoundService/TranslateText
+
     - selector: authentication.ClientService.Login
       get: /ClientService/Login
     - selector: authentication.ClientService.Register
       get: /ClientService/Register
-    - selector: authentication.ClientService.GetTranslation
-      get: /ClientService/GetTranslation
+    - selector: authentication.ClientService.RefreshToken
+      get: /ClientService/RefreshToken
+    - selector: authentication.ClientService.GetTranscription
+      get: /ClientService/GetTranscription
     - selector: authentication.ClientService.EditTranscription
       get: /ClientService/EditTranscription
     - selector: authentication.ClientService.DeleteTranscription
       get: /ClientService/DeleteTranscription
+    - selector: authentication.ClientService.GetTranslation
+      get: /ClientService/GetTranslation
+    - selector: authentication.ClientService.EditTranslation
+      get: /ClientService/EditTranslation
+    - selector: authentication.ClientService.DeleteTranslation
+      get: /ClientService/DeleteTranslation
+    - selector: authentication.ClientService.GetDiarization
+      get: /ClientService/GetDiarization
+    - selector: authentication.ClientService.EditDiarization
+      get: /ClientService/EditDiarization
+    - selector: authentication.ClientService.DeleteDiarization
+      get: /ClientService/DeleteDiarization
+    - selector: authentication.ClientService.SaveOnlyTranslation
+      get: /ClientService/SaveOnlyTranslation
+    - selector: authentication.ClientService.GetTranscriptionAndDiarization
+      get: /ClientService/GetTranscriptionAndDiarization
       
 swagger:
   info:

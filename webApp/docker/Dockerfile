@@ -1,12 +1,20 @@
-FROM node:alpine
+FROM node:alpine AS webapp
 
-WORKDIR /usr/src/app
+WORKDIR /webApp
 
-COPY package*.json ./
-RUN npm install -g http-server
+COPY package*.json ./ 
+RUN npm install -D webpack
 
 COPY . .
-EXPOSE 8080
 
-# Command to run the web server
-CMD ["http-server", "-p", "8080"]
+RUN npx webpack --mode=development
+
+
+FROM nginx:alpine
+
+COPY --from=webapp /webApp /usr/share/nginx/html/webApp
+
+COPY ./swagger /usr/share/nginx/html/swagger
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+

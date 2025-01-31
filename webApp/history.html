@@ -19,37 +19,59 @@
         }
         function expandText(text) {
             text.classList.toggle("expanded");
-            text.innerText = text.classList.contains("expanded") ? text.getAttribute("data-text") : clipString(text.getAttribute("data-text"));
+            const content = text.classList.contains("expanded") ? text.getAttribute("data-text") : clipString(text.getAttribute("data-text"));
+            text.innerText = content;
+        }
+        function buildDiarizationText(event) {
+            let text = '';
+            for (let i = 0; i < event.array[2].length; ++i) {
+                text += `${event.array[2][i]}:${event.array[3][i]}`;
+                if (i < event.array[2].length - 1) text += '\n';
+            }
+            return text;
         }
         const nj = `
         <div class="event_view">
+            <div class="event_icon material-symbols-outlined">
+                {% if mode == 'translation' %}translate
+                {% elif mode == 'transcription' %}person
+                {% elif mode == 'diarization' %}group
+                {% else %}{% endif %}
+            </div>
+            <div class="event_title">Example title {{ range(1, 100) | random }}</div>
             <div class="event_date_view">{{ timestampToDate(event.getCreatedAt()) }}</div>
-            <div class="event_title">Titles not fully supported yet (I guess)</div>
-            <div class="event_previews_view">Transcriptions
+            <div class="event_previews_view">
                 <div class="event_text_row">
                     {% if event.getTranscriptionLangauge is defined %}
-                        <div class="text_flag">{{ event.getTranscriptionLangauge() }}</div>
+                        {% set lang = getCountry(event.getTranscriptionLangauge()) %}
                     {% elseif event.getLanguage is defined %}
-                        <div class="text_flag">{{ event.getLanguage() }}</div>
+                        {% set lang = getCountry(event.getLanguage()) %}
                     {% else %}
-                        <div class="text_flag">?</div>   <!-- GETLANGAUGE??? GETSOURCELANGUAGE??? PREGANTE??? CO TU ZA FUNKCJA MA BYĆ DO JEMZYKA -->
+                        {% set lang = '?' %}
                     {% endif %}
-                    <div class="preview_text" data-text="{{ event.getTranscription() }}" onclick="expandText(this);">
-                        {{ clipString(event.getTranscription()) }}
+                    <div class="text_flag"><img src="https://flagcdn.com/w40/{{ lang }}.png" onerror="this.outerHTML = '{{ lang }}'""></div>
+                    {% set content = event.getTranscription() if event.getTranscription is defined else buildDiarizationText(event) %}
+                    <div class="preview_text" data-text="{{ content }}" onclick="expandText(this);">
+                        {{ clipString(content) }}
                     </div>
-                    <button class="option_button" onclick="() => speak('{{ event.getTranscription() }}', 'en-us');">   <!-- GETLANGAUGE??? GETSOURCELANGUAGE??? PREGANTE??? CO TU ZA FUNKCJA MA BYĆ DO JEMZYKA -->
+                    <button class="option_button" onclick="speak('{{ content }}', 'en-us');">   <!-- GETLANGAUGE??? GETSOURCELANGUAGE??? PREGANTE??? CO TU ZA FUNKCJA MA BYĆ DO JEMZYKA -->
                         <span class="material-symbols-outlined">brand_awareness</span>
                     </button>
-                    <button class="option_button" onclick="(_) => copyToClipboard('{{ event.getTranscription() }}');">
+                    <button class="option_button" onclick="copyToClipboard('{{ content }}');">
                         <span class="material-symbols-outlined">content_copy</span>
                     </button>
-                    <button class="option_button" onclick="(_) => downloadAsFile('{{ event.getTranscription() }}', 'transcription.txt');">
+                    <button class="option_button" onclick="downloadAsFile('{{ content }}', 'transcription.txt');">
                         <span class="material-symbols-outlined">download</span>
                     </button>
                 </div>
                 {% if mode == "translation" %}
-                    <div class="event_text_row">
-                        <div class="text_flag">{{ event.getTranslationLangauge() }}</div>
+                    <div class="event_text_row" style="margin-top:0.5em;color:rgb(86, 58, 156);">
+                        {% if event.getTranslationLangauge is defined %}
+                            {% set lang = getCountry(event.getTranslationLangauge()) %}
+                        {% else %}
+                            {% set lang = '?' %}
+                        {% endif %}
+                        <div class="text_flag"><img src="https://flagcdn.com/w40/{{ lang }}.png" onerror="this.outerHTML = '{{ lang }}'"></div>
                         <div class="preview_text" data-text="{{ event.getTranslation() }}" onclick="expandText(this);">
                             {{ clipString(event.getTranslation()) }}
                         </div>
@@ -79,7 +101,31 @@
     </script>
     <header>
         <div id="top_menu">
-            <p>Whisker+</p>
+            <p id="mew_banner"><img src="assets/mew.png" id="mew">Whisker</p>
+            <a href="/webApp/index.html" class="icon_button">
+                Transcribe <span class="material-symbols-outlined">edit_document</span>
+            </a>
+            <a href="/webApp/record.html" class="icon_button">
+                Dictate <span class="material-symbols-outlined">mic</span>
+            </a>
+            <a href="#" class="icon_button selected">
+                History <span class="material-symbols-outlined">lock</span>
+            </a>
+            <a href="/webApp/swagger/index.html" class="icon_button locked">
+                Swagger <span class="material-symbols-outlined">lock</span>
+            </a>
+            <a href="/webApp/about.html" class="icon_button">
+                About <span class="material-symbols-outlined">help</span>
+            </a>
+            <div id="blank_space"></div>
+            <div id="hamborgir" onclick="document.getElementById('side_menu').classList.toggle('hidden')">
+                <span class="material-symbols-outlined">menu</span>
+            </div>
+        </div>
+        <div id="side_menu" class="hidden">
+            <div id="hamborgir" onclick="document.getElementById('side_menu').classList.toggle('hidden')">
+                <span class="material-symbols-outlined">close</span>
+            </div>
             <a href="/webApp/index.html" class="icon_button">
                 Transcribe <span class="material-symbols-outlined">edit_document</span>
             </a>
@@ -98,14 +144,11 @@
             <div id="blank_space"></div>
         </div>
         <div class="header selected" id="navigation">
-            <div class="tab_button selected" onclick="openTab(this, 'translation')">
-                <div>Translations</div>
-            </div>
-            <div class="tab_button" onclick="openTab(this, 'transcription')">
+            <div class="tab_button selected" onclick="openTab(this, 'transcription')">
                 <div>Transcriptions</div>
             </div>
-            <div class="tab_button" onclick="openTab(this, 'diarization')">
-                <div>Diarization</div>
+            <div class="tab_button" onclick="openTab(this, 'translation')">
+                <div>Translations</div>
             </div>
         </div>
     </header>
@@ -113,12 +156,29 @@
         <div id="page_view">
             <div id="filter_options" class="main_content">
                 <div>
+                    <label id="search_prompt_input">
+                        <input type="text" placeholder="Search by title...">
+                        <div class="filter_option_icon material-symbols-outlined">search</div>
+                    </label>
+                </div>
+                <div class="filter_divider"></div>
+                <div class="filter_option_button filter_option_icon material-symbols-outlined">
+                    sort_by_alpha
+                </div>
+                <div class="filter_option_icon material-symbols-outlined">
+                    unfold_more
+                </div>
+                <div class="filter_divider"></div>
+                <div class="filter_option_button filter_option_icon material-symbols-outlined">
+                    calendar_month
+                </div>
+                <div class="filter_option_icon material-symbols-outlined" style="transform: rotate(-90deg)">
+                    chevron_right
                 </div>
             </div>
             <div id="main_container" class="main_content">
-                <div id="translation_history" class="tab"></div>
-                <div id="transcription_history" class="hidden tab"></div>
-                <div id="diarization_history" class="hidden tab"></div>
+                <div id="transcription_history" class="tab"></div>
+                <div id="translation_history" class="hidden tab"></div>
             </div>
         </div>
     </main>

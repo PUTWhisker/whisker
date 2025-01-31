@@ -46,8 +46,34 @@ header {
 }
 
 #filter_options {
-    background-color: #ddd;
-    height: 3vh
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 1vw 1vw 0;
+}
+
+#search_prompt_input {
+    position: relative;
+}
+
+#search_prompt_input input {
+    padding: 0.5dvh 2dvh 0.5dvh 4.5dvh;
+    font-size: 3dvh;
+}
+
+#search_prompt_input .filter_option_icon {
+    position: absolute;
+    top: 50%;
+    left: 0.5dvh;
+    transform: translateY(-50%);
+}
+
+.filter_option_icon {
+    font-size: 4dvh;
+}
+
+.filter_divider {
+    width: 1dvh;
 }
 
 .event_view {
@@ -56,15 +82,22 @@ header {
     background-color: #ddd;
     display: flex;
     flex-direction: row;
-    align-items: center;
+    /*align-items: center;*/
+}
+
+.event_icon {
+    margin-right: 0.25em;
+    font-size: 1.28em;
 }
 
 .event_date_view {
-    width: 6em;
+    text-align: center;
+    width: 7em;
 }
 
 .event_title {
-    width: 8em;
+    width: 10em;
+    font-weight: 600;
 }
 
 .event_previews_view {
@@ -91,4 +124,5 @@ header {
 
 .delete-button-container {
     margin-left: 1vw;
+    align-self: center;
 }

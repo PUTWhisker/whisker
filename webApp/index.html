@@ -119,7 +119,7 @@
       const transcriptionResult = document.getElementById("transcription_result");
       const transciptionButtons = document.getElementById("show_transcript").querySelectorAll(".result_option_button");
       const translationButtons = document.getElementById("show_translation").querySelectorAll(".result_option_button");
-      transcriptionResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
+      transcriptionResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="assets/sun.gif"></img>';
       transciptionButtons.forEach((e) => e.disabled = true);
       placeholderFetchTranscript().then((transcript) => {
         transcriptionResult.innerHTML = transcript;
@@ -127,7 +127,7 @@
       });
       if (translationCheckBox.checked) {
         const translationResult = document.getElementById("translation_result");
-        translationResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="https://media.tenor.com/-n8JvVIqBXkAAAAM/dddd.gif"></img>';
+        translationResult.innerHTML = '<span class="loading_text">Loading...</span><img class="loading_icon" src="assets/sun.gif"></img>';
         translationButtons.forEach((e) => e.disabled = true);
         placeholderFetchTranslation().then((translation) => {
           translationResult.innerHTML = translation;
@@ -143,7 +143,37 @@
 <body>
   <main>
     <div id="top_menu">
-      <p>Whisker</p>
+      <p id="mew_banner"><img src="assets/mew.png" id="mew">Whisker</p>
+      <a href="#" class="icon_button selected">
+        Transcribe <span class="material-symbols-outlined">edit_document</span>
+      </a>
+      <a href="/webApp/record.html" class="icon_button">
+        Dictate <span class="material-symbols-outlined">mic</span>
+      </a>
+      <a href="/webApp/history.html" class="icon_button locked">
+        History <span class="material-symbols-outlined">lock</span>
+      </a>
+      <a href="/webApp/swagger/index.html" class="icon_button locked">
+        Swagger <span class="material-symbols-outlined">lock</span>
+      </a>
+      <a href="/webApp/about.html" class="icon_button">
+        About <span class="material-symbols-outlined">help</span>
+      </a>
+      <div id="blank_space"></div>
+      <a href="/webApp/login.html" class="icon_button">
+        Log in&nbsp;<span class="material-symbols-outlined">login</span>
+      </a>
+      <a href="/webApp/signup.html" class="icon_button">
+        Sign up&nbsp;<span class="material-symbols-outlined">person_add</span>
+      </a>
+      <div id="hamborgir" onclick="document.getElementById('side_menu').classList.toggle('hidden')">
+        <span class="material-symbols-outlined">menu</span>
+      </div>
+    </div>
+    <div id="side_menu" class="hidden">
+      <div id="hamborgir" onclick="document.getElementById('side_menu').classList.toggle('hidden')">
+        <span class="material-symbols-outlined">close</span>
+      </div>
       <a href="#" class="icon_button selected">
         Transcribe <span class="material-symbols-outlined">edit_document</span>
       </a>
