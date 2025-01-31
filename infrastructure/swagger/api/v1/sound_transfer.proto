@@ -1,44 +1,33 @@
 syntax = "proto3";
 package sound_transfer;
 
-import "protoc-gen-openapiv2/options/annotations.proto";
-
 option go_package = "inzynierka/sound_transfer";
 option java_multiple_files = true;
 option java_package = "io.grpc.soundtransfer";
 option java_outer_classname = "SoundTransferProto";
 
-option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
-    info: {
-      title: "OpenTDF Key Access Service";
-      version: "1.5.0";
-      license: {
-        name: "BSD 3-Clause Clear";
-        url: "https://github.com/opentdf/backend/blob/master/LICENSE";
-      };
-    };
-  };
 
 
 
-// This is the description put above SoundService
 service SoundService {
     // Test connection to the gRPC server
     rpc TestConnection(TextMessage) returns (TextMessage) {};
     // Send an audio file for transcription
     rpc TranscribeFile(TranscriptionRequest) returns (SoundResponse) {};
-    // Send an audio file for translation
-    rpc TranslateFile(TranslationRequest) returns (stream SoundResponse);
-    // Send an audio file for transcription with audio diarization
-    rpc DiarizateFile(TranscriptionRequest) returns (SpeakerAndLineResponse);
     // Stream audio chunks for live transcription
     rpc TranscribeLive(stream TranscirptionLiveRequest) returns (stream SoundStreamResponse);
     // Live transcription without streaming (for grpc-web library)
     rpc TranscribeLiveWeb(TranscriptionRequest) returns (SoundStreamResponse);
+    // Send an audio file for translation
+    rpc TranslateFile(TranslationRequest) returns (stream SoundResponse);
+    // Send an audio file for transcription with audio diarization
+    rpc DiarizateFile(TranscriptionRequest) returns (SpeakerAndLineResponse);
+    // Send a text for translation
+    rpc TranslateText(TextAndId) returns (TextMessage);
 }
 
 // sound_service.TextMessage
-message TextMessage {//This is the description put next to the TextMessage
+message TextMessage {
     // Random seed
     string text = 1;
 }
@@ -49,6 +38,8 @@ message TranscriptionRequest {
     bytes sound_data = 1;
     // Selected file's language
     string source_language = 2; 
+    // Selected file's title
+    string title = 3;
 }
 
 // sound_service.TranslationRequest
@@ -59,14 +50,15 @@ message TranslationRequest {
     string source_language = 2;
     // Desired translation language
     string translation_language = 3;  
+    // Selected file's title
+    string title = 4;
 }
 
-// sound_service.TranscirptionLiveRequest
+// sound_service.TranscriptionLiveRequest
 message TranscirptionLiveRequest {
     // Selected file's raw bytes
     bytes sound_data = 1;
 }
-
 
 // sound_service.SoundResponse
 message SoundResponse {
@@ -74,6 +66,8 @@ message SoundResponse {
     string text = 1;
     // Detected language by speech-to-text model
     string detected_language = 2;
+    // Id of the transcription
+    int32 id = 3;
 }
 
 // sound_service.SoundStreamResponse
@@ -82,7 +76,6 @@ message SoundStreamResponse {
     string text = 1;
     // Informs whether server treated provided segment as new batch
     bool new_chunk = 2;
-
 }
 
 // sound_service.SpeakerAndLineResponse
@@ -95,3 +88,12 @@ message SpeakerAndLineResponse {
     string detected_language = 3;
 }
 
+// sound_service.TextAndId
+message TextAndId {
+    // Text to be translated
+    string text = 1;
+    // Original text's language
+    string text_language = 3;
+    // Desired translation language
+    string translation_language = 4;
+}

@@ -51,7 +51,8 @@ services:
       args:
         no-cache: "true"
     ports:
-      - "8080:8080"
+      - "443:443"
+      # When changing port here, please also adjust it in webApp/nginx.conf
       
 volumes:
   postgres_data:

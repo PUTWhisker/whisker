@@ -21,30 +21,31 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	SoundService_TestConnection_FullMethodName    = "/sound_transfer.SoundService/TestConnection"
 	SoundService_TranscribeFile_FullMethodName    = "/sound_transfer.SoundService/TranscribeFile"
-	SoundService_TranslateFile_FullMethodName     = "/sound_transfer.SoundService/TranslateFile"
-	SoundService_DiarizateFile_FullMethodName     = "/sound_transfer.SoundService/DiarizateFile"
 	SoundService_TranscribeLive_FullMethodName    = "/sound_transfer.SoundService/TranscribeLive"
 	SoundService_TranscribeLiveWeb_FullMethodName = "/sound_transfer.SoundService/TranscribeLiveWeb"
+	SoundService_TranslateFile_FullMethodName     = "/sound_transfer.SoundService/TranslateFile"
+	SoundService_DiarizateFile_FullMethodName     = "/sound_transfer.SoundService/DiarizateFile"
+	SoundService_TranslateText_FullMethodName     = "/sound_transfer.SoundService/TranslateText"
 )
 
 // SoundServiceClient is the client API for SoundService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// This is the description put above SoundService
 type SoundServiceClient interface {
 	// Test connection to the gRPC server
 	TestConnection(ctx context.Context, in *TextMessage, opts ...grpc.CallOption) (*TextMessage, error)
 	// Send an audio file for transcription
 	TranscribeFile(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SoundResponse, error)
-	// Send an audio file for translation
-	TranslateFile(ctx context.Context, in *TranslationRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SoundResponse], error)
-	// Send an audio file for transcription with audio diarization
-	DiarizateFile(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SpeakerAndLineResponse, error)
 	// Stream audio chunks for live transcription
 	TranscribeLive(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[TranscirptionLiveRequest, SoundStreamResponse], error)
 	// Live transcription without streaming (for grpc-web library)
 	TranscribeLiveWeb(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SoundStreamResponse, error)
+	// Send an audio file for translation
+	TranslateFile(ctx context.Context, in *TranslationRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SoundResponse], error)
+	// Send an audio file for transcription with audio diarization
+	DiarizateFile(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SpeakerAndLineResponse, error)
+	// Send a text for translation
+	TranslateText(ctx context.Context, in *TextAndId, opts ...grpc.CallOption) (*TextMessage, error)
 }
 
 type soundServiceClient struct {
@@ -75,9 +76,32 @@ func (c *soundServiceClient) TranscribeFile(ctx context.Context, in *Transcripti
 	return out, nil
 }
 
+func (c *soundServiceClient) TranscribeLive(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[TranscirptionLiveRequest, SoundStreamResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &SoundService_ServiceDesc.Streams[0], SoundService_TranscribeLive_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[TranscirptionLiveRequest, SoundStreamResponse]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type SoundService_TranscribeLiveClient = grpc.BidiStreamingClient[TranscirptionLiveRequest, SoundStreamResponse]
+
+func (c *soundServiceClient) TranscribeLiveWeb(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SoundStreamResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SoundStreamResponse)
+	err := c.cc.Invoke(ctx, SoundService_TranscribeLiveWeb_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *soundServiceClient) TranslateFile(ctx context.Context, in *TranslationRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SoundResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &SoundService_ServiceDesc.Streams[0], SoundService_TranslateFile_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &SoundService_ServiceDesc.Streams[1], SoundService_TranslateFile_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -104,23 +128,10 @@ func (c *soundServiceClient) DiarizateFile(ctx context.Context, in *Transcriptio
 	return out, nil
 }
 
-func (c *soundServiceClient) TranscribeLive(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[TranscirptionLiveRequest, SoundStreamResponse], error) {
+func (c *soundServiceClient) TranslateText(ctx context.Context, in *TextAndId, opts ...grpc.CallOption) (*TextMessage, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &SoundService_ServiceDesc.Streams[1], SoundService_TranscribeLive_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[TranscirptionLiveRequest, SoundStreamResponse]{ClientStream: stream}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type SoundService_TranscribeLiveClient = grpc.BidiStreamingClient[TranscirptionLiveRequest, SoundStreamResponse]
-
-func (c *soundServiceClient) TranscribeLiveWeb(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SoundStreamResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SoundStreamResponse)
-	err := c.cc.Invoke(ctx, SoundService_TranscribeLiveWeb_FullMethodName, in, out, cOpts...)
+	out := new(TextMessage)
+	err := c.cc.Invoke(ctx, SoundService_TranslateText_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -130,21 +141,21 @@ func (c *soundServiceClient) TranscribeLiveWeb(ctx context.Context, in *Transcri
 // SoundServiceServer is the server API for SoundService service.
 // All implementations should embed UnimplementedSoundServiceServer
 // for forward compatibility.
-//
-// This is the description put above SoundService
 type SoundServiceServer interface {
 	// Test connection to the gRPC server
 	TestConnection(context.Context, *TextMessage) (*TextMessage, error)
 	// Send an audio file for transcription
 	TranscribeFile(context.Context, *TranscriptionRequest) (*SoundResponse, error)
-	// Send an audio file for translation
-	TranslateFile(*TranslationRequest, grpc.ServerStreamingServer[SoundResponse]) error
-	// Send an audio file for transcription with audio diarization
-	DiarizateFile(context.Context, *TranscriptionRequest) (*SpeakerAndLineResponse, error)
 	// Stream audio chunks for live transcription
 	TranscribeLive(grpc.BidiStreamingServer[TranscirptionLiveRequest, SoundStreamResponse]) error
 	// Live transcription without streaming (for grpc-web library)
 	TranscribeLiveWeb(context.Context, *TranscriptionRequest) (*SoundStreamResponse, error)
+	// Send an audio file for translation
+	TranslateFile(*TranslationRequest, grpc.ServerStreamingServer[SoundResponse]) error
+	// Send an audio file for transcription with audio diarization
+	DiarizateFile(context.Context, *TranscriptionRequest) (*SpeakerAndLineResponse, error)
+	// Send a text for translation
+	TranslateText(context.Context, *TextAndId) (*TextMessage, error)
 }
 
 // UnimplementedSoundServiceServer should be embedded to have
@@ -160,17 +171,20 @@ func (UnimplementedSoundServiceServer) TestConnection(context.Context, *TextMess
 func (UnimplementedSoundServiceServer) TranscribeFile(context.Context, *TranscriptionRequest) (*SoundResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TranscribeFile not implemented")
 }
+func (UnimplementedSoundServiceServer) TranscribeLive(grpc.BidiStreamingServer[TranscirptionLiveRequest, SoundStreamResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method TranscribeLive not implemented")
+}
+func (UnimplementedSoundServiceServer) TranscribeLiveWeb(context.Context, *TranscriptionRequest) (*SoundStreamResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TranscribeLiveWeb not implemented")
+}
 func (UnimplementedSoundServiceServer) TranslateFile(*TranslationRequest, grpc.ServerStreamingServer[SoundResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method TranslateFile not implemented")
 }
 func (UnimplementedSoundServiceServer) DiarizateFile(context.Context, *TranscriptionRequest) (*SpeakerAndLineResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DiarizateFile not implemented")
 }
-func (UnimplementedSoundServiceServer) TranscribeLive(grpc.BidiStreamingServer[TranscirptionLiveRequest, SoundStreamResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method TranscribeLive not implemented")
-}
-func (UnimplementedSoundServiceServer) TranscribeLiveWeb(context.Context, *TranscriptionRequest) (*SoundStreamResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method TranscribeLiveWeb not implemented")
+func (UnimplementedSoundServiceServer) TranslateText(context.Context, *TextAndId) (*TextMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TranslateText not implemented")
 }
 func (UnimplementedSoundServiceServer) testEmbeddedByValue() {}
 
@@ -228,6 +242,31 @@ func _SoundService_TranscribeFile_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SoundService_TranscribeLive_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(SoundServiceServer).TranscribeLive(&grpc.GenericServerStream[TranscirptionLiveRequest, SoundStreamResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type SoundService_TranscribeLiveServer = grpc.BidiStreamingServer[TranscirptionLiveRequest, SoundStreamResponse]
+
+func _SoundService_TranscribeLiveWeb_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TranscriptionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SoundServiceServer).TranscribeLiveWeb(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SoundService_TranscribeLiveWeb_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SoundServiceServer).TranscribeLiveWeb(ctx, req.(*TranscriptionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _SoundService_TranslateFile_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(TranslationRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -257,27 +296,20 @@ func _SoundService_DiarizateFile_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SoundService_TranscribeLive_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(SoundServiceServer).TranscribeLive(&grpc.GenericServerStream[TranscirptionLiveRequest, SoundStreamResponse]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type SoundService_TranscribeLiveServer = grpc.BidiStreamingServer[TranscirptionLiveRequest, SoundStreamResponse]
-
-func _SoundService_TranscribeLiveWeb_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TranscriptionRequest)
+func _SoundService_TranslateText_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TextAndId)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SoundServiceServer).TranscribeLiveWeb(ctx, in)
+		return srv.(SoundServiceServer).TranslateText(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: SoundService_TranscribeLiveWeb_FullMethodName,
+		FullMethod: SoundService_TranslateText_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SoundServiceServer).TranscribeLiveWeb(ctx, req.(*TranscriptionRequest))
+		return srv.(SoundServiceServer).TranslateText(ctx, req.(*TextAndId))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -298,25 +330,29 @@ var SoundService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _SoundService_TranscribeFile_Handler,
 		},
 		{
+			MethodName: "TranscribeLiveWeb",
+			Handler:    _SoundService_TranscribeLiveWeb_Handler,
+		},
+		{
 			MethodName: "DiarizateFile",
 			Handler:    _SoundService_DiarizateFile_Handler,
 		},
 		{
-			MethodName: "TranscribeLiveWeb",
-			Handler:    _SoundService_TranscribeLiveWeb_Handler,
+			MethodName: "TranslateText",
+			Handler:    _SoundService_TranslateText_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "TranslateFile",
-			Handler:       _SoundService_TranslateFile_Handler,
-			ServerStreams: true,
-		},
 		{
 			StreamName:    "TranscribeLive",
 			Handler:       _SoundService_TranscribeLive_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
+		},
+		{
+			StreamName:    "TranslateFile",
+			Handler:       _SoundService_TranslateFile_Handler,
+			ServerStreams: true,
 		},
 	},
 	Metadata: "api/v1/sound_transfer.proto",
