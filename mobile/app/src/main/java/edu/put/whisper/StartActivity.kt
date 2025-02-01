@@ -14,14 +14,17 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
@@ -350,11 +353,37 @@ class StartActivity : AppCompatActivity() {
 
             startActivityForResult(intent, PICK_FILE_REQUEST_CODE)
         }
-        btnTranscriptLive.setOnClickListener {
-            val intent = Intent(this, LiveTranscriptionActivity::class.java)
-            startActivity(intent)
 
+        btnTranscriptLive.setOnClickListener {
+            val languages = resources.getStringArray(R.array.languages_full)
+
+            val spinner = Spinner(this)
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, languages)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinner.adapter = adapter
+
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle(getString(R.string.choose_transcription_language))
+            builder.setView(spinner)
+
+            builder.setPositiveButton("OK") { dialog, _ ->
+
+                val selectedLanguage = spinner.selectedItem.toString()
+
+                val intent = Intent(this, LiveTranscriptionActivity::class.java)
+                intent.putExtra("LANGUAGE", selectedLanguage)
+                startActivity(intent)
+
+                dialog.dismiss()
+            }
+
+            builder.setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+
+            builder.show()
         }
+
 
         btnBack.setOnClickListener {
             utilities.setVisibility(View.VISIBLE, btnRecordActivity, btnChooseFile, btnLogin, btnRegister, tvChoose, btnTranscriptLive)
@@ -380,10 +409,6 @@ class StartActivity : AppCompatActivity() {
             authClient.Logout()
             Toast.makeText(this, "Successfully logged out.", Toast.LENGTH_SHORT).show()
         }
-
-
-
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -391,14 +416,13 @@ class StartActivity : AppCompatActivity() {
         if (requestCode == PICK_FILE_REQUEST_CODE && resultCode == RESULT_OK) {
             isReturningFromFileSelection = true
             data?.data?.let { uri ->
-
                 val contentResolver = contentResolver
                 val mimeType = contentResolver.getType(uri)
                 // sprawdzenie czy uzytkownik wgrywa odpowiedni typ pliku
-                if (mimeType?.startsWith("audio/") != true) {
-                    Toast.makeText(this, getString(R.string.wrong_file_format), Toast.LENGTH_SHORT).show()
-                    return
-                }
+//                if (mimeType?.startsWith("audio/") != true) {
+//                    Toast.makeText(this, getString(R.string.wrong_file_format), Toast.LENGTH_SHORT).show()
+//                    return
+//                }
                 val fileName = getFileNameFromUri(uri)
                 if (fileName != null) {
                     tvSelectedFile.text = "$fileName is being transcripted"
@@ -477,18 +501,35 @@ class StartActivity : AppCompatActivity() {
         }
     }
 
+    private fun disableUIInteractions() {
+        val viewsToDisable = listOf(
+            btnRecordActivity, btnChooseFile, btnTranscriptLive, btnHistory, btnLogout, btnBack, btnCopy
+        )
+        viewsToDisable.forEach { it.isEnabled = false }
+        rvTranscriptions.isEnabled = false
+    }
+
     private fun showKeyboard(editText: EditText) {
         editText.requestFocus()
         val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
     }
     private fun updateUI(isServerAvailable: Boolean) {
-        tvConnectionStatus.text = if (isServerAvailable) {
-            "Serwer dostępny"
+        if (isServerAvailable) {
+            tvConnectionStatus.text = getString(R.string.server_available)
+            tvConnectionStatus.visibility = View.VISIBLE
+
+            val viewsToEnable = listOf(
+                btnRecordActivity, btnChooseFile, btnTranscriptLive, btnHistory, btnLogout, btnBack, btnCopy
+            )
+            viewsToEnable.forEach { it.isEnabled = true }
+
+            rvTranscriptions.isEnabled = true
         } else {
-            "Serwer niedostępny"
+            tvConnectionStatus.text = getString(R.string.server_unavailable_app_blocked)
+            tvConnectionStatus.visibility = View.VISIBLE
+            disableUIInteractions()
         }
-        tvConnectionStatus.visibility = View.VISIBLE
     }
 
     override fun onResume() {
@@ -503,7 +544,6 @@ class StartActivity : AppCompatActivity() {
             isReturningFromFileSelection = false
         }
     }
-
 
     override fun onDestroy() {
         super.onDestroy()

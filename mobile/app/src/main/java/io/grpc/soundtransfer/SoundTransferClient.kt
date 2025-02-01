@@ -65,10 +65,10 @@ class SoundTransferClient(uri: Uri) : Closeable {
     }
 
     // zamiast stringa obiekt ktory zwraca bula :3 i stringa
-    fun transcribeLive(callback: (String) -> Unit) {
+    fun transcribeLive(language: String, callback: (String) -> Unit) {
         val metadata = Metadata()
         val key = Metadata.Key.of("language", Metadata.ASCII_STRING_MARSHALLER)
-        metadata.put(key, "pl")
+        metadata.put(key, language) // Ustawiamy język w metadanych
         audiStreamManager.initAudioRecorder()
         audiStreamManager.record()
 

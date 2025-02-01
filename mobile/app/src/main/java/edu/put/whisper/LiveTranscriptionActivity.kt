@@ -47,7 +47,9 @@ class LiveTranscriptionActivity : AppCompatActivity() {
     }
 
     private fun startTranscription() {
-        soundTransferClient.transcribeLive { updatedText ->
+        val selectedLanguage = intent.getStringExtra("LANGUAGE") ?: "eng"
+
+        soundTransferClient.transcribeLive(selectedLanguage) { updatedText ->
             runOnUiThread {
                 tvTranscriptionsLive.text = updatedText
             }

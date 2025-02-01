@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
@@ -139,10 +140,10 @@ class MainActivity : AppCompatActivity() {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             bottomSheetBG.visibility = View.GONE
 
-            utilities.setVisibility(View.GONE, btnStop, btnResume, btnSave, btnDelete)
-            utilities.setVisibility(View.VISIBLE, btnRecord, btnList, btnBack)
-            tvTimer.text = "00:00:00"
-            waveformView.clearAmplitudes()
+//            utilities.setVisibility(View.GONE, btnStop, btnResume, btnSave, btnDelete)
+//            utilities.setVisibility(View.VISIBLE, btnRecord, btnList, btnBack)
+//            tvTimer.text = "00:00:00"
+//            waveformView.clearAmplitudes()
 
             // Hide the keyboard
             val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
@@ -158,8 +159,23 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnBack.setOnClickListener {
-            utilities.goBack(this)
+            if (tvTimer.text != "00:00:00") {
+                val dialogBuilder = AlertDialog.Builder(this)
+                dialogBuilder.setMessage(getString(R.string.are_you_sure_you_want_to_leave_you_will_lose_your_recording))
+                    .setCancelable(false)
+                    .setPositiveButton("Yes") { dialog, id ->
+                        utilities.goBack(this)
+                    }
+                    .setNegativeButton("No") { dialog, id ->
+                        dialog.dismiss()
+                    }
+                val alert = dialogBuilder.create()
+                alert.show()
+            } else {
+                utilities.goBack(this)
+            }
         }
+
     }
 
     private val amplitudeRunnable: Runnable = object : Runnable {
@@ -234,7 +250,8 @@ class MainActivity : AppCompatActivity() {
                         startActivity(intent)
                     } else {
                         val intent = Intent(this@MainActivity, TranscriptionDetailActivity::class.java).apply {
-                            putExtra("EXTRA_ERROR_MESSAGE", "Transkrypcja nie jest dostępna.")
+                            putExtra("EXTRA_ERROR_MESSAGE",
+                                getString(R.string.error_getting_transcription))
                         }
                         startActivity(intent)
                     }
@@ -254,6 +271,7 @@ class MainActivity : AppCompatActivity() {
             elapsedTime += System.currentTimeMillis() - startTime
             btnStop.visibility = View.GONE
             utilities.setVisibility(View.VISIBLE, btnResume, btnTranscript)
+            utilities.setVisibility(View.GONE, btnList)
             btnResume.setImageResource(R.drawable.ic_restart)
             Toast.makeText(this, "Recording stopped. You can now transcript it.", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
@@ -272,6 +290,8 @@ class MainActivity : AppCompatActivity() {
                 prepare()
                 start()
             }
+            utilities.setVisibility(View.GONE, btnBack, btnList)
+            utilities.setVisibility(View.VISIBLE, btnDelete, btnSave)
 
             elapsedTime = 0L
             startTime = System.currentTimeMillis()
@@ -327,7 +347,7 @@ class MainActivity : AppCompatActivity() {
             utilities.setVisibility(View.VISIBLE, btnRecord, btnList)
             btnTranscript.visibility = View.INVISIBLE
 
-            Toast.makeText(this, "Recording deleted", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Recording cancelled", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -344,7 +364,7 @@ class MainActivity : AppCompatActivity() {
 
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetBG.visibility = View.VISIBLE
-        btnTranscript.visibility = View.INVISIBLE
+        //btnTranscript.visibility = View.INVISIBLE
         filenameInput.setText(defaultFileName) // Set the default file name
 
     }
@@ -368,17 +388,12 @@ class MainActivity : AppCompatActivity() {
             val finalFile = File(finalFilePath)
 
             tempFile.copyTo(finalFile, overwrite = true)
-            tempFile.delete() // Remove the temporary file
-
+            tempFile.delete()
 
             mediaRecorder?.release()
             mediaRecorder = null
 
-            val dirPath = getExternalFilesDir(Environment.DIRECTORY_MUSIC)?.absolutePath
-            if (dirPath == null) {
-                Toast.makeText(this, "Error: Unable to access music directory", Toast.LENGTH_LONG).show()
-                return
-            }
+            val dirPath = getExternalFilesDir(Environment.DIRECTORY_MUSIC)?.absolutePath ?: return
 
             val ampsPath = "$dirPath/$fileName"
             val timestamp = Date().time
@@ -404,11 +419,16 @@ class MainActivity : AppCompatActivity() {
                 db.audioRecordDao().insert(record)
             }
 
+            tempFilePath = finalFilePath
+
             Toast.makeText(this, "Recording saved", Toast.LENGTH_LONG).show()
+            utilities.setVisibility(View.GONE, btnDelete, btnSave)
+            utilities.setVisibility(View.VISIBLE, btnList, btnBack)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
+
 
     private val timerRunnable: Runnable = object : Runnable {
         override fun run() {

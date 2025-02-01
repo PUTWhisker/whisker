@@ -1,5 +1,6 @@
 package edu.put.whisper
 
+import RolesActivity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
@@ -58,8 +59,6 @@ class TranscriptionDetailActivity : AppCompatActivity() {
         }
 
         if (transcriptionText != null && transcriptionDate != null) {
-
-
             tvTranscriptionText.setText(transcriptionText)
             try {
                 val timestamp = transcriptionDate.toLong()

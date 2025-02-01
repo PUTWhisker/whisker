@@ -105,6 +105,13 @@
     <string name="registration_failed_try_again">Registration failed. Try again.</string>
     <string name="passwords_do_not_match_please_try_again">Passwords do not match. Please try again.</string>
     <string name="please_log_in_to_view_history">Please log in to view history.</string>
+    <string name="splitting_your_transcription">Splitting your transcription...</string>
+    <string name="split_transcription_into_roles">Split transcription into roles</string>
+    <string name="error_getting_transcription">Error getting transcription</string>
+    <string name="are_you_sure_you_want_to_leave_you_will_lose_your_recording">Are you sure you want to leave? You will lose your recording.</string>
+    <string name="server_available">Server available</string>
+    <string name="server_unavailable_app_blocked">Server unavailable, app blocked</string>
+    <string name="choose_transcription_language">Choose transcription language</string>
     <string-array name="languages_full">
         <item>Polski</item>
         <item>English</item>

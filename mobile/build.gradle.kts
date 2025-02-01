@@ -22,4 +22,4 @@ subprojects {
 tasks.create("assemble").dependsOn(":server:installDist")
 
 //rootProject.extra["serverUrl"] = "http://10.0.2.2:50051/"
-rootProject.extra["serverUrl"] = "http://whisper.cs.put.poznan.pl:80/"
+rootProject.extra["serverUrl"] = "https://whisper.cs.put.poznan.pl:80/"
