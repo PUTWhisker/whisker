@@ -76,6 +76,24 @@ header {
     width: 1dvh;
 }
 
+.sort_button_and_arrows {
+    cursor: pointer;
+}
+
+.sort_button_and_arrows.sorting_undefined .sort_button_dir_arrow,
+.sort_button_and_arrows.sorting_asc .sort_button_undef_arrows,
+.sort_button_and_arrows.sorting_desc .sort_button_undef_arrows {
+    display: none;
+}
+
+.sort_button_and_arrows.sorting_asc .sort_button_dir_arrow {
+    transform: rotate(-90deg);
+}
+
+.sort_button_and_arrows.sorting_desc .sort_button_dir_arrow {
+    transform: rotate(90deg);
+}
+
 .event_view {
     margin: 1vw;
     padding: 1vw;
