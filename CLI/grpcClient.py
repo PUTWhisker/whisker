@@ -26,7 +26,6 @@ from proto.authentication import authentication_pb2
 
 sys.path.insert(0, curDir)
 
-
 class GrpcClient:
     def __init__(
         self,
@@ -44,7 +43,8 @@ class GrpcClient:
         self.language = language
         self.save = save
         self.translation = translation
-        self.channel = grpc.aio.insecure_channel(f"{self.host}:{self.port}")
+        self.host += ":%d" % int(self.port)
+        self.channel = grpc.aio.secure_channel(self.host, credentials=grpc.ssl_channel_credentials())
         self.stub = Services.SoundServiceStub(
             self.channel
         )  # Creating server stub, these are reusable
