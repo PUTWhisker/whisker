@@ -8,6 +8,7 @@ const { authenticationClient,
         QueryParamethers,
         RefreshTokenRequest } = require('./consts.js')
 
+const { callHandler } = require('./interceptor.js')
 const { getCookie } = require('./token.js')
 
 
@@ -111,41 +112,53 @@ export async function *getTranscription(start_time, end_time, limit=10) {
 
 
 export function editTranscription(id, newTranscription) {
-    let request = new NewTranscription()
-    request.setId(id)
-    request.setContent(newTranscription)
-    let metadata
-    let token = getCookie("whisker_access")
-    if (token) {
-        metadata = {"jwt": token}
+    function _editTranscription(id, newTranscription) {
+        return new Promise((resolve, reject) => {
+            let request = new NewTranscription()
+            request.setId(id)
+            request.setContent(newTranscription)
+            let metadata
+            let token = getCookie("whisker_access")
+            if (token) {
+                metadata = {"jwt": token}
+            }
+            authenticationClient.editTranscription(request, metadata, (err, response) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(response)
+            })
+        })
     }
     return new Promise((resolve, reject) => {
-        authenticationClient.editTranscription(request, metadata, (err, response) => {
-            if (err) {
-                reject(err)
-            }
-            resolve(response)
-        })
+        resolve(callHandler(_editTranscription)(id, newTranscription))
     })
+
 }
 
 
 export function deleteTranscription(id) {
-    let request = new Id()
-    request.setId(id)
-    let metadata
-    let token = getCookie("whisker_access")
-    if (token) {
-        metadata = {"jwt": token}
+    function _deleteTranscription(id) {
+        return new Promise((resolve, reject) => {
+            let request = new Id()
+            request.setId(id)
+            let metadata
+            let token = getCookie("whisker_access")
+            if (token) {
+                metadata = {"jwt": token}
+            }
+            authenticationClient.deleteTranscription(request, metadata, (err, response) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(response)
+            })
+        })
     }
     return new Promise((resolve, reject) => {
-        authenticationClient.deleteTranscription(request, metadata, (err, response) => {
-            if (err) {
-                reject(err)
-            }
-            resolve(response)
-        })
+        resolve(callHandler(_deleteTranscription)(id))
     })
+
 }
 
 
@@ -198,44 +211,56 @@ export async function *getTranslation(start_time, end_time, limit) {
 
 
 export function editTranslation(id, transcription, translation, edit_transcription, edit_translation) {
-    let request = new NewTranslation()
-    request.setId(id)
-    request.setTranscription(transcription)
-    request.setTranslation(translation)
-    request.setEditTranscription(edit_transcription)
-    request.setEditTranslation(edit_translation)
-    let metadata
-    let token = getCookie("whisker_access")
-    if (token) {
-        metadata = {"jwt": token}
+    function _editTranslation(id, transcription, translation, edit_transcription, edit_translation) {
+        return new Promise((resolve, reject) => {
+            let request = new NewTranslation()
+            request.setId(id)
+            request.setTranscription(transcription)
+            request.setTranslation(translation)
+            request.setEditTranscription(edit_transcription)
+            request.setEditTranslation(edit_translation)
+            let metadata
+            let token = getCookie("whisker_access")
+            if (token) {
+                metadata = {"jwt": token}
+            }
+            authenticationClient.editTranslation(request, metadata, (err, response) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(response)
+            })
+        })
     }
     return new Promise((resolve, reject) => {
-        authenticationClient.editTranslation(request, metadata, (err, response) => {
-            if (err) {
-                reject(err)
-            }
-            resolve(response)
-        })
+        resolve(callHandler(_editTranslation)(id, transcription, translation, edit_transcription, edit_translation))
     })
+
 }
 
 
 export function deleteTranslation(id) {
-    let request = new Id()
-    request.setId(id)
-    let metadata
-    let token = getCookie("whisker_access")
-    if (token) {
-        metadata = {"jwt": token}
+    function _deleteTranslation(id,) {
+        return new Promise((resolve, reject) => {
+            let request = new Id()
+            request.setId(id)
+            let metadata
+            let token = getCookie("whisker_access")
+            if (token) {
+                metadata = {"jwt": token}
+            }
+            authenticationClient.deleteTranslation(request, metadata, (err, response) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(response)
+            })
+        })
     }
     return new Promise((resolve, reject) => {
-        authenticationClient.deleteTranslation(request, metadata, (err, response) => {
-            if (err) {
-                reject(err)
-            }
-            resolve(response)
-        })
+        resolve(callHandler(_deleteTranslation)(id))
     })
+
 }
 
 
@@ -288,40 +313,52 @@ export async function *getDiarization(start_time, end_time, limit) {
 
 
 export function editDiarization(id, line, speaker) {
-    let request = new NewDiarization()
-    request.setId(id)
-    request.setLine(line)
-    request.setSpeaker(speaker)
-    let metadata
-    let token = getCookie("whisker_access")
-    if (token) {
-        metadata = {"jwt": token}
+    function _editDiarization(id, line, speaker) {
+        return new Promise((resolve, reject) => {
+            let request = new NewDiarization()
+            request.setId(id)
+            request.setLine(line)
+            request.setSpeaker(speaker)
+            let metadata
+            let token = getCookie("whisker_access")
+            if (token) {
+                metadata = {"jwt": token}
+            }
+            authenticationClient.editDiarization(request, metadata, (err, response) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(response)
+            })
+        })
     }
     return new Promise((resolve, reject) => {
-        authenticationClient.editDiarization(request, metadata, (err, response) => {
-            if (err) {
-                reject(err)
-            }
-            resolve(response)
-        })
+        resolve(callHandler(_editDiarization)(id, line, speaker))
     })
+
 }
 
 
 export function deleteDiarization(id) {
-    let request = new Id()
-    request.setId(id)
-    let metadata
-    let token = getCookie("whisker_access")
-    if (token) {
-        metadata = {"jwt": token}
+    function _deleteDiarization(id,) {
+        return new Promise((resolve, reject) => {
+            let request = new Id()
+            request.setId(id)
+            let metadata
+            let token = getCookie("whisker_access")
+            if (token) {
+                metadata = {"jwt": token}
+            }
+            authenticationClient.deleteDiarization(request, metadata, (err, response) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(response)
+            })
+        })
     }
     return new Promise((resolve, reject) => {
-        authenticationClient.deleteDiarization(request, metadata, (err, response) => {
-            if (err) {
-                reject(err)
-            }
-            resolve(response)
-        })
+        resolve(callHandler(_deleteDiarization)(id))
     })
+
 }

@@ -75,7 +75,7 @@ export function sendFile(file, source_language) { // Send file to the server and
     })
 }
 
-//TODO: saving does not work
+
 export async function* sendFileTranslation(file, source_language, translation_language) {
     const reader = (file) =>
         new Promise((resolve, reject) => {
@@ -139,30 +139,35 @@ export async function* sendFileTranslation(file, source_language, translation_la
 
 
 export function diarizateFile(file, source_language) {
-    console.log("Sending file for diarization")
-    let reader = new FileReader()
-    reader.readAsArrayBuffer(file)
-    return new Promise((resolve, reject) => {
-        reader.onload = function (e) {
-            let buffer = e.target.result
-            let byteArray = new Uint8Array(buffer)
-            let request = new TranscriptionRequest()
-            request.setSoundData(byteArray)
-            request.setSourceLanguage(source_language)
-            let metadata = {}
-            let token = getCookie("acs")
-            if (token) {
-                metadata = {"jwt": token}
-            }
-            soundClient.diarizateFile(request, metadata, (err, response) => {
-                if (err) {
-                    console.log(`Could not send files to the server: code = ${err.code}, message = ${err.message}`)
-                    reject(err)
+    function diarizateFile(file, source_language) {
+        return new Promise((resolve, reject) => {
+            console.log("Sending file for diarization")
+            let reader = new FileReader()
+            reader.readAsArrayBuffer(file)
+            reader.onload = function (e) {
+                let buffer = e.target.result
+                let byteArray = new Uint8Array(buffer)
+                let request = new TranscriptionRequest()
+                request.setSoundData(byteArray)
+                request.setSourceLanguage(source_language)
+                let metadata = {}
+                let token = getCookie("acs")
+                if (token) {
+                    metadata = {"jwt": token}
                 }
-                console.log("Success! Answer should be visible in the console")
-                resolve(response)
-            })
-        }
+                soundClient.diarizateFile(request, metadata, (err, response) => {
+                    if (err) {
+                        console.log(`Could not send files to the server: code = ${err.code}, message = ${err.message}`)
+                        reject(err)
+                    }
+                    console.log("Success! Answer should be visible in the console")
+                    resolve(response)
+                })
+            }
+        })
+    }
+    return new Promise((resolve, reject) => {
+        resolve(callHandler(_diarizateFile)(file, source_language))
     })
 }
 
@@ -184,20 +189,32 @@ function convertFloat32ToUint8(float32Array) {
 }
 
 
-export async function transcribeLiveWeb(audioChunk, language, metadata) { //TODO: add token to metadata
-    console.log("Sending recording for live transcription.")
-    let request = new TranscriptionRequest()
-    const uint8Array = convertFloat32ToUint8(audioChunk);
-    request.setSoundData(uint8Array)
-    request.setSourceLanguage(language)
-    return new Promise((resolve, reject) => {
-        soundClient.transcribeLiveWeb(request, metadata, (err, response) => {
-            if (err) {
-                console.log(`Could not establish connection with the server: code = ${err.code}, message = ${err.message}`)
-                reject(err)
+export async function transcribeLiveWeb(audioChunk, language, sessionId) {
+    function _transcribeLiveWeb(audioChunk, language, sessionId) {
+        return new Promise((resolve, reject) => {
+            console.log("Sending recording for live transcription.")
+            let request = new TranscriptionRequest()
+            const uint8Array = convertFloat32ToUint8(audioChunk);
+            request.setSoundData(uint8Array)
+            request.setSourceLanguage(language)
+            let metadata = {}
+            let token = getCookie("access_token")
+            if (token) {
+                metadata = {"session_id": sessionId, "jwt": token}
+            } else {
+                metadata = {"session_id": sessionId}
             }
-            resolve(response)
+            soundClient.transcribeLiveWeb(request, metadata, (err, response) => {
+                if (err) {
+                    console.log(`Could not establish connection with the server: code = ${err.code}, message = ${err.message}`)
+                    reject(err)
+                }
+                resolve(response)
+            })
         })
+    }
+    return new Promise((resolve, reject) => {
+        resolve(callHandler(_transcribeLiveWeb)(audioChunk, language, sessionId))
     })
 }
 

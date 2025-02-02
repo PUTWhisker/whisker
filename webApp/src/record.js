@@ -76,7 +76,6 @@ async function recordAndSend(audioContext, myAudioWorkletNode, selectedLanguage)
         shouldRecord = true
         canRecord = false
         let sessionId = await getSessionId()
-        let metadata = {"session_id": sessionId}
 
         recordAndSegmentChunks = setInterval(() => {
             if (shouldRecord && audioChunks.length > 0) {
@@ -90,7 +89,7 @@ async function recordAndSend(audioContext, myAudioWorkletNode, selectedLanguage)
             if (!isSending && recordedChunks.length > 0) {
                 isSending = true
                 const currentChunk = recordedChunks.shift(0)
-                response = await transcribeLiveWeb(currentChunk, selectedLanguage, metadata)
+                response = await transcribeLiveWeb(currentChunk, selectedLanguage, sessionId)
                 printResult(response)
                 isSending = false
             } else if (!shouldRecord && recordedChunks.length == 0 && !isSending) {
