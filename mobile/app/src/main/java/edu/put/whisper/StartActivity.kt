@@ -413,62 +413,75 @@ class StartActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        Log.d("DEBUG", "onActivityResult called with requestCode=$requestCode, resultCode=$resultCode")
+
         if (requestCode == PICK_FILE_REQUEST_CODE && resultCode == RESULT_OK) {
             isReturningFromFileSelection = true
-            data?.data?.let { uri ->
-                val contentResolver = contentResolver
-                val mimeType = contentResolver.getType(uri)
-                // sprawdzenie czy uzytkownik wgrywa odpowiedni typ pliku
-//                if (mimeType?.startsWith("audio/") != true) {
-//                    Toast.makeText(this, getString(R.string.wrong_file_format), Toast.LENGTH_SHORT).show()
-//                    return
-//                }
-                val fileName = getFileNameFromUri(uri)
-                if (fileName != null) {
-                    tvSelectedFile.text = "$fileName is being transcripted"
-                    Log.d("DEBUG", "File selected: $fileName")
+            val uri = data?.data
+            if (uri == null) {
+                Log.e("DEBUG", "No file URI received in intent data.")
+                return
+            }
 
-                    val startLayout = findViewById<ScrollView>(R.id.start_layout)
-                    startLayout.visibility = View.GONE
-                    val loadingAnimation = findViewById<LoadingAnimation>(R.id.LoadingAnimationStart)
-                    loadingAnimation.visibility = View.VISIBLE
+            val contentResolver = contentResolver
+            val mimeType = contentResolver.getType(uri)
+            Log.d("DEBUG", "File MIME type: $mimeType, URI: $uri")
 
-                    lifecycleScope.launch {
-                        val filePath = getFilePathFromUri(uri)
-                        Log.d("DEBUG", "File path resolved: $filePath")
+            // Sprawdzenie, czy użytkownik wgrywa odpowiedni typ pliku
+            if (mimeType?.startsWith("audio/") != true) {
+                Log.e("DEBUG", "Selected file is not an audio file. MIME type: $mimeType")
+                Toast.makeText(this, getString(R.string.wrong_file_format), Toast.LENGTH_SHORT).show()
+                return
+            }
 
-                        if (filePath != null) {
-                            utilities.uploadRecording(filePath, "en") { transcription ->
-                                Log.d("DEBUG", "Transcription result: $transcription")
-                                runOnUiThread {
-                                    val intent = Intent(this@StartActivity, TranscriptionDetailActivity::class.java)
-                                    if (transcription != null) {
-                                        intent.putExtra("EXTRA_TRANSCRIPTION_TEXT", transcription)
-                                        intent.putExtra("EXTRA_FILE_PATH", filePath)
-                                        intent.putExtra("EXTRA_LANGUAGE", "en")
-                                    } else {
-                                        intent.putExtra("EXTRA_ERROR_MESSAGE", "Transcription failed.")
-                                        Log.e("DEBUG", "Transcription failed: Result was null")
-                                    }
-                                    startActivity(intent)
-                                }
-                            }
+            val fileName = getFileNameFromUri(uri)
+            if (fileName == null) {
+                Log.e("DEBUG", "Failed to retrieve file name from URI.")
+                return
+            }
+
+            tvSelectedFile.text = getString(R.string.is_being_transcribed, fileName)
+            Log.d("DEBUG", "File selected: $fileName")
+
+            val startLayout = findViewById<ScrollView>(R.id.start_layout)
+            startLayout.visibility = View.GONE
+            val loadingAnimation = findViewById<LoadingAnimation>(R.id.LoadingAnimationStart)
+            loadingAnimation.visibility = View.VISIBLE
+
+            lifecycleScope.launch {
+                Log.d("DEBUG", "Attempting to resolve file path from URI...")
+                val filePath = getFilePathFromUri(uri)
+                Log.d("DEBUG", "File path resolved: $filePath")
+
+                if (filePath == null) {
+                    Log.e("DEBUG", "Failed to get file path from URI.")
+                    return@launch
+                }
+
+                Log.d("DEBUG", "Starting uploadRecording with file path: $filePath")
+                utilities.uploadRecording(filePath, "en") { transcription ->
+                    Log.d("DEBUG", "uploadRecording callback received. Transcription: $transcription")
+
+                    runOnUiThread {
+                        val intent = Intent(this@StartActivity, TranscriptionDetailActivity::class.java)
+                        if (transcription != null) {
+                            intent.putExtra("EXTRA_TRANSCRIPTION_TEXT", transcription)
+                            intent.putExtra("EXTRA_FILE_PATH", filePath)
+                            intent.putExtra("EXTRA_LANGUAGE", "en")
+                            Log.d("DEBUG", "Transcription successful. Launching TranscriptionDetailActivity.")
                         } else {
-                            Log.e("DEBUG", "Failed to get file path from URI")
-                            val intent = Intent(this@StartActivity, TranscriptionDetailActivity::class.java)
-                            intent.putExtra("EXTRA_ERROR_MESSAGE", "Unable to get path")
-                            startActivity(intent)
+                            intent.putExtra("EXTRA_ERROR_MESSAGE", "Transcription failed.")
+                            Log.e("DEBUG", "Transcription failed: Result was null")
                         }
+                        startActivity(intent)
                     }
-                } else {
-                    Log.e("DEBUG", "Failed to get file name from URI")
-                    val intent = Intent(this@StartActivity, TranscriptionDetailActivity::class.java)
-                    intent.putExtra("EXTRA_ERROR_MESSAGE", "Unable to get file name")
-                    startActivity(intent)
                 }
             }
+        } else {
+            Log.w("DEBUG", "User canceled file selection or invalid resultCode received.")
         }
     }
+
 
     private fun getFilePathFromUri(uri: Uri): String? {
         var inputStream = contentResolver.openInputStream(uri)

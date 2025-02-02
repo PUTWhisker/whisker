@@ -112,6 +112,7 @@
     <string name="server_available">Server available</string>
     <string name="server_unavailable_app_blocked">Server unavailable, app blocked</string>
     <string name="choose_transcription_language">Choose transcription language</string>
+    <string name="is_being_transcribed">%1$s is being transcribed</string>
     <string-array name="languages_full">
         <item>Polski</item>
         <item>English</item>
