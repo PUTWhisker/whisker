@@ -1,12 +1,16 @@
 from pyannote.audio import Pipeline
-
+from dotenv import load_dotenv
 
 import os
+import torch
 
+
+cuda = os.getenv("ENABLE_CUDA")
+device = torch.device("cuda" if torch.cuda.is_available() and cuda else "cpu")
 pipeline = Pipeline.from_pretrained(
     "pyannote/speaker-diarization-3.1",
-    use_auth_token="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",
-)
+    use_auth_token="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"
+).to(device)
 
 
 class Clip:

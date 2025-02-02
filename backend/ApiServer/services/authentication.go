@@ -129,7 +129,10 @@ func (s *AuthenticationServer) Login(ctx context.Context, in *pb.UserCredits) (*
 	if isLoginSuccesfull {
 		token, _ := s.JwtGenerator.generate(userId)
 		newRefreshToken, _ := generateOpaqueToken()
-		s.Db.addRefreshToken(ctx, userId, newRefreshToken)
+		err := s.Db.addRefreshToken(ctx, userId, newRefreshToken)
+		if err != nil {
+			return nil, err
+		}
 		return &pb.LoginResponse{JWT: token, RefreshToken: newRefreshToken}, nil
 
 	}

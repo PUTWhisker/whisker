@@ -10,4 +10,7 @@
 
 ## Changing or modifying proto files
 1. Change schema in the `proto/` directory.
-1. Run `generate-proto.sh`
+1. Run `generate-proto.sh` or `generate-proto.bat`
+
+## Web application
+To preview web application visit [our website](https://wmsd.cs.put.poznan.pl)

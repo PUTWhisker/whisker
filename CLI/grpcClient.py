@@ -1,9 +1,11 @@
 from typing import Union
-from querryParameters import QuerryParameters
+from queryParameters import QueryParameters
+from dotenv import load_dotenv, set_key
 
 import audio
 import os
 import sys
+import inspect
 import grpc
 
 curDir = os.path.dirname(__file__)
@@ -24,11 +26,6 @@ from proto.authentication import authentication_pb2
 
 sys.path.insert(0, curDir)
 
-
-# declare Keepalive pings
-# close connection on ending
-
-
 class GrpcClient:
     def __init__(
         self,
@@ -37,34 +34,106 @@ class GrpcClient:
         language: str = None,
         save: str = None,
         translation: str = None,
-        token:str = "",
+        noSSL: bool = False,
+        envFile: str = ".env",
     ):
+        self.env = envFile
+        load_dotenv(self.env)
         self.host = host
         self.port = port
         self.language = language
         self.save = save
         self.translation = translation
-        self.channel = grpc.aio.insecure_channel(f"{self.host}:{self.port}")
+        self.host += ":%d" % int(self.port)
+        if not noSSL:
+            self.channel = grpc.aio.secure_channel(self.host, credentials=grpc.ssl_channel_credentials())
+        else:
+            self.channel = grpc.aio.insecure_channel(self.host)
         self.stub = Services.SoundServiceStub(
             self.channel
         )  # Creating server stub, these are reusable
-        self.token = token
+        self.accessToken = os.getenv("JWT_TOKEN")
+        self.refreshToken = os.getenv("REFRESH_TOKEN")
 
 
+    def _errorMessage(self, grpcError: grpc.RpcError):
+        if grpcError.code() == grpc.StatusCode.UNAVAILABLE or grpcError.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+            print("\nCould not connect to the target server.")
+        else: 
+            print(f"Grpc connection failure: {grpcError.details()}") 
+            print(f"{grpcError.code()}") 
+            print(f"{grpcError.debug_error_string()}") 
+
+
+    def _errorUnaryHandler(func: callable):
+        async def wrapper(self, *args, **kwargs):
+            try:
+                return await func(self, *args, **kwargs)
+            except grpc.RpcError as grpcError:
+                if grpcError.code() == grpc.StatusCode.UNAUTHENTICATED and grpcError.details() == "invalid token":
+                    try:
+                        await self.RefreshToken()
+                        return await func(self, *args, **kwargs)
+                    except grpc.RpcError as grpcError:
+                        self._errorMessage(grpcError)
+                        raise(grpcError)
+                    except Exception as e:
+                        raise e
+                else:
+                    self._errorMessage(grpcError)
+                    raise(grpcError)
+            except Exception as e:
+                raise e # let ConsolePrinter handle client-side errors
+        return wrapper
+
+
+    def _errorStreamHandler(func: callable):
+        async def wrapper(self, *args, **kwargs):
+            try:
+                result = func(self, *args, **kwargs)
+                if inspect.isasyncgen(result):
+                    async for res in result:
+                        yield res
+                return
+            except grpc.RpcError as grpcError:
+                if grpcError.code() == grpc.StatusCode.UNAUTHENTICATED and grpcError.details() == "invalid token":
+                    try:
+                        await self.RefreshToken()
+                        result = func(self, *args, **kwargs)
+                        if inspect.isasyncgen(result):
+                            async for res in result:
+                                yield res
+                        return
+                    except grpc.RpcError as grpcError:
+                        self._errorMessage(grpcError)
+                        raise(grpcError)
+                    except Exception as e:
+                        raise e
+                else:
+                    self._errorMessage(grpcError)
+                    raise(grpcError)
+            except Exception as e:
+                raise e
+        return wrapper
+
+
+    @_errorUnaryHandler
     async def testConnection(self, seed: str) -> Union[bool, grpc.RpcError]:
         try:
             response = await self.stub.TestConnection(  # sending generated number
-                Variables.TextMessage(text=seed)
+                Variables.TextMessage(text=seed),
+                timeout=5
             )
             return response
         except Exception as e:
             raise e
         
 
+    @_errorUnaryHandler
     async def diarizateFile(self, audioFile: bytes) -> Union[bool, grpc.RpcError]:
         try:
             metadata = (
-                ("jwt", self.token),
+                ("jwt", self.accessToken),
             )
             response = await self.stub.DiarizateFile(
                 Variables.TranscriptionRequest(sound_data=audioFile,
@@ -76,10 +145,11 @@ class GrpcClient:
             raise e
         
 
+    @_errorUnaryHandler
     async def transcribeFile(self, audioFile: bytes) -> Union[bool, grpc.RpcError]:
         try:
             metadata = (
-                ("jwt", self.token),
+                ("jwt", self.accessToken),
             )
             response = await self.stub.TranscribeFile(
                 Variables.TranscriptionRequest(sound_data=audioFile,
@@ -91,10 +161,11 @@ class GrpcClient:
             raise e
         
 
+    @_errorStreamHandler
     async def translateFile(self, audioFile: bytes) -> Union[bool, grpc.RpcError]:
         try:
             metadata = (
-                ("jwt", self.token),
+                ("jwt", self.accessToken),
             )
             responseIter = self.stub.TranslateFile(
                 Variables.TranslationRequest(sound_data=audioFile,
@@ -107,17 +178,18 @@ class GrpcClient:
         except Exception as e:
             raise e
         
-    #TODO: try to transfer message sending from audio.py to here
+    
+    @_errorStreamHandler
     async def transcribeLive(self) -> Union[bool, grpc.RpcError]:
         try:
             recording = audio.AudioRecorder(self.save)  # Initiate recording class
             metadata = (
-                ("jwt", self.token),
+                ("jwt", self.accessToken),
                 ("source_language", self.language),
             )
             responseIter = self.stub.TranscribeLive(
                 recording.record(self.language), metadata=metadata
-            )  # Streaming recorded audio yield by record() funciton
+            )  # Streaming recorded audio yield by record() function
             print("Recording started. You may start talking now. Press 'ctrl+c' to stop recording.")
             async for response in responseIter:
                 yield response
@@ -125,7 +197,8 @@ class GrpcClient:
             raise e
 
 
-    async def retreiveJWT(self, username:str, password:str) -> Union[bool, grpc.RpcError]:
+    @_errorUnaryHandler
+    async def login(self, username:str, password:str) -> Union[bool, grpc.RpcError]:
         try:
             stub = authentication_pb2_grpc.ClientServiceStub(
                 self.channel
@@ -133,11 +206,14 @@ class GrpcClient:
             tokenJWT = await stub.Login(
                 authentication_pb2.UserCredits(username=username, password=password),
             )
+            set_key(self.env, "JWT_TOKEN", tokenJWT.JWT)
+            set_key(self.env, "REFRESH_TOKEN", tokenJWT.refresh_token)
             return tokenJWT
         except Exception as e:
             raise e
     
     
+    @_errorUnaryHandler
     async def register(self, username:str, password:str) -> Union[bool, grpc.RpcError]:
         try:
             stub = authentication_pb2_grpc.ClientServiceStub(
@@ -151,13 +227,32 @@ class GrpcClient:
             raise e
         
 
-    async def getTranscription(self, params:QuerryParameters) -> Union[bool, grpc.RpcError]:
+    @_errorUnaryHandler
+    async def RefreshToken(self) -> Union[bool, grpc.RpcError]:
+        try:
+            stub = authentication_pb2_grpc.ClientServiceStub(
+                self.channel
+            )            
+            response = await stub.RefreshToken(
+                authentication_pb2.RefreshTokenRequest(refresh_token=self.refreshToken)
+            )
+            self.accessToken = response.access_token
+            self.refreshToken = response.refresh_token
+            set_key(self.env, "JWT_TOKEN", self.accessToken)
+            set_key(self.env, "REFRESH_TOKEN", self.refreshToken)
+            return response
+        except Exception as e:
+            raise e
+
+
+    @_errorStreamHandler
+    async def getTranscription(self, params:QueryParameters) -> Union[bool, grpc.RpcError]:
         try:
             stub = authentication_pb2_grpc.ClientServiceStub(
                 self.channel
             )
             metadata = (
-                ("jwt", self.token),
+                ("jwt", self.accessToken),
             )
             params.convertDate()
             responseIter = stub.GetTranscription(
@@ -175,13 +270,14 @@ class GrpcClient:
             raise e
         
     
+    @_errorUnaryHandler
     async def editTranscription(self, id:int, content:str) -> Union[bool, grpc.RpcError]:
         try:
             stub = authentication_pb2_grpc.ClientServiceStub(
                 self.channel
             )
             metadata = (
-                ("jwt", self.token),
+                ("jwt", self.accessToken),
             )
             response = await stub.EditTranscription(
                 authentication_pb2.NewTranscription(
@@ -195,13 +291,14 @@ class GrpcClient:
             raise e
         
 
+    @_errorUnaryHandler
     async def deleteTranscription(self, id:int) -> Union[bool, grpc.RpcError]:
         try:
             stub = authentication_pb2_grpc.ClientServiceStub(
                 self.channel
             )
             metadata = (
-                ("jwt", self.token),
+                ("jwt", self.accessToken),
             )
             response = await stub.DeleteTranscription(
                 authentication_pb2.Id(
@@ -214,13 +311,14 @@ class GrpcClient:
             raise e
         
 
-    async def getTranslation(self, params:QuerryParameters) -> Union[bool, grpc.RpcError]:
+    @_errorStreamHandler
+    async def getTranslation(self, params:QueryParameters) -> Union[bool, grpc.RpcError]:
         try:
             stub = authentication_pb2_grpc.ClientServiceStub(
                 self.channel
             )
             metadata = (
-                ("jwt", self.token),
+                ("jwt", self.accessToken),
             )
             params.convertDate()
             responseIter = stub.GetTranslation(
@@ -239,6 +337,7 @@ class GrpcClient:
             raise e
         
 
+    @_errorUnaryHandler
     async def editTranslation(self, 
                               id:int, 
                               transcription:str,
@@ -250,7 +349,7 @@ class GrpcClient:
                 self.channel
             )
             metadata = (
-                ("jwt", self.token),
+                ("jwt", self.accessToken),
             )
             response = await stub.EditTranslation(
                 authentication_pb2.NewTranslation(
@@ -267,13 +366,14 @@ class GrpcClient:
             raise e
         
 
+    @_errorUnaryHandler
     async def deleteTranslation(self, id:int) -> Union[bool, grpc.RpcError]:
         try:
             stub = authentication_pb2_grpc.ClientServiceStub(
                 self.channel
             )
             metadata = (
-                ("jwt", self.token),
+                ("jwt", self.accessToken),
             )
             response = await stub.DeleteTranslation(
                 authentication_pb2.Id(
@@ -286,13 +386,14 @@ class GrpcClient:
             raise e
         
 
-    async def getDiarization(self, params:QuerryParameters) -> Union[bool, grpc.RpcError]:
+    @_errorStreamHandler
+    async def getDiarization(self, params:QueryParameters) -> Union[bool, grpc.RpcError]:
         try:
             stub = authentication_pb2_grpc.ClientServiceStub(
                 self.channel
             )
             metadata = (
-                ("jwt", self.token),
+                ("jwt", self.accessToken),
             )
             params.convertDate()
             responseIter = stub.GetDiarization(
@@ -310,13 +411,14 @@ class GrpcClient:
             raise e
 
 
+    @_errorUnaryHandler
     async def editDiarization(self, id:int, speaker:list, line:list) -> Union[bool, grpc.RpcError]:
         try:
             stub = authentication_pb2_grpc.ClientServiceStub(
                 self.channel
             )
             metadata = (
-                ("jwt", self.token),
+                ("jwt", self.accessToken),
             )
             response = await stub.EditDiarization(
                 authentication_pb2.NewDiarization(
@@ -331,13 +433,14 @@ class GrpcClient:
             raise e
         
 
+    @_errorUnaryHandler
     async def deleteDiarization(self, id:int) -> Union[bool, grpc.RpcError]:
         try:
             stub = authentication_pb2_grpc.ClientServiceStub(
                 self.channel
             )
             metadata = (
-                ("jwt", self.token),
+                ("jwt", self.accessToken),
             )
             response = await stub.DeleteDiarization(
                 authentication_pb2.Id(

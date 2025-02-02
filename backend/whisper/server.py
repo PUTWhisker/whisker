@@ -42,14 +42,14 @@ def _errorMessages(e: Exception, func: callable):
     if isinstance(e, WrongLanguage):
         errorCode = grpc.StatusCode.INVALID_ARGUMENT
         errorMessage = "Supplied translate language is not currently supported."
-    else:  # TODO: Debug and change for real error messages
+    else: 
         errorCode = grpc.StatusCode.INTERNAL
         errorMessage = f"An error occured while executing {func} function: {e} <Error type: {type(e)}>"
     return errorCode, errorMessage
 
 
 def run_transcribe(file_path, data: TranscriptionData):
-    model = faster_whisper_model.FasterWhisperHandler(os.getenv("FASTER_WHISPER_MODEL"))
+    model = faster_whisper_model.FasterWhisperHandler(os.getenv("FASTER_WHISPER_MODEL"), os.getenv("ENABLE_CUDA"))
     res = model.transcribe(str(file_path), data)
     return res
 
@@ -65,18 +65,21 @@ async def cleanupWebSessions():
 
 
 class SoundService(Services.SoundServiceServicer):
-    def __init__(self):
+    def __init__(self, loop: asyncio.AbstractEventLoop):
         self.number = 0
+        self.cuda = os.getenv("ENABLE_CUDA")
         self.fastModel = faster_whisper_model.FasterWhisperHandler(
             os.getenv("FASTER_WHISPER_MODEL"),
+            self.cuda
         )
-        self.translator = Translator(os.getenv("M2M100_MODEL"))
+        self.translator = Translator(os.getenv("M2M100_MODEL"), self.cuda)
+        self.loop = loop
         try:
             os.mkdir("tempFiles")
         except FileExistsError:
             pass
         except PermissionError:
-            logging.error("Permission denied: Unable to create direcotry tempFiles.")
+            logging.error("Permission denied: Unable to create directory tempFiles.")
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
@@ -92,7 +95,6 @@ class SoundService(Services.SoundServiceServicer):
                 logging.exception(f"{errorCode}: {errorMessage}")
                 await context.abort(errorCode, errorMessage)
                 return
-
         return wrapper
 
     def _errorStreamHandler(func: callable):
@@ -118,7 +120,7 @@ class SoundService(Services.SoundServiceServicer):
     async def TestConnection(self, request, context):
         return Variables.TextMessage(text=request.text)
 
-    # TODO: return detected language
+
     @_errorUnaryHandler
     async def DiarizateFile(self, request, context):
         transcriptionData = TranscriptionData(
@@ -159,9 +161,7 @@ class SoundService(Services.SoundServiceServicer):
         logging.info("Received audio file for transcription.")
         transcriptionData = TranscriptionData(language=request.source_language)
         try:
-            result, _ = await self.fastModel.handleFile(
-                request.sound_data, transcriptionData, context
-            )
+            transcription, _ = await self.fastModel.handleFile(request.sound_data, transcriptionData, context)
         except Exception as e:
             if (
                 transcriptionData.filePath.exists()
@@ -169,7 +169,7 @@ class SoundService(Services.SoundServiceServicer):
                 transcriptionData.filePath.unlink()
             raise e
         return Variables.SoundResponse(
-            text=result, detected_language=transcriptionData.language
+            text=transcription, detected_language=transcriptionData.language
         )
 
     @_errorStreamHandler
@@ -179,10 +179,8 @@ class SoundService(Services.SoundServiceServicer):
             language=request.source_language, translate=request.translation_language
         )
         if transcriptionData.translate is None:
-            raise  # TODO: Here raise error when not specified to what language text should be translated (Transcription is good cause whisper has autodetect)
-        transcription, transcriptionData = await self.fastModel.handleFile(
-            request.sound_data, transcriptionData, context
-        )
+            raise
+        transcription, transcriptionData = await self.fastModel.handleFile(request.sound_data, transcriptionData, context)
         yield Variables.SoundResponse(
             text=transcription, detected_language=transcriptionData.language
         )
@@ -191,7 +189,7 @@ class SoundService(Services.SoundServiceServicer):
         )[0]
         yield Variables.SoundResponse(text=translation)
 
-    # TODO: add language to metadata (probably), return detected language (metadata or more likely new field in proto message)
+
     @_errorStreamHandler
     async def TranscribeLive(self, requestIter, context):
         logging.info("Received live transcription request.")
@@ -203,15 +201,14 @@ class SoundService(Services.SoundServiceServicer):
                 transcriptionData.curSegment += 1
                 transcriptionData.curSeconds = 0
             try:
-                transcriptionData = await self.fastModel.handleRecord(
-                    request.sound_data, transcriptionData, context, False
-                )
-                logging.info(transcriptionData.transcription)
+                transcriptionData = await self.fastModel.handleRecord(request.sound_data, transcriptionData, context, False)
+                print(transcriptionData.transcription)
             except Exception as e:
                 if (
                     transcriptionData.filePath.exists()
                 ):  # To ensure tempFile gets deleted even when error occurs
-                    transcriptionData.filePath.unlink()
+                    # transcriptionData.filePath.unlink()
+                    pass
                 raise e
             yield Variables.SoundStreamResponse(
                 text=transcriptionData.transcription[transcriptionData.curSegment],
@@ -261,7 +258,7 @@ class SoundService(Services.SoundServiceServicer):
         return Variables.TextMessage(text=translation)
 
 
-async def server():
+async def server(loop: asyncio.AbstractEventLoop):
     load_dotenv()
     port = os.getenv("SERVER_PORT")
     server = grpc.aio.server(
@@ -277,7 +274,7 @@ async def server():
             ),  # 50MB
         ],
     )
-    Services.add_SoundServiceServicer_to_server(SoundService(), server)
+    Services.add_SoundServiceServicer_to_server(SoundService(loop), server)
     server.add_insecure_port("[::]:" + port)  # change to secure later
     await server.start()
     try:
@@ -295,7 +292,7 @@ if __name__ == "__main__":
     asyncio.set_event_loop(loop)
     cleanupTask = loop.create_task(cleanupWebSessions())
     try:
-        loop.run_until_complete(server())
+        loop.run_until_complete(server(loop))
     except KeyboardInterrupt:
         logging.info("Detected keyboard interruption, shutting down...")
     finally:
