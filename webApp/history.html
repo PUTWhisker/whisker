@@ -30,25 +30,33 @@
             }
             return text;
         }
+        countries = {
+            "Afrikaans": "za", "Amharic": "et", "Arabic": "sa", "Azerbaijani": "az", "Bashkir": "ru", "Belarusian": "by", "Bulgarian": "bg", "Bengali": "bd", "Breton": "fr", "Bosnian": "ba", "Catalan": "es", "Czech": "cz", "Welsh": "gb", "Danish": "dk", "German": "de", "Greek": "gr", "English": "us", "Spanish": "es", "Estonian": "ee", "Persian": "ir", "Finnish": "fi", "French": "fr", "Galician": "es", "Gujarati": "in", "Hausa": "ng", "Hebrew": "il", "Hindi": "in", "Croatian": "hr", "Haitian": "ht", "Hungarian": "hu", "Armenian": "am", "Indonesian": "id", "Icelandic": "is", "Italian": "it", "Japanese": "jp", "Georgian": "ge", "Kazakh": "kz", "CentralKhmer": "kh", "Kannada": "in", "Korean": "kr", "Luxembourgish": "lu", "Lingala": "cd", "Lao": "la", "Lithuanian": "lt", "Latvian": "lv", "Malagasy": "mg", "Macedonian": "mk", "Malayalam": "in", "Mongolian": "mn", "Marathi": "in", "Malay": "my", "Burmese": "mm", "Nepali": "np", "Dutch": "nl", "Norwegian": "no", "Occitan": "fr", "Panjabi": "pk", "Polish": "pl", "Pushto": "af", "Portuguese": "pt", "Romanian": "ro", "Russian": "ru", "Sindhi": "pk", "Sinhala": "lk", "Slovak": "sk", "Slovenian": "si", "Somali": "so", "Albanian": "al", "Serbian": "rs", "Sundanese": "id", "Swedish": "se", "Swahili": "tz", "Tamil": "lk", "Thai": "th", "Tagalog": "ph", "Turkish": "tr", "Ukrainian": "ua", "Urdu": "pk", "Uzbek": "uz", "Vietnamese": "vn", "Yoruba": "ng", "Chinese": "cn"
+        }
+        function coalesce(arg1, arg2) {
+            return arg1 || arg2;
+        }
         const nj = `
-        <div class="event_view">
+        {% set event_title = 'Example title ' + (Math.floor(Math.random() * 99) + 1) %}
+        <div class="event_view" data-title="{{ event_title }}" data-timestamp="{{ timestampToDate(event.getCreatedAt()) }}">
             <div class="event_icon material-symbols-outlined">
                 {% if mode == 'translation' %}translate
                 {% elif mode == 'transcription' %}person
                 {% elif mode == 'diarization' %}group
                 {% else %}{% endif %}
             </div>
-            <div class="event_title">Example title {{ range(1, 100) | random }}</div>
+            <div class="event_title">{{ event_title }}</div>
             <div class="event_date_view">{{ timestampToDate(event.getCreatedAt()) }}</div>
             <div class="event_previews_view">
                 <div class="event_text_row">
                     {% if event.getTranscriptionLangauge is defined %}
-                        {% set lang = getCountry(event.getTranscriptionLangauge()) %}
+                        {% set lang = coalesce(countries[event.getTranscriptionLangauge()], event.getTranscriptionLangauge().substring(0, 2)) %}
                     {% elseif event.getLanguage is defined %}
-                        {% set lang = getCountry(event.getLanguage()) %}
+                        {% set lang = coalesce(countries[event.getLanguage()], event.getLanguage().substring(0, 2)) %}
                     {% else %}
                         {% set lang = '?' %}
                     {% endif %}
+                    {% if lang === '' %}{% set lang = '?' %}{% endif %}
                     <div class="text_flag"><img src="https://flagcdn.com/w40/{{ lang }}.png" onerror="this.outerHTML = '{{ lang }}'""></div>
                     {% set content = event.getTranscription() if event.getTranscription is defined else buildDiarizationText(event) %}
                     <div class="preview_text" data-text="{{ content }}" onclick="expandText(this);">
@@ -157,23 +165,33 @@
             <div id="filter_options" class="main_content">
                 <div>
                     <label id="search_prompt_input">
-                        <input type="text" placeholder="Search by title...">
+                        <input id="filter_input" type="text" placeholder="Search by title...">
                         <div class="filter_option_icon material-symbols-outlined">search</div>
                     </label>
                 </div>
                 <div class="filter_divider"></div>
-                <div class="filter_option_button filter_option_icon material-symbols-outlined">
-                    sort_by_alpha
-                </div>
-                <div class="filter_option_icon material-symbols-outlined">
-                    unfold_more
+                <div id="title_sort_button" class="sort_button_and_arrows sorting_undefined">
+                    <div class="filter_option_button filter_option_icon material-symbols-outlined">
+                        sort_by_alpha
+                    </div>
+                    <div class="sort_button_undef_arrows filter_option_icon material-symbols-outlined">
+                        unfold_more
+                    </div>
+                    <div class="sort_button_dir_arrow filter_option_icon material-symbols-outlined">
+                        chevron_right
+                    </div>
                 </div>
                 <div class="filter_divider"></div>
-                <div class="filter_option_button filter_option_icon material-symbols-outlined">
-                    calendar_month
-                </div>
-                <div class="filter_option_icon material-symbols-outlined" style="transform: rotate(-90deg)">
-                    chevron_right
+                <div id="timestamp_sort_button" class="sort_button_and_arrows sorting_desc">
+                    <div class="filter_option_button filter_option_icon material-symbols-outlined">
+                        calendar_month
+                    </div>
+                    <div class="sort_button_undef_arrows filter_option_icon material-symbols-outlined">
+                        unfold_more
+                    </div>
+                    <div class="sort_button_dir_arrow filter_option_icon material-symbols-outlined">
+                        chevron_right
+                    </div>
                 </div>
             </div>
             <div id="main_container" class="main_content">

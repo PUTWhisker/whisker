@@ -11,16 +11,10 @@ const { getTranscription,
 const { connectionTest } = require('./send-file.js')
 const { refreshToken } = require('./authentication.js')
 
-const countryNames = {
-    "Polish": "pl",
-    "en": "gb",
-};
-
-function getCountry(langCode) {
-    let countryCode = langCode;
-    if (countryNames[langCode] !== undefined) countryCode = countryNames[langCode];
-    if (langCode.includes('-')) countryCode = getCountry(langCode.split('-')[1]);
-    return countryCode.toLowerCase();
+function createElementFromHTML(htmlString) {
+    var div = document.createElement('div');
+    div.innerHTML = htmlString.trim();
+    return div.firstElementChild;
 }
 
 window.onload = async function () {
@@ -30,15 +24,22 @@ window.onload = async function () {
     let translationHistory = await getTranslationHistory();
     let diarizationHistory = await getDiarizationHistory(); 
     const njGlobals = {
-        getCountry: getCountry,
+        print: console.log,
+        Math: Math,
+        countries: countries,
+        coalesce: coalesce,
         clipString: clipString,
         buildDiarizationText: buildDiarizationText,
         timestampToDate: timestampToDate
     }
+    const translationHistoryListView = document.getElementById("translation_history");
+    const transcriptionHistoryListView = document.getElementById("transcription_history");
+    const translationHistoryViews = [];
+    const transcriptionHistoryViews = [];
     if (translationHistory.length > 0) {
         translationHistory.forEach(element => {
             const html = njTemplate.render(Object.assign({}, njGlobals, { event: element, mode: "translation" }));
-            document.getElementById("translation_history").innerHTML += html;
+            translationHistoryViews.push(createElementFromHTML(html));
         });
     } else {
         document.getElementById("translation_history").innerHTML = emptyHistory;
@@ -46,15 +47,81 @@ window.onload = async function () {
     if (transcriptionHistory.length > 0 || diarizationHistory.length > 0) {
         transcriptionHistory.forEach(element => {
             const html = njTemplate.render(Object.assign({}, njGlobals, { event: element, mode: "transcription" }));
-            document.getElementById("transcription_history").innerHTML += html;
+            transcriptionHistoryViews.push(createElementFromHTML(html));
         });
         diarizationHistory.forEach(element => {
             const html = njTemplate.render(Object.assign({}, njGlobals, { event: element, mode: "diarization" }));
-            document.getElementById("transcription_history").innerHTML += html;
+            transcriptionHistoryViews.push(createElementFromHTML(html));
         });
     } else {
-        document.getElementById("transcription_history").innerHTML = emptyHistory;
+        transcriptionHistoryListView.innerHTML = emptyHistory;
     }
+
+    let displayedTranslationHistoryViews = transcriptionHistoryViews;
+    let displayedTranscriptionHistoryViews = transcriptionHistoryViews;
+    let searchedTitle = "";
+    let timestampSortingMode = "desc";
+    let titleSortingMode = undefined;
+    function refreshHistoryLists() {
+        translationHistoryListView.innerHTML = "";
+        transcriptionHistoryListView.innerHTML = "";
+        if (searchedTitle) {
+            console.log(`searched title: ${searchedTitle}`);
+            const titleFilter = (v) => v.getAttribute("data-title").toLowerCase().includes(searchedTitle.toLowerCase());
+            displayedTranslationHistoryViews = translationHistoryViews.filter(titleFilter);
+            displayedTranscriptionHistoryViews = transcriptionHistoryViews.filter(titleFilter);
+        } else {
+            displayedTranslationHistoryViews = translationHistoryViews;
+            displayedTranscriptionHistoryViews = transcriptionHistoryViews;
+        }
+        if (titleSortingMode) {
+            console.log(`titleSortingMode: ${titleSortingMode}`);
+            const sortKey = (v1, v2) => v1.getAttribute("data-title").localeCompare(v2.getAttribute("data-title")) * (titleSortingMode === "asc" ? 1 : -1);
+            displayedTranslationHistoryViews.sort(sortKey);
+            displayedTranscriptionHistoryViews.sort(sortKey);
+        }
+        if (timestampSortingMode) {
+            console.log(`timestampSortingMode: ${timestampSortingMode}`);
+            const sortKey = (v1, v2) => v1.getAttribute("data-timestamp").localeCompare(v2.getAttribute("data-timestamp")) * (timestampSortingMode === "asc" ? 1 : -1);
+            displayedTranslationHistoryViews.sort(sortKey);
+            displayedTranscriptionHistoryViews.sort(sortKey);
+        }
+        displayedTranslationHistoryViews.forEach((v) => translationHistoryListView.appendChild(v));
+        displayedTranscriptionHistoryViews.forEach((v) => transcriptionHistoryListView.appendChild(v));
+    }
+    refreshHistoryLists();
+
+    const filterInput = document.getElementById('filter_input');
+    const titleSortButton = document.getElementById("title_sort_button");
+    const timestampSortButton = document.getElementById("timestamp_sort_button");
+    filterInput.addEventListener("input", (e) => {
+        searchedTitle = filterInput.value;
+        refreshHistoryLists();
+    });
+    titleSortButton.addEventListener("click", (e) => {
+        titleSortingMode = titleSortingMode !== "desc" ? "desc" : "asc";
+        timestampSortingMode = undefined;
+        titleSortButton.classList.remove("sorting_undefined");
+        titleSortButton.classList.remove("sorting_asc");
+        titleSortButton.classList.remove("sorting_desc");
+        titleSortButton.classList.add(`sorting_${titleSortingMode}`);
+        timestampSortButton.classList.remove("sorting_asc");
+        timestampSortButton.classList.remove("sorting_desc");
+        timestampSortButton.classList.add("sorting_undefined");
+        refreshHistoryLists();
+    });
+    timestampSortButton.addEventListener("click", (e) => {
+        timestampSortingMode = timestampSortingMode !== "desc" ? "desc" : "asc";
+        titleSortingMode = undefined;
+        timestampSortButton.classList.remove("sorting_undefined");
+        timestampSortButton.classList.remove("sorting_asc");
+        timestampSortButton.classList.remove("sorting_desc");
+        timestampSortButton.classList.add(`sorting_${timestampSortingMode}`);
+        titleSortButton.classList.remove("sorting_asc");
+        titleSortButton.classList.remove("sorting_desc");
+        titleSortButton.classList.add("sorting_undefined");
+        refreshHistoryLists();
+    });
 }
 
 async function getTranscriptionHistory() {
