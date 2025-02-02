@@ -1,5 +1,5 @@
 
-const { register, login } = require('./authentication.js')
+const { register, login  } = require('./authentication.js')
 const { connectionTest } = require('./send-file.js')
 
 window.onload = function () {
@@ -33,8 +33,10 @@ async function retrieveToken() {
         password = document.getElementById("password").value;
         validateCredentials(username, password);
         response = await login(username, password);
-        token = response.getJwt();
-        document.cookie = `acs=${token}; SameSite=Strict; `;
+        accessToken = response.getJwt();
+        refreshToken = response.getRefreshToken();
+        document.cookie = `whisker_access=${accessToken}; SameSite=Strict; `;
+        document.cookie = `whisker_refresh=${refreshToken}; SameSite=Strict; `;
         window.location.href = `/webApp/${localStorage.getItem('whisker-last-page')}`;
     } catch (err) {
         alert(err.message);

@@ -7,59 +7,71 @@ const { soundClient,
         SoundStreamResponse,
         SpeakerAndLineResponse} = require('./consts.js')
 
-const { recordInChunks } = require('./record.js')
-
+const { callHandler } = require('./interceptor.js')
 const { getCookie } = require('./token.js')
 
-export function connectionTest() { // Verify whether we can connect with the Whisper server
-    let randomNum = Math.random()
-    let request = new TextMessage();
-    request.setText(randomNum.toString())
-    soundClient.testConnection(request, {}, (err, response) => {
-        if (err) {
-            console.log(`Could not connect to the server: code = ${err.code}, message = ${err.message}`)
-            return false;
-        }
-        let answer = response.getText();
-        if (answer == randomNum.toString()) {
-            console.log("Connected to the server")
-        }
-        else {
-            console.log(`Failed to connect to the server (wrong response)`)
-        }
-    })
+export function connectionTest() {
+    function _connectionTest() {
+        return new Promise((resolve, reject) => {
+            let randomNum = Math.random()
+            let request = new TextMessage();
+            request.setText(randomNum.toString())
+            soundClient.testConnection(request, {}, (err, response) => {
+                if (err) {
+                    console.log(`Could not connect to the server: code = ${err.code}, message = ${err.message}`)
+                    reject(err)
+                }
+                let answer = response.getText();
+                if (answer == randomNum.toString()) {
+                    console.log("Connected to the server")
+                    resolve(response)
+                }
+                else {
+                    console.log(`Failed to connect to the server (wrong response)`)
+                    reject(new Error("Wrong response"))
+                }
+            })
+        })
+    }
+    return callHandler(_connectionTest)() // Verify whether we can connect with the Whisper server
 }
 
 
 export function sendFile(file, source_language) { // Send file to the server and return the answer
-    console.log("Sending file for transcription")
-    console.log(source_language)
-    let reader = new FileReader()
-    console.log(file)
-    reader.readAsArrayBuffer(file)
-    return new Promise((resolve, reject) => {
-        reader.onload = function (e) {
-            let buffer = e.target.result
-            let byteArray = new Uint8Array(buffer)
-            console.log(byteArray)
-            let request = new TranscriptionRequest()
-            request.setSoundData(byteArray)
-            request.setSourceLanguage(source_language)
-            let metadata = {}
-            let token = getCookie("acs")
-            if (token) {
-                metadata = {"jwt": token}
-            }
-            console.log(metadata)
-            soundClient.transcribeFile(request, metadata, (err, response) => {
-                if (err) {
-                    console.log(`Could not send files to the server: code = ${err.code}, message = ${err.message}`)
-                    reject(err)
+    function _sendFile(file, source_language) {
+        return new Promise((resolve, reject) => {
+            console.log("Sending file for transcription")
+            console.log(source_language)
+            let reader = new FileReader()
+            console.log(file)
+            reader.readAsArrayBuffer(file)
+            reader.onload = function (e) {
+                let buffer = e.target.result
+                let byteArray = new Uint8Array(buffer)
+                console.log(byteArray)
+                let request = new TranscriptionRequest()
+                request.setSoundData(byteArray)
+                request.setSourceLanguage(source_language)
+                let metadata = {}
+                let token = getCookie("acs")
+                if (token) {
+                    metadata = {"jwt": token}
                 }
-                console.log("Success! Answer should be visible in the console")
-                resolve(response)
-            })
-        }
+                console.log(metadata)
+                soundClient.transcribeFile(request, metadata, (err, response) => {
+                    if (err) {
+                        console.log(`Could not send files to the server: code = ${err.code}, message = ${err.message}`)
+                        reject(err)
+                    }
+                    console.log("Success! Answer should be visible in the console")
+                    console.log(response)
+                    resolve(response)
+                })
+            }
+        })
+    }
+    return new Promise((resolve, reject) => {
+        resolve(callHandler(_sendFile)(file, source_language))
     })
 }
 

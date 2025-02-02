@@ -5,7 +5,8 @@ const { authenticationClient,
         NewTranscription, 
         NewTranslation, 
         NewDiarization,
-        QueryParamethers } = require('./consts.js')
+        QueryParamethers,
+        RefreshTokenRequest } = require('./consts.js')
 
 const { getCookie } = require('./token.js')
 
@@ -40,14 +41,32 @@ export function login(username, password) {
 }
 
 
-export async function *getTranscription(start_time, end_time, limit=10) {
+export async function refreshToken() {
+    let request = new RefreshTokenRequest()
+    let token = getCookie("whisker_refresh")
+    request.setRefreshToken(token)
+    return new Promise((resolve, reject) => {
+        authenticationClient.refreshToken(request, {}, (err, response) => {
+            if (err) {
+                reject(err)
+            }
+            let newAccessToken = response.getAccessToken();
+            let newRefreshToken = response.getRefreshToken();
+            document.cookie = `whisker_access=${newAccessToken}; SameSite=Strict; `;
+            document.cookie = `whisker_refresh=${newRefreshToken}; SameSite=Strict; `;
+            resolve(response)
+        })
+    })
+} 
 
+
+export async function *getTranscription(start_time, end_time, limit=10) {
     let request = new QueryParamethers()
     // request.setStartTime(start_time)
     // request.setEndTime(end_time)
     request.setLimit(limit)
     let metadata = {}
-    let token = getCookie("acs")
+    let token = getCookie("whisker_access")
     if (token) {
         metadata = {"jwt": token}
     }
@@ -96,7 +115,7 @@ export function editTranscription(id, newTranscription) {
     request.setId(id)
     request.setContent(newTranscription)
     let metadata
-    let token = getCookie("acs")
+    let token = getCookie("whisker_access")
     if (token) {
         metadata = {"jwt": token}
     }
@@ -115,7 +134,7 @@ export function deleteTranscription(id) {
     let request = new Id()
     request.setId(id)
     let metadata
-    let token = getCookie("acs")
+    let token = getCookie("whisker_access")
     if (token) {
         metadata = {"jwt": token}
     }
@@ -136,7 +155,7 @@ export async function *getTranslation(start_time, end_time, limit) {
     // request.setEndTime(end_time)
     request.setLimit(limit)
     let metadata = {}
-    let token = getCookie("acs")
+    let token = getCookie("whisker_access")
     if (token) {
         metadata = {"jwt": token}
     }
@@ -186,7 +205,7 @@ export function editTranslation(id, transcription, translation, edit_transcripti
     request.setEditTranscription(edit_transcription)
     request.setEditTranslation(edit_translation)
     let metadata
-    let token = getCookie("acs")
+    let token = getCookie("whisker_access")
     if (token) {
         metadata = {"jwt": token}
     }
@@ -205,7 +224,7 @@ export function deleteTranslation(id) {
     let request = new Id()
     request.setId(id)
     let metadata
-    let token = getCookie("acs")
+    let token = getCookie("whisker_access")
     if (token) {
         metadata = {"jwt": token}
     }
@@ -226,7 +245,7 @@ export async function *getDiarization(start_time, end_time, limit) {
     // request.setEndTime(end_time)
     request.setLimit(limit)
     let metadata = {}
-    let token = getCookie("acs")
+    let token = getCookie("whisker_access")
     if (token) {
         metadata = {"jwt": token}
     }
@@ -274,7 +293,7 @@ export function editDiarization(id, line, speaker) {
     request.setLine(line)
     request.setSpeaker(speaker)
     let metadata
-    let token = getCookie("acs")
+    let token = getCookie("whisker_access")
     if (token) {
         metadata = {"jwt": token}
     }
@@ -293,7 +312,7 @@ export function deleteDiarization(id) {
     let request = new Id()
     request.setId(id)
     let metadata
-    let token = getCookie("acs")
+    let token = getCookie("whisker_access")
     if (token) {
         metadata = {"jwt": token}
     }

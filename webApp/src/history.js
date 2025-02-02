@@ -9,6 +9,7 @@ const { getTranscription,
     deleteDiarization } = require('./authentication.js')
 
 const { connectionTest } = require('./send-file.js')
+const { refreshToken } = require('./authentication.js')
 
 const countryNames = {
     "Polish": "pl",
@@ -24,9 +25,10 @@ function getCountry(langCode) {
 
 window.onload = async function () {
     connectionTest()
-    let translationHistory = await getTranslationHistory();
+    await refreshToken()
     let transcriptionHistory = await getTranscriptionHistory();
-    let diarizationHistory = await getDiarizationHistory(); // TODO ZRUPCIE TO ŻEBY DZIAŁAŁO
+    let translationHistory = await getTranslationHistory();
+    let diarizationHistory = await getDiarizationHistory(); 
     const njGlobals = {
         getCountry: getCountry,
         clipString: clipString,
@@ -61,12 +63,17 @@ async function getTranscriptionHistory() {
     let end_time = new proto.google.protobuf.Timestamp()
     end_time.fromDate(new Date())
     let limit = 10
-    let transcriptions = getTranscription(start_time, end_time, limit)
-    const responseList = []
-    for await (const transcription of transcriptions) {
-        responseList.push(transcription);
+    try {
+        let transcriptions = getTranscription(start_time, end_time, limit)
+        const responseList = []
+        for await (const transcription of transcriptions) {
+            responseList.push(transcription);
+        }
+        return new Promise((resolve) => { resolve(responseList) });
+    } catch (err) {
+        console.error(`There was an error: ${err.code}: ${err.message}`);
+        return new Promise((resolve) => resolve([]));
     }
-    return new Promise((resolve) => { resolve(responseList) });
 }
 
 async function editTranscriptionEvent() {
@@ -86,12 +93,17 @@ async function getTranslationHistory() {
     let end_time = new proto.google.protobuf.Timestamp();
     end_time.fromDate(new Date());
     let limit = 10;
-    let translations = await getTranslation(start_time, end_time, limit);
-    const responseList = [];
-    for await (const translation of translations) {
-        responseList.push(translation);
+    try {
+        let translations = await getTranslation(start_time, end_time, limit);
+        const responseList = [];
+        for await (const translation of translations) {
+            responseList.push(translation);
+        }
+        return new Promise((resolve) => resolve(responseList));
+    } catch (err) {
+        console.error(`There was an error: ${err.code}: ${err.message}`);
+        return new Promise((resolve) => resolve([]));
     }
-    return new Promise((resolve) => resolve(responseList));
 }
 
 async function editTranslationEvent() {
@@ -114,12 +126,17 @@ async function getDiarizationHistory() {
     let end_time = new proto.google.protobuf.Timestamp();
     end_time.fromDate(new Date());
     let limit = 2;
-    let dialogs = await getDiarization(start_time, end_time, limit);
-    const responseList = []
-    for await (const dialog of dialogs) {
-        responseList.push(dialog)
+    try {
+        let dialogs = await getDiarization(start_time, end_time, limit);
+        const responseList = []
+        for await (const dialog of dialogs) {
+            responseList.push(dialog)
+        }
+        return new Promise((resolve) => resolve(responseList));
+    } catch (err) {
+        console.error(`There was an error: ${err.code}: ${err.message}`);
+        return new Promise((resolve) => resolve([]));
     }
-    return new Promise((resolve) => resolve(responseList));
 }
 
 async function editDiarizationEvent() {

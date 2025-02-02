@@ -1,5 +1,4 @@
 import serverParams from './configuration.json'
-console.log(serverParams.host)
 
 export const { SoundServiceClient } = require('../proto/sound_transfer/sound_transfer_grpc_web_pb.js')
 export const { TextMessage, 
@@ -20,7 +19,10 @@ export const { TranscriptionHistory,
         NewTranscription, 
         NewTranslation, 
         NewDiarization,
-        QueryParamethers } = require('../proto/authentication/authentication_pb.js')
+        QueryParamethers,
+        RefreshTokenRequest,
+        RefreshTokenResponse } = require('../proto/authentication/authentication_pb.js')
+
 
 export const soundClient = new SoundServiceClient(`${serverParams.host}:${serverParams.port}`)
 export const authenticationClient = new ClientServiceClient(`${serverParams.host}:${serverParams.port}`)
