@@ -1,4 +1,7 @@
 syntax = "proto3";
+package authentication;
+
+
 option go_package = "inzynierka/authentication";
 option java_multiple_files = true;
 option java_package = "io.grpc.authentication";
@@ -8,111 +11,186 @@ import "google/protobuf/empty.proto";
 
 
 service ClientService {
+    // Login into a user's account
     rpc Login (UserCredits) returns (LoginResponse) {};
+    // Create a new account
     rpc Register (UserCredits) returns (google.protobuf.Empty) {};
+    // Retrieve new access and refresh token
     rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {};
 
+    // Retrieve transcription history
     rpc GetTranscription(QueryParamethers) returns (stream TranscriptionHistory) {};
+    // Edit transcription history
     rpc EditTranscription(NewTranscription) returns (google.protobuf.Empty) {};
+    // Remove transcription history
     rpc DeleteTranscription(Id) returns (google.protobuf.Empty) {};
 
+    // Retrieve translation history
     rpc GetTranslation(QueryParamethers) returns (stream TranslationHistory) {};
+    // Edit translation history
     rpc EditTranslation(NewTranslation) returns (google.protobuf.Empty) {}
+    // Remove translation history
     rpc DeleteTranslation(Id) returns(google.protobuf.Empty) {}
     
     rpc SaveOnlyTranslation(TranslationText) returns(google.protobuf.Empty) {}
 
+    // Retrieve diarization history
     rpc GetDiarization(QueryParamethers) returns (stream DiarizationHistory) {};
+    // Edit diarization history
     rpc EditDiarization(NewDiarization) returns (google.protobuf.Empty) {};
+    // Remove diarization history
     rpc DeleteDiarization(Id) returns (google.protobuf.Empty) {}
 
-
+    // Save text's translation 
+    rpc SaveOnlyTranslation(TranslationText) returns(google.protobuf.Empty) {}
+    // Retrieve transcription and diarization history
     rpc GetTranscriptionAndDiarization(QueryParamethers) returns (stream Combined){};
 }
 
+// authentication.TranscriptionHistory
 message TranscriptionHistory {
+    // Transcription's text
     string transcription = 1;
+    // Transcription's creation time
     google.protobuf.Timestamp created_at = 2;
+    // Transcription's id
     int32 id = 3;
+    // Transcription's language
     string language = 4;
+    // Transcription's title
     string title = 5;
 }
 
+// authentication.TranslationHistory
 message TranslationHistory {
+    // Translation's id
     int32 id = 1;
+    // Translation's original language text
     string transcription = 2;
+    // Translation's text
     string translation = 3;
+    // Translation's creation time
     google.protobuf.Timestamp created_at = 4;
+    // Translation's original language
     string transcription_langauge = 5;
+    // Translation's language
     string translation_langauge = 6;
+    // Translation's title
     string title = 7;
 }
 
+// authentication.DiarizationHistory
 message DiarizationHistory {
+    // Diarization's id
     int32 diarization_id = 1;
+    // Diarization's speakers in order
     repeated string speaker = 3;
+    // Diarization's text lines in order
     repeated string line = 4;
+    // Diarization's creation time
     google.protobuf.Timestamp created_at = 5;
+    // Diarization's language
     string language = 6;
+    // Diarization's title
     string title = 7;
 }
 
+// authentication.UserCredits
 message UserCredits {
+    // User's chosen username
     string username = 1;
+    // User's chosen password
     string password = 2;
 }
 
+// authentication.LoginResponse
 message LoginResponse {
+    // Retrieved JWT token
     string JWT = 1;
+    // Retrieved refresh token
     string refresh_token = 2;
 }
 
+// authentication.Id
 message Id {
+    // Id of the entry to be deleted
     int32 id = 1;
 }
 
+// authentication.NewTranscription
 message NewTranscription {
+    // Id of the entry to be changed
     int32 id = 1;
+    // Corrected transcription text
     string content = 2;
 }
 
+// authentication.NewTranslation
 message NewTranslation {
+    // Id of the entry to be changed
     int32 id = 1;
+    // Corrected transcription text
     string transcription = 2;
+    // Corrected translation text
     string translation = 3;
+    // Should transcription be overwritten in database
     bool edit_transcription = 4;
+    // Should translation be overwritten in database
     bool edit_translation = 5;
 }
 
+// authentication.NewDiarization
 message NewDiarization {
+    // Id of the entry to be changed
     int32 id = 1;
+    // Array of corrected dialog's lines
     repeated string  line = 2; 
+    // Array of corrected speaker's names
     repeated string speaker = 3;
 }
 
+// authentication.QueryParameters
 message QueryParamethers {
+    // From time
     google.protobuf.Timestamp start_time = 1;
+    // To time
     google.protobuf.Timestamp end_time = 2;
+    // Max response count
     int32 limit = 3;
+    // Filter by language
     string language = 4;
+    // Filter by translation language (only when retrieving translation)
     string translation_language = 5; //used only by translation
 }
 
+// authentication.TranslationText
 message TranslationText {
+    // Translation's id
     int32 transcription_id = 1;
+    // Translation's text
     string content = 2;
+    // Translation's language
     string language = 3;
 }
 
+// authentication.Combined
 message Combined {
+    // User's diarization history
     DiarizationHistory diarization = 1;
+    // User's transcription history
     TranscriptionHistory transcription = 2;
 }
 
+// authentication.RefreshTokenRequest
 message RefreshTokenRequest {
+    // User's valid refresh token
     string refresh_token = 1;
 }
+
+// authentication.RefreshTokenResponse
 message RefreshTokenResponse {
+    // Retrieved refresh token
     string refresh_token = 1;
+    // Retrieved JWT token
     string access_token = 2;
 }

@@ -1,0 +1,57 @@
+type: google.api.Service
+config_version: 3
+
+http:
+  rules:
+    - selector: sound_transfer.SoundService.TestConnection 
+      get: /SoundService/TestConnection 
+    - selector: sound_transfer.SoundService.TranscribeFile
+      get: /SoundService/TranscribeFile
+    - selector: sound_transfer.SoundService.TranslateFile
+      get: /SoundService/TranslateFile
+    - selector: sound_transfer.SoundService.DiarizateFile
+      get: /SoundService/DiarizateFile
+    - selector: sound_transfer.SoundService.TranscribeLive
+      get: /SoundService/TranscribeLive
+    - selector: sound_transfer.SoundService.TranscribeLiveWeb
+      get: /SoundService/TranscribeLiveWeb
+    - selector: sound_transfer.SoundService.TranslateText
+      get: /SoundService/TranslateText
+
+    - selector: authentication.ClientService.Login
+      get: /ClientService/Login
+    - selector: authentication.ClientService.Register
+      get: /ClientService/Register
+    - selector: authentication.ClientService.RefreshToken
+      get: /ClientService/RefreshToken
+    - selector: authentication.ClientService.GetTranscription
+      get: /ClientService/GetTranscription
+    - selector: authentication.ClientService.EditTranscription
+      get: /ClientService/EditTranscription
+    - selector: authentication.ClientService.DeleteTranscription
+      get: /ClientService/DeleteTranscription
+    - selector: authentication.ClientService.GetTranslation
+      get: /ClientService/GetTranslation
+    - selector: authentication.ClientService.EditTranslation
+      get: /ClientService/EditTranslation
+    - selector: authentication.ClientService.DeleteTranslation
+      get: /ClientService/DeleteTranslation
+    - selector: authentication.ClientService.GetDiarization
+      get: /ClientService/GetDiarization
+    - selector: authentication.ClientService.EditDiarization
+      get: /ClientService/EditDiarization
+    - selector: authentication.ClientService.DeleteDiarization
+      get: /ClientService/DeleteDiarization
+    - selector: authentication.ClientService.SaveOnlyTranslation
+      get: /ClientService/SaveOnlyTranslation
+    - selector: authentication.ClientService.GetTranscriptionAndDiarization
+      get: /ClientService/GetTranscriptionAndDiarization
+      
+swagger:
+  info:
+    title: "Combined gRPC Documentation"
+    description: | 
+      This file includes gRPC for:
+      - gRPC 1: Description of SoundService
+      - gRPC 2: Description of ClientService
+    version: "1.0.0"

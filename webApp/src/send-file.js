@@ -62,7 +62,7 @@ export function sendFile(file, source_language) { // Send file to the server and
     })
 }
 
-
+//TODO: saving does not work
 export async function* sendFileTranslation(file, source_language, translation_language) {
     const reader = (file) =>
         new Promise((resolve, reject) => {

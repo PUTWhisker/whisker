@@ -25,6 +25,7 @@ const (
 	SoundService_TranscribeLiveWeb_FullMethodName = "/SoundService/TranscribeLiveWeb"
 	SoundService_TranslateFile_FullMethodName     = "/SoundService/TranslateFile"
 	SoundService_DiarizateFile_FullMethodName     = "/SoundService/DiarizateFile"
+	SoundService_TranslateText_FullMethodName     = "/SoundService/TranslateText"
 )
 
 // SoundServiceClient is the client API for SoundService service.
@@ -37,6 +38,7 @@ type SoundServiceClient interface {
 	TranscribeLiveWeb(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SoundStreamResponse, error)
 	TranslateFile(ctx context.Context, in *TranslationRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SoundResponse], error)
 	DiarizateFile(ctx context.Context, in *TranscriptionRequest, opts ...grpc.CallOption) (*SpeakerAndLineResponse, error)
+	TranslateText(ctx context.Context, in *TextAndId, opts ...grpc.CallOption) (*TextMessage, error)
 }
 
 type soundServiceClient struct {
@@ -119,6 +121,16 @@ func (c *soundServiceClient) DiarizateFile(ctx context.Context, in *Transcriptio
 	return out, nil
 }
 
+func (c *soundServiceClient) TranslateText(ctx context.Context, in *TextAndId, opts ...grpc.CallOption) (*TextMessage, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TextMessage)
+	err := c.cc.Invoke(ctx, SoundService_TranslateText_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SoundServiceServer is the server API for SoundService service.
 // All implementations must embed UnimplementedSoundServiceServer
 // for forward compatibility.
@@ -129,6 +141,7 @@ type SoundServiceServer interface {
 	TranscribeLiveWeb(context.Context, *TranscriptionRequest) (*SoundStreamResponse, error)
 	TranslateFile(*TranslationRequest, grpc.ServerStreamingServer[SoundResponse]) error
 	DiarizateFile(context.Context, *TranscriptionRequest) (*SpeakerAndLineResponse, error)
+	TranslateText(context.Context, *TextAndId) (*TextMessage, error)
 	mustEmbedUnimplementedSoundServiceServer()
 }
 
@@ -156,6 +169,9 @@ func (UnimplementedSoundServiceServer) TranslateFile(*TranslationRequest, grpc.S
 }
 func (UnimplementedSoundServiceServer) DiarizateFile(context.Context, *TranscriptionRequest) (*SpeakerAndLineResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DiarizateFile not implemented")
+}
+func (UnimplementedSoundServiceServer) TranslateText(context.Context, *TextAndId) (*TextMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TranslateText not implemented")
 }
 func (UnimplementedSoundServiceServer) mustEmbedUnimplementedSoundServiceServer() {}
 func (UnimplementedSoundServiceServer) testEmbeddedByValue()                      {}
@@ -268,6 +284,24 @@ func _SoundService_DiarizateFile_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SoundService_TranslateText_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TextAndId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SoundServiceServer).TranslateText(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SoundService_TranslateText_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SoundServiceServer).TranslateText(ctx, req.(*TextAndId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SoundService_ServiceDesc is the grpc.ServiceDesc for SoundService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -290,6 +324,10 @@ var SoundService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DiarizateFile",
 			Handler:    _SoundService_DiarizateFile_Handler,
+		},
+		{
+			MethodName: "TranslateText",
+			Handler:    _SoundService_TranslateText_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

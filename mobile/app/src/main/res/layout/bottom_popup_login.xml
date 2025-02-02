@@ -12,24 +12,36 @@
         android:id="@+id/bottomSheetTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Log in"
+        android:text="@string/log_in"
+        android:textColor="@color/primaryDark"
         android:layout_marginTop="20dp"
         android:textSize="26sp"
         android:textAlignment="center"/>
+    <TextView
+        android:id="@+id/bottomFirstUseTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/swipe_down_to_use_app_as_a_guest"
+        android:textColor="@color/primaryDark"
+        android:textSize="12sp"
+        android:textAlignment="center"/>
+
 
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/TextLayoutStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp">
+        android:layout_margin="12dp">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/loginInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Your nick"
+            android:hint="@string/your_nick"
             android:padding="16dp"
-            android:imeOptions="actionNext"/>
+            android:imeOptions="actionNext"
+            android:focusable="true"
+            android:focusableInTouchMode="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -37,32 +49,20 @@
         style="@style/TextLayoutStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp">
+        android:layout_margin="12dp">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/passwordInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password"
+            android:hint="@string/password"
             android:inputType="textPassword"
+            android:textColor="@color/primaryDark"
             android:padding="16dp"
-            android:imeOptions="actionNext"/>
+            android:imeOptions="actionNext"
+            android:focusable="true"
+            android:focusableInTouchMode="true"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/TextLayoutStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/repeatPasswordInput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Repeat password"
-            android:inputType="textPassword"
-            android:visibility="gone"
-            android:padding="16dp"
-            android:imeOptions="actionNext"/>
-    </com.google.android.material.textfield.TextInputLayout>
 
 
     <LinearLayout
@@ -76,21 +76,21 @@
             android:id="@+id/btnCancelLog"
             android:layout_width="140dp"
             android:layout_height="60dp"
-            android:text="Cancel"
-            android:backgroundTint="@color/gray"
-            android:textColor="@color/grayDark"
+            android:text="@string/cancel"
+            android:backgroundTint="@color/primaryLight"
+            android:textColor="@color/primaryDark"
             app:cornerRadius="26dp"
             app:rippleColor="@color/primaryDark"/>
 
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSubmit"
+            android:id="@+id/btnLoginConfirm"
             android:layout_width="140dp"
             android:layout_height="60dp"
-            android:text="Log in"
+            android:text="@string/log_in"
             android:layout_marginStart="20dp"
-            android:backgroundTint="@color/playerColor"
-            android:textColor="@color/white"
+            android:backgroundTint="@color/primaryDark"
+            android:textColor="@color/primaryLight"
             app:cornerRadius="26dp"
             app:rippleColor="@color/primaryDark"/>
     </LinearLayout>

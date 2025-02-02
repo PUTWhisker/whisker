@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS speaker_line;
 DROP TABLE IF EXISTS diarization;
 DROP TABLE IF EXISTS app_user;
 
+
 CREATE TABLE app_user (
     id SERIAL PRIMARY KEY,
     username VARCHAR(100) UNIQUE NOT NULL,
@@ -14,7 +15,7 @@ CREATE TABLE app_user (
 
 CREATE TABLE refresh_token (
     app_user_id INT UNIQUE REFERENCES app_user(id) ON DELETE CASCADE,
-    token_hash VARCHAR(32) NOT NULL,
+    token_hash BYTEA NOT NULL,
     expires_at TIMESTAMP NOT NULL
 );
 

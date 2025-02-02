@@ -5,203 +5,184 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <script src="text_file_io.js"></script>
-    <script>
-        const phlags = {
-            'pl_pl': '🇵🇱',
-            'en_uk': '🇬🇧',
-            'es_es': '🇪🇸'
-
-        };
-        const sampleData = {
-            'history': [
-                {
-                    'date': '24.12.2024',
-                    'file_size': '25kB',
-                    'file_audio': 'https://dl.dropbox.com/scl/fi/yn7pa2tw6tra971elx9fu/wonsz.mp3?rlkey=w0a5cijnl2fogf0zcybjy0e5l&dl=1',
-                    'transcription_result': 'nazywam sie wonsz długie mam ciało me szczenki silne chodź głowę mam mało gdy pora karmienia unosze łep rozdziawiam szeroko i ciamkam chlep',
-                    'translation_result': 'me llamo wonsz, tengo un cuerpo alargado, mis mandibulas son fuertes, aunque mi cabeza es pequeña, cuando llega la hora de comer levanto la cabeza, la abro de par en par y mastico la bazofia',
-                    'selected_options': {
-                        'original_language': 'pl_pl',
-                        'translate_language': 'es_es',
-                        'multiple_speakers': false
-                    }
-                },
-                {
-                    'date': '04.12.2024',
-                    'file_size': '6kB',
-                    'file_audio': 'https://dl.dropbox.com/scl/fi/z7167n9k8ayby0352fd4y/wonsz2.mp3?rlkey=i6sgqvu0re8bmy5b3ghfifcyg&dl=1',
-                    'transcription_result': 'jestem dugi wonsz mam silne szczenki i maly łep lubie chlep',
-                    'selected_options': {
-                        'original_language': 'en_uk',
-                        'multiple_speakers': true
-                    }
-                }
-            ]
-        };
-
-        function getTranscribeHistory() {
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    // request do waszego API, zwracający JSONa w formacie jak powyżej
-                    resolve(JSON.stringify(sampleData));
-                }, 10);
-            });
-        }
-    </script>
-    <style>
-        .event_view {
-            margin: 1vw;
-            padding: 1vw;
-            background-color: lightgray;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-        }
-
-        .event_date_view {
-            width: 6em;
-        }
-
-        .event_audio_view {
-            width: 6em;
-        }
-
-        .event_previews_view {
-            flex: 1;
-        }
-
-        .event_text_row {
-            display: flex;
-            flex-direction: row;
-            margin-top: 1vw;
-            align-items: center;
-        }
-
-        .text_phlag {
-            font-size: 200%;
-        }
-
-        .preview_text {
-            flex: 1;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="history_style.css">
+    <script src='https://mozilla.github.io/nunjucks/files/nunjucks.min.js'></script>
 </head>
 
 <body>
-    <main>
-        <div id="main_container"></div>
-    </main>
     <script>
-        function createElement(type, id, classes) {
-            const element = document.createElement(type);
-            if (id) element.id = id;
-            if (classes) element.classList.add(...classes);
-            return element;
+        function clipString(str) {
+            const limit = 128;
+            if (str.length > limit) return `${str.substring(0, limit - 3)}...`
+            else return str;
         }
-
-        function createView(event) {
-
-            const view = createElement('div', null, ['event_view']);
-
-            const dateView = createElement('div', null, ['event_date_view']);
-            view.appendChild(dateView);
-            dateView.innerText = event.date;
-
-            const audioFileView = createElement('div', null, ['event_audio_view']);
-            view.appendChild(audioFileView);
-            {
-                const audioFileDownload = createElement('div', null, ['event_audio_download']);
-                audioFileView.appendChild(audioFileDownload);
-                {
-                    const audioIcon = createElement('button', null, ['event_audio_icon']);
-                    audioFileDownload.appendChild(audioIcon);
-                    audioIcon.innerHTML = '<span class="material-symbols-outlined">brand_awareness</span>';
-                    audioIcon.onclick = () => {
-                        const audio = new Audio(event.file_audio);
-                        audio.play();
-                    };
-
-                    const downloadIcon = createElement('button', null, ['event_audio_download_icon']);
-                    audioFileDownload.appendChild(downloadIcon);
-                    downloadIcon.innerHTML = '<span class="material-symbols-outlined">download</span>';
-                    downloadIcon.onclick = () => {
-                        const a = document.createElement('a');
-                        a.href = event.file_audio;
-                        a.download = 'audio.mp3';
-                        a.click();
-                    };
-
-                }
-                const audioFileSize = createElement('div', null, ['event_audio_size']);
-                audioFileView.appendChild(audioFileSize);
-                audioFileSize.innerText = `size: ${event.file_size}`;
-            }
-
-            const previewsView = createElement('div', null, ['event_previews_view']);
-            view.appendChild(previewsView);
-            {
-                const modeView = createElement('div', null, ['event_mode']);
-                previewsView.appendChild(modeView);
-                if (event.translation_result) modeView.innerText = 'mode: translation';
-                else modeView.innerText = `mode: ${event.selected_options.multiple_speakers ? 'multiple speakers' : 'single speaker'}`;
-
-                const transcriptionView = createElement('div', null, ['event_text_row']);
-                previewsView.appendChild(transcriptionView);
-                {
-                    const transcriptionPhlag = createElement('div', null, ['text_phlag']);
-                    transcriptionView.appendChild(transcriptionPhlag);
-                    transcriptionPhlag.innerText = phlags[event.selected_options.original_language];
-
-                    const transcriptionViewText = createElement('div', null, ['preview_text']);
-                    transcriptionView.appendChild(transcriptionViewText);
-                    transcriptionViewText.innerText = event.transcription_result;
-
-                    const transcriptionCopyButton = createElement('button', null, ['option_button']);
-                    transcriptionView.appendChild(transcriptionCopyButton);
-                    transcriptionCopyButton.innerHTML = '<span class="material-symbols-outlined">content_copy</span>';
-                    transcriptionCopyButton.onclick = (_) => copyToClipboard(event.transcription_result);
-
-                    const transcriptionDownloadButton = createElement('button', null, ['option_button']);
-                    transcriptionView.appendChild(transcriptionDownloadButton);
-                    transcriptionDownloadButton.innerHTML = '<span class="material-symbols-outlined">download</span>';
-                    transcriptionDownloadButton.onclick = (_) => downloadAsFile(event.transcription_result, 'transcription.txt');
-                }
-
-                if (event.translation_result) {
-                    const translationView = createElement('div', null, ['event_text_row']);
-                    previewsView.appendChild(translationView);
-                    {
-                        const translationPhlag = createElement('div', null, ['text_phlag']);
-                        translationView.appendChild(translationPhlag);
-                        translationPhlag.innerText = phlags[event.selected_options.translate_language];
-
-                        const translationViewText = createElement('div', null, ['preview_text']);
-                        translationView.appendChild(translationViewText);
-                        translationViewText.innerText = event.translation_result;
-
-                        const translationCopyButton = createElement('button', null, ['option_button']);
-                        translationView.appendChild(translationCopyButton);
-                        translationCopyButton.innerHTML = '<span class="material-symbols-outlined">content_copy</span>';
-                        translationCopyButton.onclick = (_) => copyToClipboard(event.translation_result);
-
-                        const translationDownloadButton = createElement('button', null, ['option_button']);
-                        translationView.appendChild(translationDownloadButton);
-                        translationDownloadButton.innerHTML = '<span class="material-symbols-outlined">download</span>';
-                        translationDownloadButton.onclick = (_) => downloadAsFile(event.translation_result, 'translation.txt');
-                    }
-                }
-            }
-
-            return view;
+        function expandText(text) {
+            text.classList.toggle("expanded");
+            const content = text.classList.contains("expanded") ? text.getAttribute("data-text") : clipString(text.getAttribute("data-text"));
+            text.innerText = content;
         }
-
-        getTranscribeHistory().then((historyJSON) => {
-            const history = JSON.parse(historyJSON).history;
-            history.forEach(element => {
-                document.getElementById("main_container").appendChild(createView(element));
-            });
-        });
-
+        function buildDiarizationText(event) {
+            let text = '';
+            for (let i = 0; i < event.array[2].length; ++i) {
+                text += `${event.array[2][i]}:${event.array[3][i]}`;
+                if (i < event.array[2].length - 1) text += '\n';
+            }
+            return text;
+        }
+        const nj = `
+        <div class="event_view">
+            <div class="event_icon material-symbols-outlined">
+                {% if mode == 'translation' %}translate
+                {% elif mode == 'transcription' %}person
+                {% elif mode == 'diarization' %}group
+                {% else %}{% endif %}
+            </div>
+            <div class="event_title">Example title {{ range(1, 100) | random }}</div>
+            <div class="event_date_view">{{ timestampToDate(event.getCreatedAt()) }}</div>
+            <div class="event_previews_view">
+                <div class="event_text_row">
+                    {% if event.getTranscriptionLangauge is defined %}
+                        {% set lang = getCountry(event.getTranscriptionLangauge()) %}
+                    {% elseif event.getLanguage is defined %}
+                        {% set lang = getCountry(event.getLanguage()) %}
+                    {% else %}
+                        {% set lang = '?' %}
+                    {% endif %}
+                    <div class="text_flag"><img src="https://flagcdn.com/w40/{{ lang }}.png" onerror="this.outerHTML = '{{ lang }}'""></div>
+                    {% set content = event.getTranscription() if event.getTranscription is defined else buildDiarizationText(event) %}
+                    <div class="preview_text" data-text="{{ content }}" onclick="expandText(this);">
+                        {{ clipString(content) }}
+                    </div>
+                    <button class="option_button" onclick="speak('{{ content }}', 'en-us');">   <!-- GETLANGAUGE??? GETSOURCELANGUAGE??? PREGANTE??? CO TU ZA FUNKCJA MA BYĆ DO JEMZYKA -->
+                        <span class="material-symbols-outlined">brand_awareness</span>
+                    </button>
+                    <button class="option_button" onclick="copyToClipboard('{{ content }}');">
+                        <span class="material-symbols-outlined">content_copy</span>
+                    </button>
+                    <button class="option_button" onclick="downloadAsFile('{{ content }}', 'transcription.txt');">
+                        <span class="material-symbols-outlined">download</span>
+                    </button>
+                </div>
+                {% if mode == "translation" %}
+                    <div class="event_text_row" style="margin-top:0.5em;color:rgb(86, 58, 156);">
+                        {% if event.getTranslationLangauge is defined %}
+                            {% set lang = getCountry(event.getTranslationLangauge()) %}
+                        {% else %}
+                            {% set lang = '?' %}
+                        {% endif %}
+                        <div class="text_flag"><img src="https://flagcdn.com/w40/{{ lang }}.png" onerror="this.outerHTML = '{{ lang }}'"></div>
+                        <div class="preview_text" data-text="{{ event.getTranslation() }}" onclick="expandText(this);">
+                            {{ clipString(event.getTranslation()) }}
+                        </div>
+                        <button class="option_button" onclick="speak('{{ event.getTranslation() }}', 'en-us');">   <!-- GETLANGAUGE??? GETSOURCELANGUAGE??? PREGANTE??? CO TU ZA FUNKCJA MA BYĆ DO JEMZYKA -->
+                            <span class="material-symbols-outlined">brand_awareness</span>
+                        </button>
+                        <button class="option_button" onclick="(_) => copyToClipboard('{{ event.getTranslation() }}');">
+                            <span class="material-symbols-outlined">content_copy</span>
+                        </button>
+                        <button class="option_button" onclick="downloadAsFile('{{ event.getTranslation() }}', 'translation.txt');">
+                            <span class="material-symbols-outlined">download</span>
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="delete-button-container">
+                <button class="option_button" onclick="alert('here be delete');">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
+            </div>
+        </div>
+        `;
+        const njTemplate = nunjucks.compile(nj);
+        const emptyHistory = `
+        <div style="display:inline-block;" class="centered-message">nothing to show yet</div>
+        `;
+    </script>
+    <header>
+        <div id="top_menu">
+            <p id="mew_banner"><img src="assets/mew.png" id="mew">Whisker</p>
+            <a href="/webApp/index.html" class="icon_button">
+                Transcribe <span class="material-symbols-outlined">edit_document</span>
+            </a>
+            <a href="/webApp/record.html" class="icon_button">
+                Dictate <span class="material-symbols-outlined">mic</span>
+            </a>
+            <a href="#" class="icon_button selected">
+                History <span class="material-symbols-outlined">lock</span>
+            </a>
+            <a href="/webApp/swagger/index.html" class="icon_button locked">
+                Swagger <span class="material-symbols-outlined">lock</span>
+            </a>
+            <a href="/webApp/about.html" class="icon_button">
+                About <span class="material-symbols-outlined">help</span>
+            </a>
+            <div id="blank_space"></div>
+            <div id="hamborgir" onclick="document.getElementById('side_menu').classList.toggle('hidden')">
+                <span class="material-symbols-outlined">menu</span>
+            </div>
+        </div>
+        <div id="side_menu" class="hidden">
+            <div id="hamborgir" onclick="document.getElementById('side_menu').classList.toggle('hidden')">
+                <span class="material-symbols-outlined">close</span>
+            </div>
+            <a href="/webApp/index.html" class="icon_button">
+                Transcribe <span class="material-symbols-outlined">edit_document</span>
+            </a>
+            <a href="/webApp/record.html" class="icon_button">
+                Dictate <span class="material-symbols-outlined">mic</span>
+            </a>
+            <a href="#" class="icon_button selected">
+                History <span class="material-symbols-outlined">lock</span>
+            </a>
+            <a href="/webApp/swagger.html" class="icon_button locked">
+                Swagger <span class="material-symbols-outlined">lock</span>
+            </a>
+            <a href="/webApp/about.html" class="icon_button">
+                About <span class="material-symbols-outlined">help</span>
+            </a>
+            <div id="blank_space"></div>
+        </div>
+        <div class="header selected" id="navigation">
+            <div class="tab_button selected" onclick="openTab(this, 'transcription')">
+                <div>Transcriptions</div>
+            </div>
+            <div class="tab_button" onclick="openTab(this, 'translation')">
+                <div>Translations</div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div id="page_view">
+            <div id="filter_options" class="main_content">
+                <div>
+                    <label id="search_prompt_input">
+                        <input type="text" placeholder="Search by title...">
+                        <div class="filter_option_icon material-symbols-outlined">search</div>
+                    </label>
+                </div>
+                <div class="filter_divider"></div>
+                <div class="filter_option_button filter_option_icon material-symbols-outlined">
+                    sort_by_alpha
+                </div>
+                <div class="filter_option_icon material-symbols-outlined">
+                    unfold_more
+                </div>
+                <div class="filter_divider"></div>
+                <div class="filter_option_button filter_option_icon material-symbols-outlined">
+                    calendar_month
+                </div>
+                <div class="filter_option_icon material-symbols-outlined" style="transform: rotate(-90deg)">
+                    chevron_right
+                </div>
+            </div>
+            <div id="main_container" class="main_content">
+                <div id="transcription_history" class="tab"></div>
+                <div id="translation_history" class="hidden tab"></div>
+            </div>
+        </div>
+    </main>
+    <script src="dist/history.js">
     </script>
 </body>
 

@@ -9,15 +9,19 @@ import android.media.MediaRecorder
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import edu.put.whisper.animations.LoadingAnimation
 import edu.put.whisper.utils.Utilities
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -38,13 +42,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnDelete: ImageButton
     private lateinit var btnList: ImageButton
     private lateinit var btnRecord: ImageButton
-    private lateinit var btnCopy: ImageButton
     private lateinit var btnBack: ImageButton
     private lateinit var tvTranscript: TextView
     private lateinit var utilities: Utilities
     private var isRecordingStopped: Boolean = false
     private var currentFileName: String? = null
     private var tempFilePath: String? = null
+    //private lateinit var loadingGif: ImageView
 
     // Timer variables
     private lateinit var tvTimer: TextView
@@ -61,6 +65,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var filenameInput: EditText
 
     private lateinit var db : AppDatabase
+
+    private lateinit var spinnerLanguage: Spinner
+    private lateinit var languages: Array<String>
+    private lateinit var languagesFull: Array<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,10 +91,25 @@ class MainActivity : AppCompatActivity() {
         btnCancel = findViewById(R.id.btnCancel)
         btnOk = findViewById(R.id.btnOk)
         btnTranscript = findViewById(R.id.btnTranscript)
-        btnCopy = findViewById(R.id.btnCopy)
-        tvTranscript = findViewById(R.id.tvTranscript)
         btnBack = findViewById(R.id.btnBack)
+        //loadingGif = findViewById(R.id.loadingGif)
 
+        spinnerLanguage = findViewById(R.id.spinner_language)
+        languages = resources.getStringArray(R.array.languages)
+        languagesFull = resources.getStringArray(R.array.languages_full)
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, languagesFull)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerLanguage.adapter = adapter
+        spinnerLanguage.setSelection(languages.indexOf("en")) // default language
+
+        val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
 
         if (utilities.isMicrophonePresent()) {
             getMicrophonePermission()
@@ -117,10 +140,10 @@ class MainActivity : AppCompatActivity() {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             bottomSheetBG.visibility = View.GONE
 
-            utilities.setVisibility(View.GONE, btnStop, btnResume, btnSave, btnDelete)
-            utilities.setVisibility(View.VISIBLE, btnRecord, btnList, btnBack)
-            tvTimer.text = "00:00:00"
-            waveformView.clearAmplitudes()
+//            utilities.setVisibility(View.GONE, btnStop, btnResume, btnSave, btnDelete)
+//            utilities.setVisibility(View.VISIBLE, btnRecord, btnList, btnBack)
+//            tvTimer.text = "00:00:00"
+//            waveformView.clearAmplitudes()
 
             // Hide the keyboard
             val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
@@ -136,8 +159,23 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnBack.setOnClickListener {
-            utilities.goBack(this)
+            if (tvTimer.text != "00:00:00") {
+                val dialogBuilder = AlertDialog.Builder(this)
+                dialogBuilder.setMessage(getString(R.string.are_you_sure_you_want_to_leave_you_will_lose_your_recording))
+                    .setCancelable(false)
+                    .setPositiveButton("Yes") { dialog, id ->
+                        utilities.goBack(this)
+                    }
+                    .setNegativeButton("No") { dialog, id ->
+                        dialog.dismiss()
+                    }
+                val alert = dialogBuilder.create()
+                alert.show()
+            } else {
+                utilities.goBack(this)
+            }
         }
+
     }
 
     private val amplitudeRunnable: Runnable = object : Runnable {
@@ -192,20 +230,28 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Please stop the recording first", Toast.LENGTH_LONG).show()
             return
         }
+        val mainContent = findViewById<ConstraintLayout>(R.id.main_content)
+        mainContent.visibility = View.GONE
+        val loadingAnimation = findViewById<LoadingAnimation>(R.id.LoadingAnimation)
+        loadingAnimation.visibility = View.VISIBLE
 
         lifecycleScope.launch {
             val filePath = tempFilePath ?: return@launch
-            utilities.uploadRecording(filePath, "en") { output ->
+            val selectedLanguage = languages[spinnerLanguage.selectedItemPosition]
+            utilities.uploadRecording(filePath, selectedLanguage) { output ->
                 runOnUiThread {
                     if (output != null) {
                         val intent = Intent(this@MainActivity, TranscriptionDetailActivity::class.java).apply {
                             putExtra("EXTRA_TRANSCRIPTION_TEXT", output)
+                            putExtra("EXTRA_FILE_PATH", filePath)
+                            putExtra("EXTRA_LANGUAGE", selectedLanguage)
                             putExtra("EXTRA_TRANSCRIPTION_DATE", SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()))
                         }
                         startActivity(intent)
                     } else {
                         val intent = Intent(this@MainActivity, TranscriptionDetailActivity::class.java).apply {
-                            putExtra("EXTRA_ERROR_MESSAGE", "Transkrypcja nie jest dostępna.")
+                            putExtra("EXTRA_ERROR_MESSAGE",
+                                getString(R.string.error_getting_transcription))
                         }
                         startActivity(intent)
                     }
@@ -225,6 +271,7 @@ class MainActivity : AppCompatActivity() {
             elapsedTime += System.currentTimeMillis() - startTime
             btnStop.visibility = View.GONE
             utilities.setVisibility(View.VISIBLE, btnResume, btnTranscript)
+            utilities.setVisibility(View.GONE, btnList)
             btnResume.setImageResource(R.drawable.ic_restart)
             Toast.makeText(this, "Recording stopped. You can now transcript it.", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
@@ -243,6 +290,8 @@ class MainActivity : AppCompatActivity() {
                 prepare()
                 start()
             }
+            utilities.setVisibility(View.GONE, btnBack, btnList)
+            utilities.setVisibility(View.VISIBLE, btnDelete, btnSave)
 
             elapsedTime = 0L
             startTime = System.currentTimeMillis()
@@ -298,7 +347,7 @@ class MainActivity : AppCompatActivity() {
             utilities.setVisibility(View.VISIBLE, btnRecord, btnList)
             btnTranscript.visibility = View.INVISIBLE
 
-            Toast.makeText(this, "Recording deleted", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Recording cancelled", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -315,7 +364,7 @@ class MainActivity : AppCompatActivity() {
 
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetBG.visibility = View.VISIBLE
-        btnTranscript.visibility = View.INVISIBLE
+        //btnTranscript.visibility = View.INVISIBLE
         filenameInput.setText(defaultFileName) // Set the default file name
 
     }
@@ -339,17 +388,12 @@ class MainActivity : AppCompatActivity() {
             val finalFile = File(finalFilePath)
 
             tempFile.copyTo(finalFile, overwrite = true)
-            tempFile.delete() // Remove the temporary file
-
+            tempFile.delete()
 
             mediaRecorder?.release()
             mediaRecorder = null
 
-            val dirPath = getExternalFilesDir(Environment.DIRECTORY_MUSIC)?.absolutePath
-            if (dirPath == null) {
-                Toast.makeText(this, "Error: Unable to access music directory", Toast.LENGTH_LONG).show()
-                return
-            }
+            val dirPath = getExternalFilesDir(Environment.DIRECTORY_MUSIC)?.absolutePath ?: return
 
             val ampsPath = "$dirPath/$fileName"
             val timestamp = Date().time
@@ -375,14 +419,20 @@ class MainActivity : AppCompatActivity() {
                 db.audioRecordDao().insert(record)
             }
 
+            tempFilePath = finalFilePath
+
             Toast.makeText(this, "Recording saved", Toast.LENGTH_LONG).show()
+            utilities.setVisibility(View.GONE, btnDelete, btnSave)
+            utilities.setVisibility(View.VISIBLE, btnList, btnBack)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
+
     private val timerRunnable: Runnable = object : Runnable {
         override fun run() {
+            Log.d("Timer", "Timer tick")
             val currentTime = System.currentTimeMillis()
             val millis = elapsedTime + (currentTime - startTime)
             val minutes = (millis / 60000).toInt() % 60
@@ -399,5 +449,14 @@ class MainActivity : AppCompatActivity() {
         if (tempFile.exists()) {
             tempFile.delete()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val mainContent = findViewById<ConstraintLayout>(R.id.main_content)
+        mainContent.visibility = View.VISIBLE
+
+        val loadingAnimation = findViewById<LoadingAnimation>(R.id.LoadingAnimation)
+        loadingAnimation.visibility = View.GONE
     }
 }

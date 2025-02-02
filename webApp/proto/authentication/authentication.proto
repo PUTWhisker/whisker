@@ -10,6 +10,7 @@ import "google/protobuf/empty.proto";
 service ClientService {
     rpc Login (UserCredits) returns (LoginResponse) {};
     rpc Register (UserCredits) returns (google.protobuf.Empty) {};
+    rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {};
 
     rpc GetTranscription(QueryParamethers) returns (stream TranscriptionHistory) {};
     rpc EditTranscription(NewTranscription) returns (google.protobuf.Empty) {};
@@ -18,18 +19,23 @@ service ClientService {
     rpc GetTranslation(QueryParamethers) returns (stream TranslationHistory) {};
     rpc EditTranslation(NewTranslation) returns (google.protobuf.Empty) {}
     rpc DeleteTranslation(Id) returns(google.protobuf.Empty) {}
-
     
+    rpc SaveOnlyTranslation(TranslationText) returns(google.protobuf.Empty) {}
 
     rpc GetDiarization(QueryParamethers) returns (stream DiarizationHistory) {};
     rpc EditDiarization(NewDiarization) returns (google.protobuf.Empty) {};
     rpc DeleteDiarization(Id) returns (google.protobuf.Empty) {}
+
+
+    rpc GetTranscriptionAndDiarization(QueryParamethers) returns (stream Combined){};
 }
 
 message TranscriptionHistory {
     string transcription = 1;
     google.protobuf.Timestamp created_at = 2;
     int32 id = 3;
+    string language = 4;
+    string title = 5;
 }
 
 message TranslationHistory {
@@ -37,13 +43,18 @@ message TranslationHistory {
     string transcription = 2;
     string translation = 3;
     google.protobuf.Timestamp created_at = 4;
+    string transcription_langauge = 5;
+    string translation_langauge = 6;
+    string title = 7;
 }
 
 message DiarizationHistory {
-    int32 id = 1;
-    repeated string speaker = 2;
-    repeated string line = 3;
-    google.protobuf.Timestamp created_at = 4;
+    int32 diarization_id = 1;
+    repeated string speaker = 3;
+    repeated string line = 4;
+    google.protobuf.Timestamp created_at = 5;
+    string language = 6;
+    string title = 7;
 }
 
 message UserCredits {
@@ -53,7 +64,7 @@ message UserCredits {
 
 message LoginResponse {
     string JWT = 1;
-    bool successful = 2;
+    string refresh_token = 2;
 }
 
 message Id {
@@ -83,4 +94,25 @@ message QueryParamethers {
     google.protobuf.Timestamp start_time = 1;
     google.protobuf.Timestamp end_time = 2;
     int32 limit = 3;
+    string language = 4;
+    string translation_language = 5; //used only by translation
+}
+
+message TranslationText {
+    int32 transcription_id = 1;
+    string content = 2;
+    string language = 3;
+}
+
+message Combined {
+    DiarizationHistory diarization = 1;
+    TranscriptionHistory transcription = 2;
+}
+
+message RefreshTokenRequest {
+    string refresh_token = 1;
+}
+message RefreshTokenResponse {
+    string refresh_token = 1;
+    string access_token = 2;
 }

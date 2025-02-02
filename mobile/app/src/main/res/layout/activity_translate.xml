@@ -1,47 +1,89 @@
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#F9F9F9">
+    android:layout_height="match_parent">
 
-    <Spinner
-        android:id="@+id/spinner_language"
-        android:layout_width="match_parent"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/rounded_border"
-        android:padding="12dp" />
+        android:background="@color/primaryDark"
+        android:theme="?attr/actionBarTheme"
+        android:elevation="4dp"
+        app:title="@string/translate"
+        app:titleTextColor="@color/primaryLight"
+        app:navigationIcon="@drawable/ic_arrow_toolbar"
+        app:titleTextAppearance="@style/ToolbarTitleStyle"
+        app:tint = "@color/primaryLight"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <EditText
-        android:id="@+id/edit_text_original"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Tekst oryginalny"
-        android:background="@drawable/rounded_border"
-        android:padding="12dp"
-        android:layout_marginBottom="16dp"
-        android:gravity="top"
-        android:inputType="textMultiLine"
-        android:minHeight="100dp" />
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <EditText
-        android:id="@+id/edit_text_translated"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Przetłumaczony tekst"
-        android:background="@drawable/rounded_border"
-        android:padding="12dp"
-        android:gravity="top"
-        android:inputType="textMultiLine"
-        android:minHeight="100dp"
-        android:focusable="false" />
+        <LinearLayout
+            android:id="@+id/linear_layout_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-    <Button
-        android:id="@+id/button_translate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Przetłumacz"
-        android:layout_marginTop="16dp" />
-</LinearLayout>
+            <Spinner
+                android:id="@+id/spinner_language"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/rounded_border_spinner"
+                android:padding="12dp" />
+
+            <EditText
+                android:id="@+id/edit_text_original"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/original_text"
+                android:background="@drawable/rounded_border"
+                android:padding="12dp"
+                android:layout_marginBottom="16dp"
+                android:gravity="top"
+                android:inputType="textMultiLine"
+                android:minHeight="100dp" />
+
+            <Spinner
+                android:id="@+id/spinner_target_language"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/rounded_border_spinner"
+                android:padding="12dp" />
+
+            <EditText
+                android:id="@+id/edit_text_translated"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/translated_text"
+                android:background="@drawable/rounded_border"
+                android:padding="12dp"
+                android:gravity="top"
+                android:inputType="textMultiLine"
+                android:minHeight="100dp"
+                android:focusable="false" />
+
+            <Button
+                android:id="@+id/button_translate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/translate"
+                android:layout_marginTop="16dp"
+                android:textColor="@color/primaryLight"/>
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

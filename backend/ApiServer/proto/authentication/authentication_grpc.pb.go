@@ -22,7 +22,6 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	ClientService_Login_FullMethodName                          = "/ClientService/Login"
 	ClientService_Register_FullMethodName                       = "/ClientService/Register"
-	ClientService_RefreshToken_FullMethodName                   = "/ClientService/RefreshToken"
 	ClientService_GetTranscription_FullMethodName               = "/ClientService/GetTranscription"
 	ClientService_EditTranscription_FullMethodName              = "/ClientService/EditTranscription"
 	ClientService_DeleteTranscription_FullMethodName            = "/ClientService/DeleteTranscription"
@@ -43,7 +42,7 @@ type ClientServiceClient interface {
 	Login(ctx context.Context, in *UserCredits, opts ...grpc.CallOption) (*LoginResponse, error)
 	Register(ctx context.Context, in *UserCredits, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
-	GetTranscription(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (grpc.ServerStreamingClient[TranscriptionHistory], error)
+	GetTranscription(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (ClientService_GetTranscriptionClient, error)
 	EditTranscription(ctx context.Context, in *NewTranscription, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DeleteTranscription(ctx context.Context, in *Id, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetTranslation(ctx context.Context, in *QueryParamethers, opts ...grpc.CallOption) (grpc.ServerStreamingClient[TranslationHistory], error)
@@ -85,9 +84,8 @@ func (c *clientServiceClient) Register(ctx context.Context, in *UserCredits, opt
 }
 
 func (c *clientServiceClient) RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(RefreshTokenResponse)
-	err := c.cc.Invoke(ctx, ClientService_RefreshToken_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, "/ClientService/RefreshToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -247,7 +245,7 @@ type ClientServiceServer interface {
 	Login(context.Context, *UserCredits) (*LoginResponse, error)
 	Register(context.Context, *UserCredits) (*emptypb.Empty, error)
 	RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error)
-	GetTranscription(*QueryParamethers, grpc.ServerStreamingServer[TranscriptionHistory]) error
+	GetTranscription(*QueryParamethers, ClientService_GetTranscriptionServer) error
 	EditTranscription(context.Context, *NewTranscription) (*emptypb.Empty, error)
 	DeleteTranscription(context.Context, *Id) (*emptypb.Empty, error)
 	GetTranslation(*QueryParamethers, grpc.ServerStreamingServer[TranslationHistory]) error
@@ -277,7 +275,7 @@ func (UnimplementedClientServiceServer) Register(context.Context, *UserCredits) 
 func (UnimplementedClientServiceServer) RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RefreshToken not implemented")
 }
-func (UnimplementedClientServiceServer) GetTranscription(*QueryParamethers, grpc.ServerStreamingServer[TranscriptionHistory]) error {
+func (UnimplementedClientServiceServer) GetTranscription(*QueryParamethers, ClientService_GetTranscriptionServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetTranscription not implemented")
 }
 func (UnimplementedClientServiceServer) EditTranscription(context.Context, *NewTranscription) (*emptypb.Empty, error) {
@@ -377,7 +375,7 @@ func _ClientService_RefreshToken_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ClientService_RefreshToken_FullMethodName,
+		FullMethod: "/ClientService/RefreshToken",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ClientServiceServer).RefreshToken(ctx, req.(*RefreshTokenRequest))

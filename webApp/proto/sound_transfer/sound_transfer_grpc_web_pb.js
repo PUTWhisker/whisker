@@ -373,5 +373,66 @@ proto.SoundServicePromiseClient.prototype.diarizateFile =
 };
 
 
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.TextAndId,
+ *   !proto.TextMessage>}
+ */
+const methodDescriptor_SoundService_TranslateText = new grpc.web.MethodDescriptor(
+  '/SoundService/TranslateText',
+  grpc.web.MethodType.UNARY,
+  proto.TextAndId,
+  proto.TextMessage,
+  /**
+   * @param {!proto.TextAndId} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.TextMessage.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.TextAndId} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.TextMessage)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.TextMessage>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.SoundServiceClient.prototype.translateText =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/SoundService/TranslateText',
+      request,
+      metadata || {},
+      methodDescriptor_SoundService_TranslateText,
+      callback);
+};
+
+
+/**
+ * @param {!proto.TextAndId} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.TextMessage>}
+ *     Promise that resolves to the response
+ */
+proto.SoundServicePromiseClient.prototype.translateText =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/SoundService/TranslateText',
+      request,
+      metadata || {},
+      methodDescriptor_SoundService_TranslateText);
+};
+
+
 module.exports = proto;
 

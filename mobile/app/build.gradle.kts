@@ -88,4 +88,5 @@ dependencies {
     kapt(libs.androidx.room.compiler)
     implementation(libs.android.material)
     runtimeOnly(libs.grpc.okhttp)
+    implementation("com.squareup.okhttp3:okhttp:4.9.1")
 }

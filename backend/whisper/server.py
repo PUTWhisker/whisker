@@ -231,6 +231,9 @@ class SoundService(Services.SoundServiceServicer):
         transcriptionData = _clientData[sessionId][0]
         transcriptionData.language = request.source_language
         try:
+            if transcriptionData.curSeconds >= 10:
+                transcriptionData.curSegment += 1
+                transcriptionData.curSeconds = 0
             transcriptionData = await self.fastModel.handleRecord(
                 request.sound_data, transcriptionData, context, True
             )
@@ -244,8 +247,15 @@ class SoundService(Services.SoundServiceServicer):
             raise e
         return Variables.SoundStreamResponse(
             text=transcriptionData.transcription[transcriptionData.curSegment],
-            new_chunk=False,
+            new_chunk=transcriptionData.isSilence,
         )
+
+    @_errorUnaryHandler
+    async def TranslateText(self, request, context):
+        translation = self.translator.translate(
+            request.text, request.text_language, request.translation_language
+        )[0]
+        return Variables.TextMessage(text=translation)
 
 
 async def server(loop: asyncio.AbstractEventLoop):

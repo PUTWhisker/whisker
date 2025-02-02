@@ -202,6 +202,67 @@ proto.ClientServicePromiseClient.prototype.register =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
+ *   !proto.RefreshTokenRequest,
+ *   !proto.RefreshTokenResponse>}
+ */
+const methodDescriptor_ClientService_RefreshToken = new grpc.web.MethodDescriptor(
+  '/ClientService/RefreshToken',
+  grpc.web.MethodType.UNARY,
+  proto.RefreshTokenRequest,
+  proto.RefreshTokenResponse,
+  /**
+   * @param {!proto.RefreshTokenRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.RefreshTokenResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.RefreshTokenRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.RefreshTokenResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.RefreshTokenResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.ClientServiceClient.prototype.refreshToken =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/ClientService/RefreshToken',
+      request,
+      metadata || {},
+      methodDescriptor_ClientService_RefreshToken,
+      callback);
+};
+
+
+/**
+ * @param {!proto.RefreshTokenRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.RefreshTokenResponse>}
+ *     Promise that resolves to the response
+ */
+proto.ClientServicePromiseClient.prototype.refreshToken =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/ClientService/RefreshToken',
+      request,
+      metadata || {},
+      methodDescriptor_ClientService_RefreshToken);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
  *   !proto.QueryParamethers,
  *   !proto.TranscriptionHistory>}
  */
@@ -558,6 +619,67 @@ proto.ClientServicePromiseClient.prototype.deleteTranslation =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
+ *   !proto.TranslationText,
+ *   !proto.google.protobuf.Empty>}
+ */
+const methodDescriptor_ClientService_SaveOnlyTranslation = new grpc.web.MethodDescriptor(
+  '/ClientService/SaveOnlyTranslation',
+  grpc.web.MethodType.UNARY,
+  proto.TranslationText,
+  google_protobuf_empty_pb.Empty,
+  /**
+   * @param {!proto.TranslationText} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  google_protobuf_empty_pb.Empty.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.TranslationText} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.google.protobuf.Empty)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.google.protobuf.Empty>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.ClientServiceClient.prototype.saveOnlyTranslation =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/ClientService/SaveOnlyTranslation',
+      request,
+      metadata || {},
+      methodDescriptor_ClientService_SaveOnlyTranslation,
+      callback);
+};
+
+
+/**
+ * @param {!proto.TranslationText} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.google.protobuf.Empty>}
+ *     Promise that resolves to the response
+ */
+proto.ClientServicePromiseClient.prototype.saveOnlyTranslation =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/ClientService/SaveOnlyTranslation',
+      request,
+      metadata || {},
+      methodDescriptor_ClientService_SaveOnlyTranslation);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
  *   !proto.QueryParamethers,
  *   !proto.DiarizationHistory>}
  */
@@ -730,6 +852,62 @@ proto.ClientServicePromiseClient.prototype.deleteDiarization =
       request,
       metadata || {},
       methodDescriptor_ClientService_DeleteDiarization);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.QueryParamethers,
+ *   !proto.Combined>}
+ */
+const methodDescriptor_ClientService_GetTranscriptionAndDiarization = new grpc.web.MethodDescriptor(
+  '/ClientService/GetTranscriptionAndDiarization',
+  grpc.web.MethodType.SERVER_STREAMING,
+  proto.QueryParamethers,
+  proto.Combined,
+  /**
+   * @param {!proto.QueryParamethers} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.Combined.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.QueryParamethers} request The request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!grpc.web.ClientReadableStream<!proto.Combined>}
+ *     The XHR Node Readable Stream
+ */
+proto.ClientServiceClient.prototype.getTranscriptionAndDiarization =
+    function(request, metadata) {
+  return this.client_.serverStreaming(this.hostname_ +
+      '/ClientService/GetTranscriptionAndDiarization',
+      request,
+      metadata || {},
+      methodDescriptor_ClientService_GetTranscriptionAndDiarization);
+};
+
+
+/**
+ * @param {!proto.QueryParamethers} request The request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!grpc.web.ClientReadableStream<!proto.Combined>}
+ *     The XHR Node Readable Stream
+ */
+proto.ClientServicePromiseClient.prototype.getTranscriptionAndDiarization =
+    function(request, metadata) {
+  return this.client_.serverStreaming(this.hostname_ +
+      '/ClientService/GetTranscriptionAndDiarization',
+      request,
+      metadata || {},
+      methodDescriptor_ClientService_GetTranscriptionAndDiarization);
 };
 
 
