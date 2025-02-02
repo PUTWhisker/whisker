@@ -58,18 +58,18 @@ class TranscriptionDetailActivity : AppCompatActivity() {
             tvTranscriptionText.setText(errorMessage)
         }
 
-        if (transcriptionText != null && transcriptionDate != null) {
+        if (transcriptionText != null) {
             tvTranscriptionText.setText(transcriptionText)
-            try {
-                val timestamp = transcriptionDate.toLong()
-                val date = Date(timestamp)
-
-                val outputFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
-                tvTranscriptionDate.text = outputFormat.format(date)
-            } catch (e: Exception) {
-                tvTranscriptionDate.text = transcriptionDate
-                Log.e("DateParseError", "Error parsing timestamp: $transcriptionDate", e)
-            }
+//            try {
+//                val timestamp = transcriptionDate.toLong()
+//                val date = Date(timestamp)
+//
+//                val outputFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
+//                tvTranscriptionDate.text = outputFormat.format(date)
+//            } catch (e: Exception) {
+//                tvTranscriptionDate.text = transcriptionDate
+//                Log.e("DateParseError", "Error parsing timestamp: $transcriptionDate", e)
+//            }
 
             findViewById<LinearLayout>(R.id.btnTranslate).setOnClickListener {
                 val intent = Intent(this, TranslateActivity::class.java)

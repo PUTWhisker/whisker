@@ -41,10 +41,10 @@
             android:padding="16dp"
             android:imeOptions="actionNext"
             android:focusable="true"
-            android:focusableInTouchMode="true" />
+            android:focusableInTouchMode="true"
+            android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"/>
     </com.google.android.material.textfield.TextInputLayout>
-
-
+    
     <com.google.android.material.textfield.TextInputLayout
         style="@style/TextLayoutStyle"
         android:layout_width="match_parent"
@@ -60,7 +60,8 @@
             android:padding="16dp"
             android:imeOptions="actionNext"
             android:focusable="true"
-            android:focusableInTouchMode="true"/>
+            android:focusableInTouchMode="true"
+            android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"/>
     </com.google.android.material.textfield.TextInputLayout>
 
 
