@@ -26,10 +26,11 @@ class ConsolePrinter:
         language: str = None,
         save: str = None,
         translation: str = None,
+        noSSL: bool = False,
         envFile: str = ".env"
     ):
         self.env = envFile
-        self.grpcClient = GrpcClient(host, port, language, save, translation)
+        self.grpcClient = GrpcClient(host, port, language, save, translation, noSSL)
         self.language = language
 
 
@@ -91,7 +92,7 @@ class ConsolePrinter:
         # if self.language is None:
             # print(f"Detected transcription language: {scripts.detected_language}")
         for speaker, text in zip(speakers, texts):
-            print(f"\033[1m\033[38;2;{speakerColors[speaker][0]};{speakerColors[speaker][1]};{speakerColors[speaker][2]}m{speaker}: {text}")
+            print(f"\033[1m\033[38;2;{speakerColors[speaker][0]};{speakerColors[speaker][1]};{speakerColors[speaker][2]}m{speaker}: {text}\033[0m")
 
 
     @_errorHandler

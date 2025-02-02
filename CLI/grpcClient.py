@@ -34,6 +34,7 @@ class GrpcClient:
         language: str = None,
         save: str = None,
         translation: str = None,
+        noSSL: bool = False,
         envFile: str = ".env",
     ):
         self.env = envFile
@@ -44,7 +45,10 @@ class GrpcClient:
         self.save = save
         self.translation = translation
         self.host += ":%d" % int(self.port)
-        self.channel = grpc.aio.secure_channel(self.host, credentials=grpc.ssl_channel_credentials())
+        if not noSSL:
+            self.channel = grpc.aio.secure_channel(self.host, credentials=grpc.ssl_channel_credentials())
+        else:
+            self.channel = grpc.aio.insecure_channel(self.host)
         self.stub = Services.SoundServiceStub(
             self.channel
         )  # Creating server stub, these are reusable

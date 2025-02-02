@@ -95,6 +95,12 @@ def parse() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--noSSL",
+        action="store_true",
+        help="Use it to initiate connection without SSL"
+    )
+
+    parser.add_argument(
         "fileName", nargs="?", default=None, help="File to be transcribed"
     )
 
@@ -128,7 +134,7 @@ async def main(parser: argparse.ArgumentParser):
             return
 
     console = ConsolePrinter(
-        host, port, args.language, args.save, args.trans, ".env"
+        host, port, args.language, args.save, args.trans, args.noSSL, ".env"
     )
     if args.logout:
         set_key(env, "JWT_TOKEN", "")

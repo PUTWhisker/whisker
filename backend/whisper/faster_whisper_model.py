@@ -27,7 +27,10 @@ class FasterWhisperHandler:
                 )
                 print("Cuda option enabled")
             else:
-                print("Could not initiate Faster-Whisper model with cuda.")
+                print("Could not initiate Faster-Whisper model with cuda. Initializing wit CPU. ")
+                self.model = WhisperModel(
+                    self.whisperSize, device="cpu", compute_type="float32", cpu_threads=8
+                )
         else:
             self.model = WhisperModel(
                 self.whisperSize, device="cpu", compute_type="float32", cpu_threads=8
@@ -102,7 +105,7 @@ class FasterWhisperHandler:
         return data
     
 
-    def handleFile(
+    async def handleFile(
         self,
         receivedAudio: bytes,
         data: TranscriptionData,
@@ -115,7 +118,7 @@ class FasterWhisperHandler:
         return result, data
     
 
-    def handleRecord(
+    async def handleRecord(
         self,
         receivedAudio: bytes,
         data: TranscriptionData,

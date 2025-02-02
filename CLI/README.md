@@ -8,6 +8,6 @@ To see available flags with descriptions run `python whisker.py --help`
 
 
 ### Example use
-`python whisker.py --local --port 7070 --save <file_path> C:\Users\bombo\Documents\studia-inf\whisper-monorepo\CLI\english.wav`
+`python whisker.py --local --port 7070 --save <file_path> .\english.wav`
 
-`python whisker.py --local --diarizate --port 7070 .\to_test.mp3`
+`python whisker.py --local --diarization --port 7070 .\to_test.mp3`
