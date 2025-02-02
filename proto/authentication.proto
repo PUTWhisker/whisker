@@ -31,8 +31,6 @@ service ClientService {
     rpc EditTranslation(NewTranslation) returns (google.protobuf.Empty) {}
     // Remove translation history
     rpc DeleteTranslation(Id) returns(google.protobuf.Empty) {}
-    
-    rpc SaveOnlyTranslation(TranslationText) returns(google.protobuf.Empty) {}
 
     // Retrieve diarization history
     rpc GetDiarization(QueryParamethers) returns (stream DiarizationHistory) {};
