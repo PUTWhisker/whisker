@@ -88,8 +88,8 @@ class ConsolePrinter:
         speakers = list(scripts.speakerName)
         speakerColors = self._generateRandomUniqueColors(speakers)
         texts = list(scripts.text)
-        if self.language is None:
-            print(f"Detected transcription language: {scripts.detected_language}")
+        # if self.language is None:
+            # print(f"Detected transcription language: {scripts.detected_language}")
         for speaker, text in zip(speakers, texts):
             print(f"\033[1m\033[38;2;{speakerColors[speaker][0]};{speakerColors[speaker][1]};{speakerColors[speaker][2]}m{speaker}: {text}")
 
