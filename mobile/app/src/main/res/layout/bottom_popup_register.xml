@@ -43,8 +43,10 @@
             android:padding="16dp"
             android:imeOptions="actionNext"
             android:focusable="true"
-            android:focusableInTouchMode="true" />
+            android:focusableInTouchMode="true"
+            android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"/>
     </com.google.android.material.textfield.TextInputLayout>
+
 
 
     <com.google.android.material.textfield.TextInputLayout
@@ -62,7 +64,8 @@
             android:padding="16dp"
             android:imeOptions="actionNext"
             android:focusable="true"
-            android:focusableInTouchMode="true"/>
+            android:focusableInTouchMode="true"
+            android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -77,7 +80,8 @@
             android:hint="@string/repeat_password"
             android:inputType="textPassword"
             android:padding="16dp"
-            android:imeOptions="actionNext"/>
+            android:imeOptions="actionNext"
+            android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"/>
     </com.google.android.material.textfield.TextInputLayout>
 
 

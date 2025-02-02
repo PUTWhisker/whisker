@@ -75,22 +75,17 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:visibility="gone" />
 
-            <LinearLayout
-                android:id="@+id/llAbout"
+            <TextView
+                android:id="@+id/tvAboutWhisker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:textSize="16dp"
+                android:text="@string/about_whisker"
+                android:gravity="start"
+                android:layout_marginBottom="16dp"
+                android:padding="24dp"/>
 
-                <TextView
-                    android:id="@+id/tvAboutWhisker"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/about_whisker"
-                    android:gravity="center"
-                    android:layout_marginBottom="16dp"/>
 
-            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
