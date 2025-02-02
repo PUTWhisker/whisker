@@ -75,7 +75,9 @@
                 {% if mode == "translation" %}
                     <div class="event_text_row" style="margin-top:0.5em;color:rgb(86, 58, 156);">
                         {% if event.getTranslationLangauge is defined %}
-                            {% set lang = getCountry(event.getTranslationLangauge()) %}
+                            {% set lang = coalesce(countries[event.getTranslationLangauge()], event.getTranslationLangauge().substring(0, 2)) %}
+                        {% elseif event.getLanguage is defined %}
+                            {% set lang = coalesce(countries[event.getLanguage()], event.getLanguage().substring(0, 2)) %}
                         {% else %}
                             {% set lang = '?' %}
                         {% endif %}
